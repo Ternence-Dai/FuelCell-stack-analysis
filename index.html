@@ -35,9 +35,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hira
 .top-chip{font-size:10.5px;padding:4px 10px;border-radius:20px;background:rgba(0,212,138,.13);color:var(--green);border:1px solid rgba(0,212,138,.28);font-weight:600;white-space:nowrap;transition:.2s}
 .top-chip.b{background:rgba(10,132,255,.13);color:var(--blue);border-color:rgba(10,132,255,.3)}
 .content{flex:1;overflow-y:auto;overflow-x:hidden;padding:18px;scroll-behavior:smooth}
-.view{display:none;animation:fade .28s ease}
-.view.active{display:block}
-@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .card{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
 .card-h{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .card-h h3{font-size:13.5px;font-weight:650;letter-spacing:.2px;flex:1}
@@ -113,6 +110,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border:none;border-ra
 .param-group.open .param-group-head .pchev{transform:rotate(90deg)}
 .param-group-body{display:none;border-top:1px solid var(--line);padding:12px 15px 14px}
 .param-group.open .param-group-body{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .param-item{margin-bottom:16px}
 .param-item:last-child{margin-bottom:0}
 .param-item-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
@@ -184,8 +182,8 @@ canvas.tall{height:250px}
 .search-wrap input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(10,132,255,.14)}
 .search-wrap .clr{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--mut);cursor:pointer;display:none}
 .search-wrap input:not(:placeholder-shown) + .clr,.search-wrap input:focus + .clr{display:block}
-.lib-stats{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--mut);padding:10px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
-.lib-stats b{color:var(--cyan);font-weight:700;font-variant-numeric:tabular-nums}
+.lib-stats,.kb-stats{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--mut);padding:10px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
+.lib-stats b,.kb-stats b{color:var(--cyan);font-weight:700;font-variant-numeric:tabular-nums}
 .lib-cat{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
 .lib-cat-head{display:flex;align-items:center;gap:11px;padding:14px 16px;cursor:pointer;user-select:none;transition:.16s}
 .lib-cat-head:hover{background:rgba(255,255,255,.02)}
@@ -260,9 +258,6 @@ canvas.tall{height:250px}
 .kb-tag.range{background:rgba(0,212,138,.12);color:var(--green);border:1px solid rgba(0,212,138,.28)}
 .kb-tag.note{background:rgba(255,159,10,.12);color:var(--orange);border:1px solid rgba(255,159,10,.28)}
 .kb-tag.tip{background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.28)}
-.kb-stats{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--mut);padding:10px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
-.kb-stats b{color:var(--cyan);font-weight:700}
-/* 新增样式 */
 .bench{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:11px 12px;margin-bottom:8px;transition:.16s}
 .bench:hover{border-color:#2c3d59}
 .bench-h{display:flex;align-items:center;gap:8px;margin-bottom:9px}
@@ -276,13 +271,29 @@ canvas.tall{height:250px}
 .bar-k{font-size:11px;color:#a9bcd6;width:96px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bar-track{flex:1;height:6px;border-radius:3px;background:#1a2436;overflow:hidden}
 .bar-track i{display:block;height:100%;border-radius:3px;transition:width .5s ease}
-.bar-v{font-size:11px;font-weight:700;width:66px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;color:#cfe6ff}
+.bar-v{font-size:11px;font-weight:700;width:70px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;color:#cfe6ff}
 .mono-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(30px,1fr));gap:4px}
-.mono-cell{height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#04121f;font-variant-numeric:tabular-nums}
+.mono-cell{height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#04121f;font-variant-numeric:tabular-nums;transition:.2s}
 .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:#c6d3e8;padding:9px 11px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;cursor:pointer;user-select:none;transition:.15s}
 .chk input{width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
 .chk.on{border-color:rgba(10,132,255,.5);background:rgba(10,132,255,.1)}
 .chk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+/* 全局数据库卡片 */
+.gcard{background:linear-gradient(150deg,rgba(10,132,255,.06),rgba(0,0,0,0));border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;transition:.18s}
+.gcard:hover{border-color:#2f4160}
+.gcard-h{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.gcard-h .rn{font-size:13px;font-weight:700;color:#eaf3ff;flex:1}
+.gcard-h .rt{font-size:9.5px;padding:2px 8px;border-radius:6px;background:rgba(167,139,250,.14);color:var(--purple);border:1px solid rgba(167,139,250,.3);font-weight:600}
+.gcard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:9px}
+.gcard-i{background:rgba(255,255,255,.03);border-radius:7px;padding:7px 8px;text-align:center}
+.gcard-k{font-size:9px;color:var(--mut);margin-bottom:2px}
+.gcard-v{font-size:13px;font-weight:750;font-variant-numeric:tabular-nums;color:var(--cyan)}
+.gcard-bars{margin-top:6px}
+.gcmp-bar{display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:10px}
+.gcmp-bar span:first-child{width:56px;color:var(--mut);flex-shrink:0}
+.gcmp-bar .track{flex:1;height:5px;background:#1a2436;border-radius:3px;overflow:hidden}
+.gcmp-bar .track i{display:block;height:100%;border-radius:3px}
+.gcmp-bar span:last-child{width:54px;text-align:right;color:#cfe6ff;font-weight:700;font-variant-numeric:tabular-nums}
 @media (max-width:820px){
   .sidebar{display:none}
   .bottomnav{display:flex}
@@ -295,7 +306,7 @@ canvas.tall{height:250px}
   .g3{grid-template-columns:repeat(2,1fr)}
   canvas{height:180px}
   .param-item-body .pnum{width:70px;font-size:12px}
-  .bench-grid{grid-template-columns:repeat(2,1fr)}
+  .bench-grid,.gcard-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media (max-width:400px){.g2{grid-template-columns:1fr}.power-num{font-size:38px}.chk-grid{grid-template-columns:1fr}}
 </style>
@@ -317,7 +328,7 @@ canvas.tall{height:250px}
       <span class="sign">戴煜</span><br>
       <b>18662613315@163.com</b><br>
       燃料电池研发工程师<br>
-      <span style="opacity:.6">V1.6.0 · 保留所有权利</span>
+      <span style="opacity:.6">V1.7.0 · 保留所有权利</span>
     </div>
   </aside>
   <div class="main">
@@ -335,14 +346,13 @@ canvas.tall{height:250px}
 
 <script>
 /* =========================================================
-   氢枢 HyHub · 燃料电池电堆全能平台 V1.6.0
+   氢枢 HyHub · 燃料电池电堆全能平台 V1.7.0
+   修复：仿真页面参数滑块标签反馈失效
+   优化：工作台 / 计算器 / 参数库 / 监控 / 数据 / 知识库
    设计者：戴煜 | 燃料电池研发工程师
-   联系方式：18662613315@163.com
-   版权所有 © 2026 戴煜 · 保留所有权利
    ========================================================= */
 'use strict';
 
-/* ================= 全局状态 ================= */
 const state = {
   view: 'dashboard',
   simMode: 'steady',
@@ -359,46 +369,36 @@ const state = {
   dataSel: { A:0, B:1 },
   dataMetrics: { eta:true, soh:true, mh2:true, gkwh:false, i:false, vpd:false, sp:false, q:false },
   mon: {
-    auto: true, t: 0, hist: [], timer: null,
+    auto: true, t: 0, hist: [], eisHist: [], timer: null,
     over: { power:150, T:82, pH2:0.19, pAir:0.20, lamAir:2.3 },
     cells: [],
   },
   params: {
-    /* 结构 */
     stackPower:150, N:370, area:420, cellThk:1.5, bppThk:0.40, compress:1.2, dT:5.5,
-    /* 操作 */
     T:82, Tamb:25, altitude:0, pH2:0.19, pAir:0.20, lambdaH2:1.12, lambdaAir:2.3,
     purH2:5.0, rh:45, stoichMode:'auto',
-    /* MEA */
     memType:'gore', memThk:15, ptLoading:0.25, catType:'ptco',
     gdlThk:200, gdlPorosity:76, ionomer:30, mplThk:30,
-    /* 双极板 */
     bppMat:'ti', flowField:'3d', coating:'tin', coatThk:120, contactR:5,
-    /* 电化学 */
     R:0.095, Aact:0.0085, i0:0.0018, m:2.2e-5, n:4,
-    /* 水热 */
     coolFlow:120, coolType:'eg50', dpH2:15, dpAir:22, radMargin:20, pumpEff:0.65,
-    /* BOP */
     cmpType:'centri', cmpEff:0.72, cmpRatio:2.5, dcdcEff:0.98, recirc:'ejector',
-    /* 吹扫 */
     purgePeriod:15, purgeDur:0.9,
-    /* 智能 */
     optMode:'balanced', adaptive:'on', sohWeight:50,
   },
   projects: [
     { name:'城市公交电堆 120kW 稳态', tier:'中型', power:120, date:'2026-09-28', N:280, area:460, T:79, eta:58.2, mh2:5.2, soh:98.2 },
     { name:'重卡电堆 220kW 动态变载', tier:'大型', power:220, date:'2026-09-26', N:410, area:480, T:83, eta:57.5, mh2:9.6, soh:97.6 },
-    { name:'乘用车电堆 90kW 低温启动', tier:'小型', power:90,  date:'2026-09-22', N:330, area:300, T:75, eta:59.1, mh2:3.8, soh:98.8 },
+    { name:'乘用车电堆 90kW 低温启动', tier:'小型', power:90, date:'2026-09-22', N:330, area:300, T:75, eta:59.1, mh2:3.8, soh:98.8 },
     { name:'电站电堆 350kW 耐久循环', tier:'大型', power:350, date:'2026-09-20', N:480, area:620, T:85, eta:56.8, mh2:15.4, soh:96.4 },
-    { name:'便携电堆 18kW 教学验证',  tier:'微型', power:18,  date:'2026-09-18', N:80,  area:180, T:63, eta:52.6, mh2:0.86, soh:99.1 },
-    { name:'物流车电堆 60kW 经济型',  tier:'小型', power:60,  date:'2026-09-15', N:260, area:280, T:76, eta:57.8, mh2:2.7, soh:98.5 },
-    { name:'热电联供电堆 280kW',     tier:'大型', power:280, date:'2026-09-12', N:440, area:560, T:86, eta:58.6, mh2:11.8, soh:97.9 },
-    { name:'无人机电堆 12kW 轻量',   tier:'微型', power:12,  date:'2026-09-10', N:64,  area:160, T:60, eta:51.4, mh2:0.62, soh:99.3 },
+    { name:'便携电堆 18kW 教学验证', tier:'微型', power:18, date:'2026-09-18', N:80, area:180, T:63, eta:52.6, mh2:0.86, soh:99.1 },
+    { name:'物流车电堆 60kW 经济型', tier:'小型', power:60, date:'2026-09-15', N:260, area:280, T:76, eta:57.8, mh2:2.7, soh:98.5 },
+    { name:'热电联供电堆 280kW', tier:'大型', power:280, date:'2026-09-12', N:440, area:560, T:86, eta:58.6, mh2:11.8, soh:97.9 },
+    { name:'无人机电堆 12kW 轻量', tier:'微型', power:12, date:'2026-09-10', N:64, area:160, T:60, eta:51.4, mh2:0.62, soh:99.3 },
   ],
 };
 
-/* ================= 工具函数 ================= */
-const $  = s => document.querySelector(s);
+const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 const fmt = (v,d=2) => (isFinite(v) ? Number(v).toFixed(d) : '—');
 const clamp = (v,a,b) => Math.min(b, Math.max(a,v));
@@ -411,31 +411,31 @@ function toast(msg){
   toastTimer = setTimeout(()=>t.classList.remove('show'), 2000);
 }
 
-/* ================= 电堆功率分级 ================= */
 const TIERS = [
-  {id:'micro', name:'微型', min:10,  max:30,  color:'#22d3ee', scenes:'便携电源电堆 / 无人机电堆 / 小型备电 / 教学电堆'},
-  {id:'small', name:'小型', min:30,  max:80,  color:'#00d48a', scenes:'乘用车电堆 / 轻型物流车电堆 / 小型测试电堆'},
-  {id:'mid',   name:'中型', min:80,  max:200, color:'#0a84ff', scenes:'客车电堆 / 重卡电堆 / 工程机械电堆 / 商用测试电堆'},
+  {id:'micro', name:'微型', min:10, max:30, color:'#22d3ee', scenes:'便携电源电堆 / 无人机电堆 / 小型备电 / 教学电堆'},
+  {id:'small', name:'小型', min:30, max:80, color:'#00d48a', scenes:'乘用车电堆 / 轻型物流车电堆 / 小型测试电堆'},
+  {id:'mid', name:'中型', min:80, max:200, color:'#0a84ff', scenes:'客车电堆 / 重卡电堆 / 工程机械电堆 / 商用测试电堆'},
   {id:'large', name:'大型', min:200, max:400, color:'#a78bfa', scenes:'电站电堆 / 热电联供电堆 / 重载装备电堆 / 高端测试电堆'},
 ];
 const tierOf = P => TIERS.find(t => P <= t.max) || TIERS[3];
 const tierName = id => (TIERS.find(t=>t.id===id) || {}).name || id;
 
-/* ================= 物理常量 ================= */
 const F = 96485, M_H2 = 2.016, LHV_H2 = 33.33, E_IDEAL = 1.482;
 
-/* ================= 全球电堆数据库 ================= */
+/* ================= 全球电堆数据库（扩充） ================= */
 const GLOBAL_DB = [
-  { n:'Toyota Mirai 2',      r:'丰田',      p:128, N:330, area:400, vpd:5.4, sp:4.0, i:1.30, eta:60.0, life:15000, cold:-30, mem:10, pt:0.20, bpp:'钛合金', note:'3D 细密流场 + 增强复合膜' },
-  { n:'Hyundai NEXO',        r:'现代',      p:95,  N:440, area:250, vpd:3.1, sp:2.3, i:1.20, eta:60.0, life:5000,  cold:-30, mem:15, pt:0.30, bpp:'不锈钢', note:'金属板 + 石墨复合' },
-  { n:'Honda Clarity',       r:'本田',      p:103, N:390, area:300, vpd:3.1, sp:2.0, i:1.10, eta:59.0, life:5000,  cold:-20, mem:12, pt:0.25, bpp:'钛合金', note:'薄型化流场板' },
-  { n:'Ballard FCmove-HD',   r:'巴拉德',    p:120, N:400, area:300, vpd:4.2, sp:2.8, i:1.10, eta:58.0, life:30000, cold:-30, mem:18, pt:0.28, bpp:'石墨/金属', note:'重卡长寿命设计' },
-  { n:'Cummins HD120',       r:'康明斯',    p:120, N:380, area:330, vpd:4.0, sp:2.9, i:1.15, eta:58.5, life:25000, cold:-30, mem:16, pt:0.26, bpp:'金属', note:'Hydrogenics 平台' },
-  { n:'亿华通 G120',         r:'亿华通',    p:120, N:380, area:340, vpd:4.5, sp:3.2, i:1.20, eta:58.0, life:15000, cold:-30, mem:15, pt:0.25, bpp:'金属', note:'公交/重卡主力机型' },
-  { n:'重塑 Prisma 12+',     r:'重塑集团',  p:130, N:390, area:350, vpd:4.8, sp:3.5, i:1.25, eta:58.0, life:20000, cold:-30, mem:14, pt:0.24, bpp:'金属', note:'镜星系列高功率密度' },
-  { n:'捷氢 PROME P4',       r:'捷氢科技',  p:130, N:360, area:380, vpd:5.0, sp:3.6, i:1.30, eta:59.0, life:15000, cold:-30, mem:12, pt:0.22, bpp:'金属', note:'乘用车/商用车通用' },
-  { n:'Plug GenDrive',       r:'Plug Power',p:80,  N:300, area:280, vpd:3.0, sp:2.2, i:1.00, eta:57.0, life:20000, cold:-20, mem:20, pt:0.32, bpp:'石墨', note:'叉车/仓储应用' },
-  { n:'国鸿鸿芯 G 系列',     r:'国鸿氢能',  p:110, N:360, area:320, vpd:4.0, sp:2.8, i:1.10, eta:57.5, life:18000, cold:-30, mem:16, pt:0.27, bpp:'石墨/金属', note:'电堆与系统集成' },
+  { n:'Toyota Mirai 2', r:'日本·丰田', p:128, N:330, area:400, vpd:5.4, sp:4.0, i:1.30, eta:60.0, life:15000, cold:-30, mem:10, pt:0.20, bpp:'钛合金', note:'3D 细密流场 + 增强复合膜' },
+  { n:'Hyundai NEXO', r:'韩国·现代', p:95, N:440, area:250, vpd:3.1, sp:2.3, i:1.20, eta:60.0, life:5000, cold:-30, mem:15, pt:0.30, bpp:'不锈钢', note:'金属板 + 石墨复合' },
+  { n:'Honda Clarity', r:'日本·本田', p:103, N:390, area:300, vpd:3.1, sp:2.0, i:1.10, eta:59.0, life:5000, cold:-20, mem:12, pt:0.25, bpp:'钛合金', note:'薄型化流场板' },
+  { n:'GM Hydrotec', r:'美国·通用', p:100, N:400, area:280, vpd:4.0, sp:3.0, i:1.15, eta:58.5, life:15000, cold:-30, mem:15, pt:0.26, bpp:'金属', note:'商用车平台' },
+  { n:'Ballard FCmove-HD', r:'加拿大·巴拉德', p:120, N:400, area:300, vpd:4.2, sp:2.8, i:1.10, eta:58.0, life:30000, cold:-30, mem:18, pt:0.28, bpp:'石墨/金属', note:'重卡长寿命设计' },
+  { n:'Cummins HD120', r:'美国·康明斯', p:120, N:380, area:330, vpd:4.0, sp:2.9, i:1.15, eta:58.5, life:25000, cold:-30, mem:16, pt:0.26, bpp:'金属', note:'Hydrogenics 平台' },
+  { n:'Plug GenDrive', r:'美国·Plug Power', p:80, N:300, area:280, vpd:3.0, sp:2.2, i:1.00, eta:57.0, life:20000, cold:-20, mem:20, pt:0.32, bpp:'石墨', note:'叉车/仓储应用' },
+  { n:'Nikola TRE FCEV', r:'美国·Nikola', p:200, N:450, area:450, vpd:4.5, sp:3.0, i:1.15, eta:58.0, life:25000, cold:-30, mem:16, pt:0.27, bpp:'金属', note:'重卡 800V 平台' },
+  { n:'亿华通 G120', r:'中国·亿华通', p:120, N:380, area:340, vpd:4.5, sp:3.2, i:1.20, eta:58.0, life:15000, cold:-30, mem:15, pt:0.25, bpp:'金属', note:'公交/重卡主力机型' },
+  { n:'重塑 Prisma 12+', r:'中国·重塑集团', p:130, N:390, area:350, vpd:4.8, sp:3.5, i:1.25, eta:58.0, life:20000, cold:-30, mem:14, pt:0.24, bpp:'金属', note:'镜星系列高功率密度' },
+  { n:'捷氢 PROME P4', r:'中国·捷氢科技', p:130, N:360, area:380, vpd:5.0, sp:3.6, i:1.30, eta:59.0, life:15000, cold:-30, mem:12, pt:0.22, bpp:'金属', note:'乘用车/商用车通用' },
+  { n:'国鸿鸿芯 G 系列', r:'中国·国鸿氢能', p:110, N:360, area:320, vpd:4.0, sp:2.8, i:1.10, eta:57.5, life:18000, cold:-30, mem:16, pt:0.27, bpp:'石墨/金属', note:'电堆与系统集成' },
 ];
 
 /* ================= 电堆求解内核 ================= */
@@ -474,29 +474,24 @@ function solveSystem(){
   const mH2 = P.N * I * M_H2 * 3.6 / (2 * F) * lamH2;
   const mAir = mH2 * 34.3 * lamAir;
 
-  /* 空压机（考虑海拔环境压力折减） */
   const gamma = 0.2857;
   const cmpEff = P.cmpEff || 0.72;
   const ratio = Math.max(P.cmpRatio || 2.5, 1.01) * (0.75 + 0.25 * pAtm / 0.1013);
   const pCmp = (mAir/3600) * 1.005 * 293 * (Math.pow(ratio, gamma) - 1) / cmpEff;
 
-  /* 产热 & 冷却 */
   const Q = Pstack * (1/etaStack - 1);
   const flow = P.coolFlow || Math.max(Q / (3.55*4.18*(P.dT||5)) * 60, 10);
   const pPump = flow * 0.25 / 60 / (P.pumpEff || 0.65);
 
-  /* 氢循环 */
   const pRecirc = P.recirc === 'ejector' ? P.stackPower * 0.004
                  : P.recirc === 'roots' ? P.stackPower * 0.020 : P.stackPower * 0.012;
 
-  /* DC-DC */
   const pDcdc = Pstack * (1 - (P.dcdcEff || 0.98));
 
   const pBop = pCmp + pPump + pRecirc + pDcdc;
   const Pnet = Math.max(Pstack - pBop, 0.1);
   const etaSys = Pnet / Math.max(Pstack, 1e-6) * etaStack;
 
-  /* 体积 / 质量 */
   const coreVol = P.N * (P.cellThk||1.5) * P.area * 0.0001;
   const volL = coreVol * 1.5;
   const massKg = coreVol * 1.65 + 8;
@@ -504,7 +499,6 @@ function solveSystem(){
   const sp = Pstack / Math.max(massKg, 1e-6);
   const pd = Vc * i * 1000;
 
-  /* 损耗分解 */
   const lossAct = P.N * I * P.Aact * Math.log(i/P.i0) / 1000;
   const lossOhm = P.N * I * P.R * i / 1000;
   const lossCon = P.N * I * P.m * Math.exp(P.n*i) / 1000;
@@ -518,11 +512,11 @@ function solveSystem(){
   };
 }
 
-/* ================= 工作台参数组（8 组） ================= */
+/* ================= 参数组 ================= */
 const PARAM_GROUPS = [
   { id:'struct', ico:'▤', name:'电堆结构与规格', desc:'额定功率、片数、有效面积、板厚、封装压缩', items:[
-    { key:'stackPower', k:'电堆额定功率', unit:'kW', min:10, max:400, step:1, dec:0, note:'10–400kW；对标 Mirai 2 电堆 128kW / NEXO 95kW / 亿华通 G120 120kW / 捷氢 P4 130kW' },
-    { key:'N', k:'电堆片数', unit:'片', min:40, max:600, step:5, dec:0, note:'金属板乘用车 300–370 片（Mirai 2 约 330）；商用车 400–480 片；石墨堆可至 600 片' },
+    { key:'stackPower', k:'电堆额定功率', unit:'kW', min:10, max:400, step:1, dec:0, note:'对标 Mirai 2 128kW / NEXO 95kW / 亿华通 G120 120kW / 捷氢 P4 130kW / Nikola 200kW' },
+    { key:'N', k:'电堆片数', unit:'片', min:40, max:600, step:5, dec:0, note:'金属板乘用车 300–370 片；商用车 400–480 片；石墨堆可至 600 片' },
     { key:'area', k:'单片有效面积', unit:'cm²', min:100, max:800, step:5, dec:0, note:'乘用车 250–350 cm²；商用车 400–550 cm²；电站堆可至 620 cm²' },
     { key:'cellThk', k:'单片厚度（含板）', unit:'mm', min:0.9, max:3.5, step:0.05, dec:2, note:'金属板 1.2–1.5 mm；石墨板 2.0–3.0 mm；Mirai 2 约 1.1 mm' },
     { key:'bppThk', k:'双极板单板厚度', unit:'mm', min:0.30, max:2.00, step:0.05, dec:2, note:'Mirai 2 钛板约 0.4 mm；不锈钢板 0.5–0.8 mm；石墨板 1.5–3.0 mm' },
@@ -530,14 +524,14 @@ const PARAM_GROUPS = [
     { key:'dT', k:'冷却液温差', unit:'K', min:3, max:12, step:0.5, dec:1, note:'领先水平 4–6 K；温差越小温度场越均匀，但泵功上升' },
   ]},
   { id:'op', ico:'≈', name:'电堆操作条件', desc:'温度、海拔、氢/空压力、计量比、纯度、湿度', items:[
-    { key:'T', k:'电堆工作温度', unit:'℃', min:40, max:100, step:1, dec:0, note:'领先水平 80–90℃ 高温低湿运行；Mirai 2 约 85℃；NEXO 约 80℃' },
+    { key:'T', k:'电堆工作温度', unit:'℃', min:40, max:100, step:1, dec:0, note:'领先水平 80–90℃ 高温低湿运行；Mirai 2 约 85℃' },
     { key:'Tamb', k:'环境温度', unit:'℃', min:-40, max:55, step:1, dec:0, note:'影响冷启动与散热；-30℃ 以下需专门低温策略' },
     { key:'altitude', k:'海拔高度', unit:'m', min:0, max:5000, step:100, dec:0, note:'海拔每升高 1000 m 大气压降约 11%，空气侧传质与空压机压比需补偿' },
     { key:'pH2', k:'氢气入口压力', unit:'MPa', min:0.08, max:0.35, step:0.01, dec:2, note:'领先水平 0.16–0.25 MPa 中高压运行' },
     { key:'pAir', k:'空气入口压力', unit:'MPa', min:0.08, max:0.35, step:0.01, dec:2, note:'与氢压协同匹配；氢空压差是水管理的关键参数' },
     { key:'lambdaH2', k:'氢气计量比', unit:'—', min:1.00, max:1.50, step:0.01, dec:2, note:'领先水平 1.05–1.15；配合引射器与脉冲吹扫实现低氢损' },
     { key:'lambdaAir', k:'空气计量比', unit:'—', min:1.5, max:4.0, step:0.1, dec:1, note:'高功率段 2.2–2.6；低功率段 1.8–2.0 提效' },
-    { key:'purH2', k:'氢气纯度等级', unit:'—', min:3.0, max:5.0, step:0.5, dec:1, note:'5.0 = 99.999%，车用标准（GB/T 37244 / SAE J2719）' },
+    { key:'purH2', k:'氢气纯度等级', unit:'—', min:3.0, max:5.0, step:0.5, dec:1, note:'5.0 = 99.999%，车用标准（GB/T 37244 / SAE J2719 / ISO 14687）' },
     { key:'rh', k:'进气相对湿度', unit:'%', min:10, max:90, step:1, dec:0, note:'高温低湿运行是领先方向；30–60% 为典型工作区间' },
     { key:'stoichMode', k:'计量比模式', unit:'—', type:'select', options:[{v:'auto',t:'自动（按电堆功率自适应）'},{v:'manual',t:'手动（使用上方设定值）'}], note:'领先水平：MPC 模型预测控制' },
   ]},
@@ -618,21 +612,20 @@ const PARAM_GROUPS = [
   ]},
 ];
 
-/* ================= 预设参数 ================= */
 const PRESETS = [
-  { name:'微型电堆 18kW',  stackPower:18,  N:80,  area:180, T:63, pH2:0.12, pAir:0.12, memThk:25, ptLoading:0.35, gdlThk:250, R:0.135, Aact:0.010, i0:0.0010, m:3.5e-5, n:4, dT:5, cellThk:2.2, bppThk:1.5, cmpRatio:1.8, cmpEff:0.62 },
-  { name:'乘用车电堆 90kW',stackPower:90,  N:330, area:300, T:75, pH2:0.16, pAir:0.17, memThk:12, ptLoading:0.22, gdlThk:180, R:0.095, Aact:0.0085,i0:0.0018, m:2.2e-5, n:4, dT:5.5, cellThk:1.3, bppThk:0.4, cmpRatio:2.3, cmpEff:0.76 },
-  { name:'商用车电堆 150kW',stackPower:150,N:370, area:420, T:82, pH2:0.19, pAir:0.20, memThk:15, ptLoading:0.25, gdlThk:200, R:0.092, Aact:0.0082,i0:0.0020, m:2.0e-5, n:4, dT:5, cellThk:1.5, bppThk:0.45, cmpRatio:2.5, cmpEff:0.74 },
-  { name:'电站电堆 350kW', stackPower:350, N:480, area:620, T:86, pH2:0.23, pAir:0.24, memThk:20, ptLoading:0.30, gdlThk:230, R:0.088, Aact:0.0080,i0:0.0022, m:1.8e-5, n:4, dT:6, cellThk:1.8, bppThk:0.6, cmpRatio:2.8, cmpEff:0.78 },
-  { name:'重卡电堆 220kW', stackPower:220, N:410, area:480, T:83, pH2:0.21, pAir:0.22, memThk:16, ptLoading:0.26, gdlThk:210, R:0.090, Aact:0.0082,i0:0.0020, m:2.0e-5, n:4, dT:5.5, cellThk:1.6, bppThk:0.5, cmpRatio:2.6, cmpEff:0.75 },
-  { name:'物流车电堆 60kW', stackPower:60,  N:260, area:280, T:76, pH2:0.15, pAir:0.16, memThk:18, ptLoading:0.28, gdlThk:210, R:0.100, Aact:0.0090,i0:0.0016, m:2.6e-5, n:4, dT:5, cellThk:1.6, bppThk:0.5, cmpRatio:2.2, cmpEff:0.70 },
+  { name:'微型电堆 18kW', stackPower:18, N:80, area:180, T:63, pH2:0.12, pAir:0.12, memThk:25, ptLoading:0.35, gdlThk:250, R:0.135, Aact:0.010, i0:0.0010, m:3.5e-5, n:4, dT:5, cellThk:2.2, bppThk:1.5, cmpRatio:1.8, cmpEff:0.62 },
+  { name:'乘用车电堆 90kW', stackPower:90, N:330, area:300, T:75, pH2:0.16, pAir:0.17, memThk:12, ptLoading:0.22, gdlThk:180, R:0.095, Aact:0.0085, i0:0.0018, m:2.2e-5, n:4, dT:5.5, cellThk:1.3, bppThk:0.4, cmpRatio:2.3, cmpEff:0.76 },
+  { name:'商用车电堆 150kW', stackPower:150, N:370, area:420, T:82, pH2:0.19, pAir:0.20, memThk:15, ptLoading:0.25, gdlThk:200, R:0.092, Aact:0.0082, i0:0.0020, m:2.0e-5, n:4, dT:5, cellThk:1.5, bppThk:0.45, cmpRatio:2.5, cmpEff:0.74 },
+  { name:'电站电堆 350kW', stackPower:350, N:480, area:620, T:86, pH2:0.23, pAir:0.24, memThk:20, ptLoading:0.30, gdlThk:230, R:0.088, Aact:0.0080, i0:0.0022, m:1.8e-5, n:4, dT:6, cellThk:1.8, bppThk:0.6, cmpRatio:2.8, cmpEff:0.78 },
+  { name:'重卡电堆 220kW', stackPower:220, N:410, area:480, T:83, pH2:0.21, pAir:0.22, memThk:16, ptLoading:0.26, gdlThk:210, R:0.090, Aact:0.0082, i0:0.0020, m:2.0e-5, n:4, dT:5.5, cellThk:1.6, bppThk:0.5, cmpRatio:2.6, cmpEff:0.75 },
+  { name:'物流车电堆 60kW', stackPower:60, N:260, area:280, T:76, pH2:0.15, pAir:0.16, memThk:18, ptLoading:0.28, gdlThk:210, R:0.100, Aact:0.0090, i0:0.0016, m:2.6e-5, n:4, dT:5, cellThk:1.6, bppThk:0.5, cmpRatio:2.2, cmpEff:0.70 },
 ];
 
-/* ================= 参数库（22 大类） ================= */
+/* ================= 参数库 ================= */
 const LIB = [
   { id:'stack_struct', t:'电堆结构与规格', ico:'▤', desc:'片数、有效面积、厚度、体积与重量', items:[
-    { id:'stack.N', k:'片数范围', v:'300 – 480', u:'片', range:'40 – 600', note:'金属板乘用车 300–370 片（Mirai 2 约 330 片）；商用车 400–480 片', tiers:['micro','small','mid','large'], map:{key:'N', value:370} },
-    { id:'stack.area', k:'单片有效面积', v:'250 – 550', u:'cm²', range:'100 – 850', note:'乘用车 250–350 cm²；商用车 400–550 cm²；电站堆 600–620 cm²', tiers:['micro','small','mid','large'], map:{key:'area', value:420} },
+    { id:'stack.N', k:'片数范围', v:'300 – 480', u:'片', range:'40 – 600', note:'金属板乘用车 300–370 片；商用车 400–480 片', tiers:['micro','small','mid','large'], map:{key:'N', value:370} },
+    { id:'stack.area', k:'单片有效面积', v:'250 – 550', u:'cm²', range:'100 – 850', note:'乘用车 250–350 cm²；商用车 400–550 cm²', tiers:['micro','small','mid','large'], map:{key:'area', value:420} },
     { id:'stack.thk', k:'单片厚度（含板）', v:'1.2 – 2.0', u:'mm', range:'0.9 – 3.5', note:'金属板单板 0.4–0.6 mm；含 MEA 与密封后单片厚度 1.2–1.5 mm', tiers:['small','mid','large'], map:{key:'cellThk', value:1.5} },
     { id:'stack.bppThk', k:'双极板单板厚度', v:'0.40 – 0.80', u:'mm', range:'0.30 – 2.00', note:'Mirai 2 钛合金板约 0.4 mm；不锈钢板 0.5–0.8 mm', tiers:['small','mid','large'], map:{key:'bppThk', value:0.4} },
     { id:'stack.compress', k:'封装压缩力', v:'0.8 – 1.5', u:'MPa', range:'0.5 – 2.5', note:'压缩力过低接触电阻大，过高可能压溃 GDL', tiers:['small','mid','large'], map:{key:'compress', value:1.2} },
@@ -640,18 +633,16 @@ const LIB = [
     { id:'stack.w', k:'电堆宽度', v:'250 – 400', u:'mm', range:'120 – 550', note:'受限于发动机舱与安装支架尺寸' },
     { id:'stack.V', k:'电堆体积', v:'30 – 80', u:'L', range:'10 – 150', note:'Mirai 2 电堆体积约 37 L / 128 kW → 5.4 kW/L（领先）', tiers:['small','mid','large'] },
     { id:'stack.m', k:'电堆质量', v:'35 – 90', u:'kg', range:'10 – 180', note:'Mirai 2 电堆约 32 kg / 128 kW → 4.0 kW/kg（领先）', tiers:['micro','small','mid'] },
-    { id:'stack.torque', k:'封装压缩力', v:'0.8 – 1.5', u:'MPa', range:'0.5 – 2.5', note:'压缩力过低接触电阻大，过高可能压溃 GDL' },
     { id:'stack.bolt', k:'紧固螺栓数量', v:'8 – 16', u:'个', range:'6 – 24', note:'力分布均匀性直接影响单片一致性' },
   ]},
   { id:'mea', t:'膜电极 MEA', ico:'◈', desc:'质子膜、催化剂、GDL 与 MPL', items:[
-    { id:'mea.mem', k:'质子交换膜', v:'Gore SELECT / Nafion 211 / 212 / ePTFE 增强', u:'—', range:'—', note:'Gore SELECT 增强复合膜（8–12 μm）为车用主流；Mirai 2 约 10 μm', tiers:['micro','small','mid','large'] },
+    { id:'mea.mem', k:'质子交换膜', v:'Gore SELECT / Nafion 211 / 212 / ePTFE 增强', u:'—', range:'—', note:'Gore SELECT 增强复合膜（8–12 μm）为车用主流', tiers:['micro','small','mid','large'] },
     { id:'mea.memt', k:'膜厚度', v:'8 – 25', u:'μm', range:'6 – 60', note:'乘用车 8–15 μm；商用车 15–25 μm', tiers:['small','mid','large'], map:{key:'memThk', value:15} },
     { id:'mea.ptA', k:'阳极 Pt 载量', v:'0.03 – 0.08', u:'mg/cm²', range:'0.02 – 0.15', note:'阳极载量持续下探；抗 CO 场景需提高至 0.10–0.20' },
     { id:'mea.ptC', k:'阴极 Pt 载量', v:'0.15 – 0.28', u:'mg/cm²', range:'0.10 – 0.45', note:'Mirai 2 阴极约 0.20 mg/cm²；捷氢 P4 约 0.22', tiers:['micro','small','mid','large'], map:{key:'ptLoading', value:0.25} },
     { id:'mea.cat', k:'催化剂类型', v:'PtCo/C · PtNi/C · 高活性 Pt/C', u:'—', range:'—', note:'PtCo 合金抗衰减更好；PtNi 达更高比活性', tiers:['small','mid','large'] },
     { id:'mea.gdl', k:'GDL 类型', v:'碳纸（SGL 29BC / Toray 060）+ MPL', u:'—', range:'碳纸 / 碳布', note:'带 MPL 的碳纸为车用主流', tiers:['micro','small','mid','large'] },
     { id:'mea.gdlt', k:'GDL 厚度', v:'150 – 250', u:'μm', range:'100 – 400', note:'低湿高电流密度宜用薄 GDL（150–190 μm）', tiers:['small','mid','large'], map:{key:'gdlThk', value:200} },
-    { id:'mea.mpl', k:'微孔层 MPL', v:'有（必备）', u:'—', range:'有 / 无', note:'MPL 为标准配置，显著改善低湿与高电流密度性能', tiers:['small','mid','large'] },
     { id:'mea.mplT', k:'MPL 厚度', v:'20 – 50', u:'μm', range:'10 – 80', note:'薄 MPL 传质好，厚 MPL 保水能力强', map:{key:'mplThk', value:30} },
     { id:'mea.ion', k:'离聚物含量', v:'25 – 35', u:'wt%', range:'15 – 45', note:'离聚物高则质子传导好，但氧气传质阻力上升', map:{key:'ionomer', value:30} },
     { id:'mea.por', k:'GDL 孔隙率', v:'70 – 82', u:'%', range:'60 – 90', note:'高孔隙利于传质但机械强度下降', map:{key:'gdlPorosity', value:76} },
@@ -668,14 +659,14 @@ const LIB = [
     { id:'bpp.chD', k:'流道深度', v:'0.4 – 0.8', u:'mm', range:'0.3 – 1.5', note:'深流道排水好但传质阻力上升' },
   ]},
   { id:'op', t:'电堆操作参数', ico:'⬡', desc:'温度、压力、计量比与气体品质', items:[
-    { id:'op.T', k:'电堆工作温度', v:'80 – 90', u:'℃', range:'40 – 100', note:'高温低湿运行是领先方向；Mirai 2 电堆约 85℃；NEXO 约 80℃', tiers:['micro','small','mid','large'], map:{key:'T', value:82} },
+    { id:'op.T', k:'电堆工作温度', v:'80 – 90', u:'℃', range:'40 – 100', note:'高温低湿运行是领先方向；Mirai 2 约 85℃', tiers:['micro','small','mid','large'], map:{key:'T', value:82} },
     { id:'op.Tamb', k:'环境温度', v:'-30 – 50', u:'℃', range:'-40 – 55', note:'-30℃ 以下需专门低温策略', map:{key:'Tamb', value:25} },
-    { id:'op.alt', k:'海拔高度', v:'0 – 3000', u:'m', range:'0 – 5000', note:'海拔每升高 1000 m 大气压降约 11%，需补偿空压机压比', map:{key:'altitude', value:0} },
+    { id:'op.alt', k:'海拔高度', v:'0 – 3000', u:'m', range:'0 – 5000', note:'海拔每升高 1000 m 大气压降约 11%', map:{key:'altitude', value:0} },
     { id:'op.pH2', k:'氢气入口压力', v:'0.16 – 0.25', u:'MPa', range:'0.08 – 0.35', note:'中高压运行提升传质与排水', tiers:['micro','small','mid','large'], map:{key:'pH2', value:0.19} },
     { id:'op.pAir', k:'空气入口压力', v:'0.17 – 0.26', u:'MPa', range:'0.08 – 0.35', note:'与氢压协同匹配', tiers:['micro','small','mid','large'], map:{key:'pAir', value:0.20} },
     { id:'op.lamH2', k:'氢气计量比', v:'1.05 – 1.15', u:'—', range:'1.02 – 1.50', note:'配合引射器 + 脉冲吹扫', tiers:['micro','small','mid','large'], map:{key:'lambdaH2', value:1.12} },
     { id:'op.lamAir', k:'空气计量比', v:'1.8 – 2.6', u:'—', range:'1.5 – 3.5', note:'小功率低计量比提效；大功率高计量比保水热平衡', tiers:['micro','small','mid','large'], map:{key:'lambdaAir', value:2.3} },
-    { id:'op.pur', k:'氢气纯度', v:'5.0 级（99.999%）', u:'—', range:'5.0 / 4.5 / 3.0', note:'车用标准 5.0 级；SAE J2719 / GB/T 37244', map:{key:'purH2', value:5.0} },
+    { id:'op.pur', k:'氢气纯度', v:'5.0 级（99.999%）', u:'—', range:'5.0 / 4.5 / 3.0', note:'车用标准 5.0 级（GB/T 37244）', map:{key:'purH2', value:5.0} },
     { id:'op.rh', k:'进气相对湿度', v:'30 – 60', u:'%', range:'10 – 90', note:'高温低湿运行是领先方向', map:{key:'rh', value:45} },
     { id:'op.dpH2', k:'氢侧压降', v:'10 – 25', u:'kPa', range:'5 – 50', note:'压降升高预示流场堵塞或水淹', map:{key:'dpH2', value:15} },
     { id:'op.dpAir', k:'空气侧压降', v:'15 – 30', u:'kPa', range:'8 – 60', note:'压降过高增加空压机功耗', map:{key:'dpAir', value:22} },
@@ -697,7 +688,7 @@ const LIB = [
     { id:'perf.sp', k:'比功率', v:'2.5 – 4.5', u:'kW/kg', range:'1.8 – 5.5', note:'Mirai 2 达 4.0 kW/kg；捷氢 P4 达 3.6 kW/kg', tiers:['micro','small','mid'] },
     { id:'perf.ocv', k:'开路电压 OCV', v:'0.96 – 1.02', u:'V', range:'0.92 – 1.08', note:'受膜厚、温度、湿度、氢渗综合影响', tiers:['micro','small','mid','large'] },
     { id:'perf.ilim', k:'极限电流密度', v:'2.5 – 3.2', u:'A/cm²', range:'2.0 – 3.8', note:'Mirai 2 达 3.0 A/cm²', tiers:['small','mid','large'] },
-    { id:'perf.eff', k:'额定点电堆效率', v:'55 – 62', u:'%', range:'48 – 65', note:'Mirai 2 电堆效率约 60%；NEXO 约 60%', tiers:['micro','small','mid','large'] },
+    { id:'perf.eff', k:'额定点电堆效率', v:'55 – 62', u:'%', range:'48 – 65', note:'Mirai 2 / NEXO 约 60%', tiers:['micro','small','mid','large'] },
     { id:'perf.gkwh', k:'电堆单位氢耗', v:'48 – 60', u:'g/kWh', range:'40 – 75', note:'电堆级氢耗（不含辅机）' },
     { id:'perf.cons', k:'单片一致性', v:'最大偏差 < 20', u:'mV', range:'10 – 60', note:'< 20 mV 为国际领先', tiers:['small','mid','large'] },
     { id:'perf.peak', k:'峰值功率倍率', v:'1.10 – 1.25', u:'—', range:'1.05 – 1.40', note:'峰值功率持续时间 ≥ 30 s' },
@@ -710,7 +701,7 @@ const LIB = [
     { id:'life.fail', k:'主要失效模式', v:'Pt 团聚 / 膜降解 / 碳腐蚀', u:'—', range:'—', note:'Pt 溶解与团聚占衰减 40–50%', tiers:['small','mid','large'] },
     { id:'life.soh', k:'SOH 评估指标', v:'V_avg / R_ohmic / 氢耗', u:'—', range:'—', note:'多参数融合模型' },
     { id:'life.cold', k:'低温启动衰减', v:'30 – 60', u:'μV/次', range:'15 – 100', note:'-30℃ 启动对膜与催化剂的损伤大于常温启动' },
-    { id:'life.rul', k:'剩余寿命预测 RUL', v:'基于 SOH + 衰减速率', u:'h', range:'—', note:'采用卡尔曼滤波 + 经验衰减模型融合预测' },
+    { id:'life.rul', k:'剩余寿命预测 RUL', v:'基于 SOH + 衰减速率', u:'h', range:'—', note:'卡尔曼滤波 + 经验衰减模型融合预测' },
   ]},
   { id:'gas', t:'气路系统', ico:'⚙', desc:'气路元件与参数', items:[
     { id:'gas.pur', k:'氢气纯度等级', v:'5.0 / 4.5 / 3.0', u:'—', range:'—', note:'车用标准 5.0 级；3.0 级工业副产氢需深度净化' },
@@ -749,15 +740,14 @@ const LIB = [
     { id:'std.37244', k:'GB/T 37244', v:'燃料电池汽车用燃料氢气', u:'—', range:'—', note:'氢气纯度 5.0 / 4.5 / 3.0 分级与杂质限值；对标 SAE J2719' },
     { id:'std.26990', k:'GB/T 26990', v:'车载氢系统技术条件', u:'—', range:'—', note:'35 MPa / 70 MPa 储氢系统安全要求' },
     { id:'std.24549', k:'GB/T 24549', v:'燃料电池电动汽车安全要求', u:'—', range:'—', note:'涵盖电堆、氢系统、电气安全等要求' },
-    { id:'std.24548', k:'GB/T 24548', v:'燃料电池电动汽车术语', u:'—', range:'—', note:'统一电堆、系统、部件术语定义' },
     { id:'std.j2719', k:'SAE J2719', v:'氢气品质标准（国际）', u:'—', range:'—', note:'H₂ ≥ 99.97%；CO ≤ 0.2 μmol/mol；总硫 ≤ 0.004 μmol/mol' },
     { id:'std.j2579', k:'SAE J2579', v:'氢系统安全技术规范', u:'—', range:'—', note:'泄漏率、耐压、碰撞等安全试验方法' },
-    { id:'std.iso14687', k:'ISO 14687', v:'氢气燃料质量规范', u:'—', range:'—', note:'国际通用氢气品质标准，分 Grade A/B/C' },
+    { id:'std.iso14687', k:'ISO 14687', v:'氢气燃料质量规范', u:'—', range:'—', note:'国际通用氢气品质标准，分 Grade A/B/C/D' },
+    { id:'std.iec62282', k:'IEC 62282', v:'燃料电池技术国际标准', u:'—', range:'—', note:'涵盖固定式、便携式、车用燃料电池全系列国际标准' },
     { id:'std.cold', k:'低温启动阈值', v:'-30℃ 通过 / -40℃ 领先', u:'—', range:'—', note:'-30℃ ≤ 30 s；-40℃ 无需外部辅助可启动' },
     { id:'std.dur', k:'耐久阈值', v:'15000 h 衰减 < 5%', u:'—', range:'—', note:'车用 15000 h；电站级 30000–40000 h' },
-    { id:'std.eff', k:'电堆效率阈值', v:'≥ 58', u:'%', range:'50 – 65', note:'额定点电堆效率（单片电压/理论电压）≥ 58%' },
+    { id:'std.eff', k:'电堆效率阈值', v:'≥ 58', u:'%', range:'50 – 65', note:'额定点电堆效率 ≥ 58%' },
     { id:'std.h2c', k:'单位氢耗阈值', v:'≤ 52', u:'g/kWh', range:'45 – 70', note:'电堆级氢耗；对应电堆效率约 60%' },
-    { id:'std.cons', k:'单片一致性阈值', v:'最大偏差 < 20', u:'mV', range:'10 – 60', note:'偏差持续扩大预示膜/催化剂老化' },
   ]},
   { id:'diagnose', t:'电堆诊断与故障', ico:'⚕', desc:'故障模式、诊断方法、阈值', items:[
     { id:'diag.cold', k:'低温启动故障', v:'冰堵 / 膜脆化 / 电压爬升慢', u:'—', range:'—', note:'提前吹扫除水；采用 PTC 或电加热辅助' },
@@ -805,18 +795,10 @@ const LIB = [
     { id:'test.cycle', k:'耐久循环', v:'5000 – 15000 h', u:'—', range:'—', note:'启停循环 / 变载循环 / 怠速循环 三类' },
     { id:'test.cold', k:'冷启动测试', v:'-30 / -35 / -40', u:'℃', range:'-40 – 0', note:'环境仓浸泡 ≥ 8h 至热平衡' },
   ]},
-  { id:'global', t:'全球电堆数据库', ico:'🌐', desc:'国际主流电堆实测参数对标', items:[
-    { id:'g.mirai', k:'Toyota Mirai 2', v:'128 kW / 5.4 kW/L / 4.0 kW/kg', u:'—', range:'—', note:'330 片 · 400 cm² · 1.30 A/cm² · 效率 60% · 寿命 15000h · -30℃ 冷启动' },
-    { id:'g.nexo', k:'Hyundai NEXO', v:'95 kW / 3.1 kW/L / 2.3 kW/kg', u:'—', range:'—', note:'440 片 · 250 cm² · 1.20 A/cm² · 效率 60% · 寿命 5000h' },
-    { id:'g.clarity', k:'Honda Clarity', v:'103 kW / 3.1 kW/L / 2.0 kW/kg', u:'—', range:'—', note:'390 片 · 300 cm² · 1.10 A/cm² · 效率 59%' },
-    { id:'g.ballard', k:'Ballard FCmove-HD', v:'120 kW / 4.2 kW/L / 2.8 kW/kg', u:'—', range:'—', note:'400 片 · 300 cm² · 寿命 30000h（重卡长寿命标杆）' },
-    { id:'g.cummins', k:'Cummins HD120', v:'120 kW / 4.0 kW/L / 2.9 kW/kg', u:'—', range:'—', note:'380 片 · 330 cm² · 寿命 25000h' },
-    { id:'g.sinosyn', k:'亿华通 G120', v:'120 kW / 4.5 kW/L / 3.2 kW/kg', u:'—', range:'—', note:'380 片 · 340 cm² · 1.20 A/cm² · 寿命 15000h' },
-    { id:'g.refire', k:'重塑 Prisma 12+', v:'130 kW / 4.8 kW/L / 3.5 kW/kg', u:'—', range:'—', note:'390 片 · 350 cm² · 1.25 A/cm² · 寿命 20000h' },
-    { id:'g.shrpt', k:'捷氢 PROME P4', v:'130 kW / 5.0 kW/L / 3.6 kW/kg', u:'—', range:'—', note:'360 片 · 380 cm² · 1.30 A/cm² · 效率 59%' },
-    { id:'g.plug', k:'Plug GenDrive', v:'80 kW / 3.0 kW/L / 2.2 kW/kg', u:'—', range:'—', note:'300 片 · 280 cm² · 寿命 20000h（叉车应用）' },
-    { id:'g.hongxin', k:'国鸿鸿芯 G 系列', v:'110 kW / 4.0 kW/L / 2.8 kW/kg', u:'—', range:'—', note:'360 片 · 320 cm² · 寿命 18000h' },
-  ]},
+  { id:'global', t:'全球电堆数据库', ico:'', desc:'国际主流电堆实测参数对标', items: GLOBAL_DB.map((g,i) => ({
+    id:'g.'+i, k:g.n, v:`${g.p} kW / ${g.vpd} kW/L / ${g.sp} kW/kg`, u:'—', range:'—',
+    note:`${g.N} 片 · ${g.area} cm² · ${g.i} A/cm² · 效率 ${g.eta}% · 寿命 ${g.life}h · ${g.r}`
+  }))},
 ];
 
 function libAllItems(){
@@ -845,7 +827,7 @@ function libFilterItems(items){
   });
 }
 
-/* ================= 知识库（13 大类） ================= */
+/* ================= 知识库 ================= */
 const KB_CATS = [
   { id:'std', ico:'§', name:'国标与测试规范', desc:'电堆级国家标准与试验方法', entries:[
     { id:'gb24554', title:'GB/T 24554 燃料电池发动机性能试验方法', tags:['强制国标','电堆性能试验'],
@@ -895,17 +877,6 @@ const KB_CATS = [
         '电气安全':['高压安全隔离','绝缘监测实时','过流保护'],
         '工程建议':['定期检查绝缘电阻与接地连续性','定期更换氢气过滤器与密封件','建议每 6 个月做一次完整安全评估'],
       } },
-    { id:'sae2719', title:'SAE J2719 氢气品质标准（国际对标）', tags:['国际标准','氢气品质'],
-      summary:'国际主流氢气品质标准，与 GB/T 37244 互相对标。',
-      detail:{
-        '适用范围':['适用于燃料电池汽车用氢气品质评价','与 GB/T 37244 内容基本一致'],
-        '关键杂质限值':[
-          { k:'H₂ 纯度', v:'≥ 99.97%' },{ k:'H₂O', v:'≤ 5 μmol/mol' },
-          { k:'O₂', v:'≤ 5 μmol/mol' },{ k:'He/N₂/Ar', v:'≤ 100 μmol/mol' },
-          { k:'CO₂', v:'≤ 2 μmol/mol' },{ k:'CO', v:'≤ 0.2 μmol/mol' },
-          { k:'总硫', v:'≤ 0.004 μmol/mol' },{ k:'NH₃', v:'≤ 0.1 μmol/mol' }],
-        '工程建议':['出口至欧美市场的产品需满足 SAE J2719','建议氢气供应商同时提供 GB 与 SAE 双认证报告'],
-      } },
     { id:'iso14687', title:'ISO 14687 氢气燃料质量规范', tags:['国际标准','氢品质'],
       summary:'国际标准化组织氢气品质分级（Grade A/B/C/D）。',
       detail:{
@@ -917,12 +888,16 @@ const KB_CATS = [
         '关键指标':['CO ≤ 0.2 μmol/mol','总硫 ≤ 0.004 μmol/mol','H₂O ≤ 5 μmol/mol','颗粒物 ≤ 1 mg/kg'],
         '工程建议':['出口欧洲的产品需按 ISO 14687 Grade A 要求','建议建立氢气全链条质量追溯体系'],
       } },
-    { id:'saej2579', title:'SAE J2579 氢系统安全技术规范', tags:['国际标准','氢安全'],
-      summary:'氢系统泄漏、耐压、碰撞等安全试验方法。',
+    { id:'iec62282', title:'IEC 62282 燃料电池技术国际标准体系', tags:['国际标准','IEC'],
+      summary:'涵盖固定式、便携式、车用燃料电池的全系列国际标准。',
       detail:{
-        '试验项目':['氢气泄漏率试验（< 0.5% / 100h）','耐压试验（1.5 倍工作压力）','碰撞试验（后碰 / 侧碰）','火烧试验','温度循环试验（-40℃ ~ 85℃）'],
-        '判定要求':['无泄漏、无破裂、无起火','安全阀动作压力符合设计值','碰撞后氢系统完整'],
-        '工程建议':['建议每 3 年做一次整车级氢安全评估','管路接头应做氦检漏'],
+        '子标准':[
+          { k:'IEC 62282-2', v:'燃料电池模块安全要求' },
+          { k:'IEC 62282-3', v:'固定式燃料电池发电系统' },
+          { k:'IEC 62282-4', v:'车用及便携式燃料电池动力系统' },
+          { k:'IEC 62282-5', v:'便携式燃料电池系统' },
+          { k:'IEC 62282-6', v:'微型燃料电池系统' }],
+        '工程建议':['出口欧盟市场的产品需符合 IEC 62282 系列','建议在产品设计阶段引入 IEC 62282 安全设计理念'],
       } },
   ]},
   { id:'bench', ico:'⌗', name:'电堆测试与标定', desc:'电堆测试台架与故障调试', entries:[
@@ -1031,16 +1006,6 @@ const KB_CATS = [
         '对应氢耗':[{ k:'50% 效率', v:'约 60 g/kWh' },{ k:'55% 效率', v:'约 54 g/kWh' },{ k:'58% 效率', v:'约 52 g/kWh' }],
         '工程建议':['小功率电堆 BOP 占比高，系统效率偏低属正常','大功率电堆应追求 ≥ 58% 电堆效率','建议通过优化膜电极与流场提效'],
       } },
-    { id:'thpd', title:'电堆功率密度阈值', tags:['功率密度','kW/L'],
-      summary:'体积功率密度 ≥ 4.5 kW/L；比功率 ≥ 3.0 kW/kg。',
-      detail:{
-        '分级标准':[
-          { k:'合格', v:'体积功率密度 ≥ 3.0 kW/L' },
-          { k:'优秀', v:'体积功率密度 ≥ 4.5 kW/L' },
-          { k:'领先', v:'体积功率密度 ≥ 5.4 kW/L（Mirai 2）' }],
-        '比功率分级':[{ k:'合格', v:'≥ 2.0 kW/kg' },{ k:'优秀', v:'≥ 3.5 kW/kg' },{ k:'领先', v:'≥ 4.0 kW/kg' }],
-        '工程建议':['提高功率密度需薄板 + 薄膜 + 高电流密度','注意散热与传质限制','需权衡耐久性'],
-      } },
   ]},
   { id:'component', ico:'⚙', name:'关键零部件', desc:'膜电极 / 双极板 / GDL 深度解读', entries:[
     { id:'mea_deep', title:'膜电极 MEA 深度解析', tags:['MEA','核心部件'],
@@ -1108,41 +1073,6 @@ const KB_CATS = [
         '工程建议':['需标定过程噪声与观测噪声','建议与 EIS 实测交叉验证'],
       } },
   ]},
-  { id:'standard_deep', ico:'◫', name:'深度标准解读', desc:'标准条款重点与实施要点', entries:[
-    { id:'std_life', title:'耐久性标准要求对比', tags:['耐久','标准'],
-      summary:'GB/T 24554 / DOE / EU 耐久目标对比。',
-      detail:{
-        'GB/T 24554':['车用 5000 h 衰减 < 10%（基础）','车用 8000–10000 h（进阶）','车用 15000 h 衰减 < 5%（领先）'],
-        'DOE 目标':['2020：5000 h','2025：8000 h','2030：15000 h + 衰减 < 5%'],
-        'EU 目标':['乘用车 5000 h','重卡 20000 h','电站 40000 h'],
-        '工程建议':['国内产品建议对标 GB/T 24554 与 DOE 双标准','出口产品需符合当地标准','建议做加速老化测试验证'],
-      } },
-    { id:'std_cold', title:'低温启动标准深度解读', tags:['低温','标准'],
-      summary:'-30℃ / -35℃ / -40℃ 三级标准与实施要点。',
-      detail:{
-        '-30℃ 标准（合格）':['启动时间 ≤ 60 s','启动后 5 min 单片电压 ≥ 0.55 V','无冰堵'],
-        '-35℃ 标准（优秀）':['启动时间 ≤ 30 s','启动后 5 min 单片电压 ≥ 0.58 V','启动能耗 ≤ 3% 额定功率·h'],
-        '-40℃ 标准（领先）':['无需外部辅助可启动','启动时间 ≤ 30 s','丰田 / 现代已实现'],
-        '关键技术':['PTC 加热 / 电加热','进气预热','低温膜材料','快速吹扫除水'],
-      } },
-    { id:'std_h2q', title:'氢气品质标准逐条对比', tags:['氢品质','GB/SAE/ISO'],
-      summary:'GB/T 37244 / SAE J2719 / ISO 14687 三条标准对比。',
-      detail:{
-        '纯度要求':[
-          { k:'GB/T 37244', v:'5.0 级 99.999% / 4.5 级 99.995% / 3.0 级 99.9%' },
-          { k:'SAE J2719', v:'H₂ ≥ 99.97%' },
-          { k:'ISO 14687 Grade A', v:'H₂ ≥ 99.97%' }],
-        'CO 限值':[
-          { k:'GB/T 37244', v:'≤ 0.2 μmol/mol' },
-          { k:'SAE J2719', v:'≤ 0.2 μmol/mol' },
-          { k:'ISO 14687', v:'≤ 0.2 μmol/mol' }],
-        '总硫限值':[
-          { k:'GB/T 37244', v:'≤ 0.004 μmol/mol' },
-          { k:'SAE J2719', v:'≤ 0.004 μmol/mol' },
-          { k:'ISO 14687', v:'≤ 0.004 μmol/mol' }],
-        '工程建议':['三条标准在关键杂质上高度一致','建议供应商提供三方检测报告'],
-      } },
-  ]},
   { id:'industry', ico:'◈', name:'行业前沿', desc:'市场格局与技术趋势', entries:[
     { id:'ind_player', title:'全球主要电堆厂商格局', tags:['行业','竞争'],
       summary:'丰田 / 现代 / Plug Power / 亿华通 / 重塑等。',
@@ -1153,7 +1083,8 @@ const KB_CATS = [
           { k:'本田', v:'Clarity 电堆 103 kW，薄型化流场板' },
           { k:'Ballard', v:'FCmove-HD 120 kW，寿命 30000 h（重卡标杆）' },
           { k:'Cummins', v:'HD120，收购 Hydrogenics 后发力' },
-          { k:'Plug Power', v:'GenDrive 80 kW，液氢技术与仓储应用领先' }],
+          { k:'Plug Power', v:'GenDrive 80 kW，液氢技术与仓储应用领先' },
+          { k:'Nikola', v:'TRE FCEV 200 kW 电堆，重卡 800V 平台' }],
         '国内厂商':[
           { k:'亿华通', v:'G120 电堆，公交 / 重卡优势，寿命 15000 h' },
           { k:'重塑集团', v:'Prisma 12+ 130 kW，重卡与物流车配套' },
@@ -1169,32 +1100,16 @@ const KB_CATS = [
         '控制层面':['MPC 模型预测控制','AI 智能诊断','水管理实时 EIS','寿命预测 RUL'],
         '成本层面':['目标 500 元/kW（大批量）','Pt 用量降至 0.10 g/kW','规模化生产','国产替代'],
       } },
-    { id:'ind_cost', title:'电堆成本结构与降本路径', tags:['成本','降本'],
-      summary:'MEA 占 45–60%，双极板占 20–30%，Pt 用量 0.15–0.30 g/kW。',
-      detail:{
-        '成本构成':[
-          { k:'MEA', v:'45–60%（其中 Pt 与膜为主）' },
-          { k:'双极板', v:'20–30%（含涂层）' },
-          { k:'端板/紧固件', v:'5–10%' },
-          { k:'其他（密封、装配）', v:'10–15%' }],
-        '降本路径':['低 Pt 催化剂（0.30 → 0.10 mg/cm²）','薄金属板（0.6 → 0.3 mm）','规模化生产（万台级）','国产化替代（膜、催化剂、碳纸）'],
-        '目标':['2025：500–800 元/kW（大批量）','2030：300–500 元/kW'],
-      } },
   ]},
-  { id:'global_db', ico:'🌐', name:'全球电堆数据库', desc:'国际主流电堆实测参数对标', entries:[
+  { id:'global_db', ico:'', name:'全球电堆数据库', desc:'国际主流电堆实测参数对标', entries:[
     { id:'db_toyota', title:'Toyota Mirai 2 电堆技术解析', tags:['丰田','全球数据库'],
       summary:'128 kW / 5.4 kW/L / 4.0 kW/kg，3D 细密流场 + 增强复合膜。',
       detail:{
         '核心参数':[
-          { k:'额定功率', v:'128 kW' },
-          { k:'片数', v:'约 330 片' },
-          { k:'有效面积', v:'约 400 cm²' },
-          { k:'电流密度', v:'1.30 A/cm²' },
-          { k:'体积功率密度', v:'5.4 kW/L' },
-          { k:'比功率', v:'4.0 kW/kg' },
-          { k:'电堆效率', v:'约 60%' },
-          { k:'寿命', v:'15000 h+' },
-          { k:'冷启动', v:'-30℃' }],
+          { k:'额定功率', v:'128 kW' },{ k:'片数', v:'约 330 片' },
+          { k:'有效面积', v:'约 400 cm²' },{ k:'电流密度', v:'1.30 A/cm²' },
+          { k:'体积功率密度', v:'5.4 kW/L' },{ k:'比功率', v:'4.0 kW/kg' },
+          { k:'电堆效率', v:'约 60%' },{ k:'寿命', v:'15000 h+' },{ k:'冷启动', v:'-30℃' }],
         '关键技术':['钛合金双极板（约 0.4 mm）','3D 细密流场','增强复合质子膜（约 10 μm）','低 Pt 载量（约 0.20 mg/cm²）','自增湿 + 内部水管理'],
         '借鉴价值':['体积功率密度与比功率为行业标杆','3D 流场是排水与传质的关键设计'],
       } },
@@ -1202,14 +1117,10 @@ const KB_CATS = [
       summary:'95 kW / 3.1 kW/L / 2.3 kW/kg，不锈钢板 + 复合膜。',
       detail:{
         '核心参数':[
-          { k:'额定功率', v:'95 kW' },
-          { k:'片数', v:'约 440 片' },
-          { k:'有效面积', v:'约 250 cm²' },
-          { k:'电流密度', v:'1.20 A/cm²' },
-          { k:'体积功率密度', v:'3.1 kW/L' },
-          { k:'比功率', v:'2.3 kW/kg' },
-          { k:'电堆效率', v:'约 60%' },
-          { k:'寿命', v:'5000 h（初代）' }],
+          { k:'额定功率', v:'95 kW' },{ k:'片数', v:'约 440 片' },
+          { k:'有效面积', v:'约 250 cm²' },{ k:'电流密度', v:'1.20 A/cm²' },
+          { k:'体积功率密度', v:'3.1 kW/L' },{ k:'比功率', v:'2.3 kW/kg' },
+          { k:'电堆效率', v:'约 60%' },{ k:'寿命', v:'5000 h（初代）' }],
         '关键技术':['不锈钢双极板 + 涂层','较大片数、较小面积设计','复合质子膜（约 15 μm）'],
         '借鉴价值':['不锈钢板成本优势明显','片数多可降低单堆电压波动'],
       } },
@@ -1217,12 +1128,9 @@ const KB_CATS = [
       summary:'120 kW，寿命 30000 h，重卡长寿命标杆。',
       detail:{
         '核心参数':[
-          { k:'额定功率', v:'120 kW' },
-          { k:'片数', v:'约 400 片' },
-          { k:'体积功率密度', v:'4.2 kW/L' },
-          { k:'比功率', v:'2.8 kW/kg' },
-          { k:'寿命', v:'30000 h' },
-          { k:'冷启动', v:'-30℃' }],
+          { k:'额定功率', v:'120 kW' },{ k:'片数', v:'约 400 片' },
+          { k:'体积功率密度', v:'4.2 kW/L' },{ k:'比功率', v:'2.8 kW/kg' },
+          { k:'寿命', v:'30000 h' },{ k:'冷启动', v:'-30℃' }],
         '关键技术':['长寿命 MEA 配方','耐久性优先的控制策略','石墨/金属复合板方案'],
         '借鉴价值':['重卡场景应优先耐久而非极致功率密度','寿命设计需从 MEA 材料层面入手'],
       } },
@@ -1239,6 +1147,16 @@ const KB_CATS = [
           { k:'功率', v:'130 kW' },{ k:'体积功率密度', v:'5.0 kW/L' },
           { k:'比功率', v:'3.6 kW/kg' },{ k:'寿命', v:'15000 h' }],
         '结论':['国产电堆体积功率密度已达国际先进水平（4.5–5.0 kW/L）','寿命指标与 Ballard 等仍有差距','低 Pt 与材料国产化是关键突破点'],
+      } },
+    { id:'db_nikola', title:'Nikola TRE FCEV 电堆技术解析', tags:['Nikola','重卡'],
+      summary:'200 kW 电堆，800V 高压平台，面向北美重卡市场。',
+      detail:{
+        '核心参数':[
+          { k:'额定功率', v:'200 kW' },{ k:'片数', v:'约 450 片' },
+          { k:'有效面积', v:'约 450 cm²' },{ k:'体积功率密度', v:'4.5 kW/L' },
+          { k:'比功率', v:'3.0 kW/kg' },{ k:'寿命', v:'25000 h' },{ k:'冷启动', v:'-30℃' }],
+        '关键技术':['800V 高压平台','金属双极板','长寿命 MEA'],
+        '借鉴价值':['高压平台是重卡趋势','高功率密度 + 长寿命需平衡设计'],
       } },
   ]},
 ];
@@ -1257,15 +1175,15 @@ function kbFilterEntries(entries){
   });
 }
 
-/* ================= 视图导航 ================= */
+/* ================= 导航 ================= */
 const NAV = [
   { id:'dashboard', ico:'◈', label:'工作台' },
-  { id:'sim',       ico:'∿', label:'仿真' },
-  { id:'calc',      ico:'∑', label:'计算器' },
-  { id:'lib',       ico:'▤', label:'参数库' },
-  { id:'monitor',   ico:'◉', label:'监控' },
-  { id:'data',      ico:'◫', label:'数据' },
-  { id:'kb',        ico:'✦', label:'知识库' },
+  { id:'sim', ico:'∿', label:'仿真' },
+  { id:'calc', ico:'∑', label:'计算器' },
+  { id:'lib', ico:'▤', label:'参数库' },
+  { id:'monitor', ico:'◉', label:'监控' },
+  { id:'data', ico:'◫', label:'数据' },
+  { id:'kb', ico:'✦', label:'知识库' },
 ];
 const TITLES = {
   dashboard:'电堆工作台', sim:'电堆全域仿真系统', calc:'电堆工程计算器', lib:'电堆参数库',
@@ -1307,7 +1225,7 @@ function renderView(){
   if(state.view === 'data')    afterData();
 }
 
-/* ================= 视图 1：工作台 ================= */
+/* ================= 工作台 ================= */
 function viewDashboard(){
   const r = solveSystem();
   const pct = (state.params.stackPower - 10) / 390 * 100;
@@ -1330,18 +1248,12 @@ function viewDashboard(){
     <div class="scale-row"><span>10</span><span>100</span><span>200</span><span>300</span><span>400</span></div>
     <div class="auto-grid" id="autoGrid">
       ${[
-        ['电流密度','i','A/cm²',2],
-        ['单片电压','Vc','V',3],
-        ['电堆效率','etaStack','%',1],
-        ['电堆氢耗','mH2','kg/h',2],
-        ['电堆电压','Vstack','V',0],
-        ['电堆电流','I','A',0],
-        ['体积功率密度','vpd','kW/L',2],
-        ['比功率','sp','kW/kg',2],
-        ['产热功率','Q','kW',1],
-        ['冷却流量','flow','L/min',0],
-        ['净功率','Pnet','kW',1],
-        ['辅机占比','bopPct','%',1],
+        ['电流密度','i','A/cm²',2],['单片电压','Vc','V',3],
+        ['电堆效率','etaStack','%',1],['电堆氢耗','mH2','kg/h',2],
+        ['电堆电压','Vstack','V',0],['电堆电流','I','A',0],
+        ['体积功率密度','vpd','kW/L',2],['比功率','sp','kW/kg',2],
+        ['产热功率','Q','kW',1],['冷却流量','flow','L/min',0],
+        ['净功率','Pnet','kW',1],['辅机占比','bopPct','%',1],
       ].map(x => `
         <div class="auto-item">
           <div class="auto-k">${x[0]}</div>
@@ -1363,25 +1275,40 @@ function viewDashboard(){
     <div style="font-size:11.5px;color:#8aa7c4;line-height:1.7"><b style="color:${r.tier.color}">适用场景：</b>${r.tier.scenes}</div>
   </div>
 
-  <div class="sec-title">全球电堆数据库对标</div>
+  <div class="sec-title">全球电堆数据库对标（${GLOBAL_DB.length} 款）</div>
   <div class="card">
-    <div class="card-h"><h3>当前方案 vs 全球主流电堆</h3><span class="tag">对标 ${GLOBAL_DB.length} 款</span></div>
+    <div class="card-h"><h3>当前方案 vs 全球主流电堆</h3><span class="tag">实时对比</span></div>
     ${GLOBAL_DB.map(g => {
-      const ours = { p:r.Pstack, vpd:r.vpd, sp:r.sp, eta:r.etaStack*100 };
-      const cmp = (a, b) => a >= b ? 'var(--green)' : a >= b*0.9 ? 'var(--orange)' : 'var(--red)';
+      const cmp = (v, ref) => v >= ref ? 'var(--green)' : v >= ref * 0.9 ? 'var(--orange)' : 'var(--red)';
+      const myVpd = r.vpd, mySp = r.sp, myEta = r.etaStack * 100, myPd = r.pd;
       return `
-      <div class="bench">
-        <div class="bench-h">
-          <span class="bench-n">${g.n}</span>
-          <span class="bench-tag">${g.r}</span>
+      <div class="gcard">
+        <div class="gcard-h">
+          <span class="rn">${g.n}</span>
+          <span class="rt">${g.r}</span>
         </div>
-        <div class="bench-grid">
-          <div class="bench-i"><div class="bench-k">额定功率</div><div class="bench-v">${g.p} kW</div></div>
-          <div class="bench-i"><div class="bench-k">体积功率密度</div><div class="bench-v">${g.vpd} kW/L</div></div>
-          <div class="bench-i"><div class="bench-k">比功率</div><div class="bench-v">${g.sp} kW/kg</div></div>
-          <div class="bench-i"><div class="bench-k">电堆效率</div><div class="bench-v">${g.eta} %</div></div>
+        <div class="gcard-grid">
+          <div class="gcard-i"><div class="gcard-k">额定功率</div><div class="gcard-v">${g.p} kW</div></div>
+          <div class="gcard-i"><div class="gcard-k">体积功率密度</div><div class="gcard-v">${g.vpd} kW/L</div></div>
+          <div class="gcard-i"><div class="gcard-k">比功率</div><div class="gcard-v">${g.sp} kW/kg</div></div>
+          <div class="gcard-i"><div class="gcard-k">电堆效率</div><div class="gcard-v">${g.eta}%</div></div>
         </div>
-        <div style="font-size:10px;color:#6b87ab;margin-top:7px;line-height:1.6">${g.note}</div>
+        <div class="gcmp-bar">
+          <span>VPD</span>
+          <div class="track"><i style="width:${Math.min(myVpd / g.vpd * 100, 100)}%;background:${cmp(myVpd, g.vpd)}"></i></div>
+          <span>${fmt(myVpd, 2)}</span>
+        </div>
+        <div class="gcmp-bar">
+          <span>比功率</span>
+          <div class="track"><i style="width:${Math.min(mySp / g.sp * 100, 100)}%;background:${cmp(mySp, g.sp)}"></i></div>
+          <span>${fmt(mySp, 2)}</span>
+        </div>
+        <div class="gcmp-bar">
+          <span>效率</span>
+          <div class="track"><i style="width:${Math.min(myEta / g.eta * 100, 100)}%;background:${cmp(myEta, g.eta)}"></i></div>
+          <span>${fmt(myEta, 1)}</span>
+        </div>
+        <div style="font-size:10px;color:#6b87ab;margin-top:6px;line-height:1.6">${g.note}</div>
       </div>`;
     }).join('')}
     <div class="res-box" style="margin-top:12px">
@@ -1469,7 +1396,7 @@ function viewDashboard(){
   <div class="foot-note">
     设计者：<b class="sign">戴煜</b> · 燃料电池研发工程师<br>
     联系方式：<b>18662613315@163.com</b><br>
-    参数已对接全球电堆数据库（Toyota Mirai 2 / Hyundai NEXO / Ballard / 亿华通 / 重塑 / 捷氢）<br>
+    参数已对接全球电堆数据库（Toyota Mirai 2 / Hyundai NEXO / Ballard / Nikola / 亿华通 / 重塑 / 捷氢）<br>
     版权所有 © 2026 戴煜 · 保留所有权利
   </div>`;
 }
@@ -1481,7 +1408,7 @@ function paramItemHtml(it){
     return `
     <div class="param-item">
       <div class="param-item-head"><span class="param-item-k">${it.k}</span></div>
-      <select class="pselect field" style="width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:#0a111d;color:var(--txt);font-size:13.5px;font-family:inherit;outline:none;cursor:pointer" data-pkey="${it.key}">
+      <select class="pselect" data-pkey="${it.key}">
         ${it.options.map(o => `<option value="${o.v}" ${cur === o.v ? 'selected' : ''}>${o.t}</option>`).join('')}
       </select>
       <div class="param-item-note">${it.note}</div>
@@ -1614,17 +1541,17 @@ function updateLiveValues(){
   set('bopPct', r.pBop / Math.max(r.Pstack, 0.01) * 100, 1);
 }
 
-/* ================= 视图 2：仿真 ================= */
+/* ================= 仿真 ================= */
 const SIM_MODES = [
-  { id:'steady',  ico:'▬', t:'电堆稳态仿真', d:'极化曲线·功率密度·损耗拆解' },
+  { id:'steady', ico:'▬', t:'电堆稳态仿真', d:'极化曲线·功率密度·损耗拆解' },
   { id:'dynamic', ico:'∿', t:'电堆动态变载', d:'怠速→50%→100%→峰值' },
-  { id:'cold',    ico:'❄', t:'−35℃ 冷启动',  d:'国标低温启动验证' },
-  { id:'durab',   ico:'∞', t:'电堆耐久循环', d:'启停衰减·寿命预测' },
-  { id:'bench',   ico:'⇄', t:'台架对标仿真', d:'实测 vs 仿真偏差标定' },
-  { id:'limit',   ico:'⚡', t:'极限边界仿真', d:'超载·高低压·多温度' },
-  { id:'eis',     ico:'∿', t:'EIS 阻抗谱仿真', d:'Nyquist·Bode 双图' },
-  { id:'cv',      ico:'♻', t:'CV 循环伏安仿真', d:'ECSA 与催化活性' },
-  { id:'water',   ico:'≈', t:'水热联合仿真', d:'温度场·水含量·压降' },
+  { id:'cold', ico:'❄', t:'−35℃ 冷启动', d:'国标低温启动验证' },
+  { id:'durab', ico:'∞', t:'电堆耐久循环', d:'启停衰减·寿命预测' },
+  { id:'bench', ico:'⇄', t:'台架对标仿真', d:'实测 vs 仿真偏差标定' },
+  { id:'limit', ico:'⚡', t:'极限边界仿真', d:'超载·高低压·多温度' },
+  { id:'eis', ico:'∿', t:'EIS 阻抗谱仿真', d:'Nyquist·Bode 双图' },
+  { id:'cv', ico:'♻', t:'CV 循环伏安仿真', d:'ECSA 与催化活性' },
+  { id:'water', ico:'≈', t:'水热联合仿真', d:'温度场·水含量·压降' },
 ];
 
 function viewSim(){
@@ -1708,6 +1635,7 @@ function viewSim(){
 }
 
 function afterSim(){
+  /* ★ 修复：标签 id 是 `${id}Val`，必须补上 Val 后缀 */
   const map = {
     stackPower:['simP', v => v + ' kW'], N:['simN', v => v + ' 片'],
     area:['simArea', v => v + ' cm²'], cellThk:['simCellThk', v => parseFloat(v).toFixed(2) + ' mm'],
@@ -1732,7 +1660,7 @@ function afterSim(){
       state.params[key] = parseFloat(e.target.value);
       const m = map[key];
       if(m){
-        const el = $('#' + m[0]);
+        const el = $('#' + m[0] + 'Val');  /* ★ 修复点 */
         if(el) el.textContent = m[1](e.target.value);
       }
     });
@@ -2008,20 +1936,20 @@ function runSim(){
   toast('电堆仿真完成 · ' + SIM_MODES.find(m => m.id === state.simMode).t);
 }
 
-/* ================= 视图 3：计算器 ================= */
+/* ================= 计算器 ================= */
 const CALCS = [
-  { id:'elec',   n:'电堆电气' },
-  { id:'h2',     n:'电堆氢耗' },
-  { id:'air',    n:'空气配比' },
-  { id:'eta',    n:'电堆效率' },
-  { id:'heat',   n:'电堆热管理' },
-  { id:'purge',  n:'阳极吹扫' },
-  { id:'cal',    n:'台架标定' },
-  { id:'unit',   n:'单位换算' },
-  { id:'stack',  n:'电堆结构' },
-  { id:'mea',    n:'MEA 计算' },
-  { id:'cost',   n:'成本估算' },
-  { id:'life',   n:'寿命预测' },
+  { id:'elec', n:'电堆电气' },
+  { id:'h2', n:'电堆氢耗' },
+  { id:'air', n:'空气配比' },
+  { id:'eta', n:'电堆效率' },
+  { id:'heat', n:'电堆热管理' },
+  { id:'purge', n:'阳极吹扫' },
+  { id:'cal', n:'台架标定' },
+  { id:'unit', n:'单位换算' },
+  { id:'stack', n:'电堆结构' },
+  { id:'mea', n:'MEA 计算' },
+  { id:'cost', n:'成本估算' },
+  { id:'life', n:'寿命预测' },
 ];
 
 function viewCalc(){
@@ -2038,10 +1966,6 @@ function calcPanel(){
   const F_ = (label, id, val, step = 'any', unit = '') => `
     <div class="field"><label>${label}${unit ? ' <b>'+unit+'</b>' : ''}</label>
       <input type="number" id="${id}" value="${val}" step="${step}">
-    </div>`;
-  const S_ = (label, id, opts, sel) => `
-    <div class="field"><label>${label}</label>
-      <select id="${id}">${opts.map(o => `<option value="${o[0]}" ${o[0] === sel ? 'selected' : ''}>${o[1]}</option>`).join('')}</select>
     </div>`;
 
   const forms = {
@@ -2184,7 +2108,6 @@ function runCalc(type){
     const p = { N, area:A, T_K:T+273.15, pH2, R, Aact, i0, m:mm, n:nn };
     const i = solveCurrentDensity(PkW, p);
     const V = vcell(i, p.T_K, p);
-    const Rtot = R + cr / 1000;
     html = `<div class="res-box">
       ${row('电流密度 i', fmt(i, 3), 'A/cm²')}
       ${row('单片电压 V', fmt(V, 4), 'V')}
@@ -2437,7 +2360,7 @@ function runCalc(type){
   out.innerHTML = html;
 }
 
-/* ================= 视图 4：参数库 ================= */
+/* ================= 参数库 ================= */
 function viewLib(){
   const allItems = libAllItems();
   const filtered = libFilterItems(allItems);
@@ -2530,7 +2453,7 @@ function viewLib(){
     设计者：<b class="sign">戴煜</b> · 燃料电池研发工程师<br>
     联系方式：<b>18662613315@163.com</b><br>
     参数库覆盖电堆结构 / MEA / 双极板 / 操作 / 水热 / 性能 / 寿命 / 辅机 / 安全 / 成本 / 全球数据库 等 ${LIB.length} 大类<br>
-    参考 GB/T 24554、GB/T 37244、SAE J2719、ISO 14687 等标准，对齐全球领先水平<br>
+    参考 GB/T 24554、GB/T 37244、SAE J2719、ISO 14687、IEC 62282 等标准，对齐全球领先水平<br>
     版权所有 © 2026 戴煜 · 保留所有权利
   </div>`;
 }
@@ -2551,7 +2474,7 @@ function afterLib(){
   }
 }
 
-/* ================= 视图 5：监控 ================= */
+/* ================= 监控 ================= */
 function viewMonitor(){
   const o = state.mon.over;
   const S_ = (label, id, val, min, max, step, unit) => `
@@ -2671,6 +2594,7 @@ function viewMonitor(){
 function startMonitor(){
   stopMonitor();
   state.mon.hist = [];
+  state.mon.eisHist = [];
   state.mon.t = 0;
   state.mon.timer = setInterval(tickMonitor, 900);
   tickMonitor();
@@ -2726,7 +2650,6 @@ function tickMonitor(){
   upd('m_flow', r.flow, 'L/min', 0); upd('m_cmp', r.pCmp, 'kW', 2);
   upd('m_bop', r.pBop, 'kW', 2); upd('m_gkwh', r.gkwh, 'g/kWh', 1);
 
-  /* 单片电压分布 */
   const Ns = Math.min(state.params.N, 60);
   const cells = [];
   for(let k = 0; k < Ns; k++){
@@ -2795,16 +2718,16 @@ function tickMonitor(){
   }
 }
 
-/* ================= 视图 6：数据管理 ================= */
+/* ================= 数据 ================= */
 const DATA_METRICS = [
-  { id:'eta',  n:'电堆效率 (%)',   c:'#0a84ff' },
-  { id:'soh',  n:'SOH (%)',        c:'#00d48a' },
-  { id:'mh2',  n:'氢耗 (kg/h×10)', c:'#ff9f0a' },
+  { id:'eta', n:'电堆效率 (%)', c:'#0a84ff' },
+  { id:'soh', n:'SOH (%)', c:'#00d48a' },
+  { id:'mh2', n:'氢耗 (kg/h×10)', c:'#ff9f0a' },
   { id:'gkwh', n:'单位氢耗 (g/kWh)', c:'#22d3ee' },
-  { id:'i',    n:'电流密度 (A/cm²×100)', c:'#a78bfa' },
-  { id:'vpd',  n:'体积功率密度 (kW/L)', c:'#f472b6' },
-  { id:'sp',   n:'比功率 (kW/kg)', c:'#ff453a' },
-  { id:'q',    n:'产热 (kW)',      c:'#7d8fb3' },
+  { id:'i', n:'电流密度 (A/cm²×100)', c:'#a78bfa' },
+  { id:'vpd', n:'体积功率密度 (kW/L)', c:'#f472b6' },
+  { id:'sp', n:'比功率 (kW/kg)', c:'#ff453a' },
+  { id:'q', n:'产热 (kW)', c:'#7d8fb3' },
 ];
 
 function projMetrics(p){
@@ -2870,15 +2793,12 @@ function viewData(){
 
   <div class="sec-title">各方案指标分布</div>
   <div class="card">
-    ${state.projects.map(p => {
-      const m = projMetrics(p);
-      return `
+    ${state.projects.map(p => `
       <div class="bar-row">
         <span class="bar-k">${p.name.replace(/电堆.*/, '')}</span>
         <div class="bar-track"><i style="width:${Math.min(p.eta / 65 * 100, 100)}%;background:linear-gradient(90deg,#0a84ff,#22d3ee)"></i></div>
         <span class="bar-v">${p.eta}%</span>
-      </div>`;
-    }).join('')}
+      </div>`).join('')}
   </div>
 
   <div class="sec-title">数据溯源</div>
@@ -2988,7 +2908,7 @@ function runCompare(){
   toast('电堆方案对比完成');
 }
 
-/* ================= 视图 7：知识库 ================= */
+/* ================= 知识库 ================= */
 function viewKb(){
   const allEntries = kbAllEntries();
   const filtered = kbFilterEntries(allEntries);
@@ -3068,7 +2988,7 @@ function viewKb(){
     设计者：<b class="sign">戴煜</b> · 燃料电池研发工程师<br>
     联系方式：<b>18662613315@163.com</b><br>
     知识库覆盖国标 / 测试标定 / 场景设计 / 行业阈值 / 零部件 / 控制 / 深度标准 / 行业前沿 / 全球数据库 等 ${KB_CATS.length} 大类<br>
-    对接 GB/T 24554、GB/T 37244、SAE J2719、SAE J2579、ISO 14687 等国际国内标准<br>
+    对接 GB/T 24554、GB/T 37244、SAE J2719、SAE J2579、ISO 14687、IEC 62282 等国际国内标准<br>
     版权所有 © 2026 戴煜 · 保留所有权利
   </div>`;
 }
@@ -3485,7 +3405,7 @@ renderNav();
 navigate('dashboard');
 $('#chipPower').textContent = state.params.stackPower + ' kW';
 
-console.log('%c氢枢 HyHub %cV1.6.0',
+console.log('%c氢枢 HyHub %cV1.7.0',
   'font-size:16px;font-weight:800;color:#0a84ff',
   'font-size:12px;color:#7d8fb3');
 console.log('%c设计者：戴煜 · 燃料电池研发工程师',
@@ -3494,9 +3414,9 @@ console.log('%c联系方式：18662613315@163.com',
   'font-size:11px;color:#7fa8d4');
 console.log('%c版权所有 © 2026 戴煜 · 保留所有权利',
   'font-size:11px;color:#5f7391');
-console.log('%c燃料电池电堆全能平台 · 参数库 22 类 / 知识库 13 类 / 全球数据库 10 款机型',
+console.log('%c燃料电池电堆全能平台 · 参数库 22 类 / 知识库 12 类 / 全球数据库 12 款机型',
   'font-size:11px;color:#00d48a');
-console.log('%c★ V1.6.0 更新：工作台参数精细化 + 全球数据库对标 + 仿真可视化增强 + 计算器条件可调 + 监控手动调节 + 数据多指标对比 + 知识库全球对接',
+console.log('%c★ V1.7.0 修复：仿真参数滑块标签反馈失效（simPVal 后缀）｜优化：工作台全球对标卡 / 计算器条件扩充 / 知识库新增 IEC 62282 与 Nikola',
   'font-size:11px;color:#ff9f0a;font-weight:600');
 </script>
 </body>
