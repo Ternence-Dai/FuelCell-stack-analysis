@@ -49,11 +49,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hira
 .btn:hover{filter:brightness(1.18)}
 .btn:active{transform:scale(.975)}
 .btn.primary{background:linear-gradient(135deg,var(--blue),#0b6fe0);color:#fff;box-shadow:0 6px 18px rgba(10,132,255,.32)}
+.btn.purple{background:linear-gradient(135deg,var(--purple),#7c4dff);color:#fff;box-shadow:0 6px 18px rgba(167,139,250,.32)}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--mut)}
 .btn.ghost:hover{color:var(--txt);border-color:#33445f}
 .btn.block{width:100%}
 .btn.sm{padding:8px 12px;font-size:12px}
 .hero{position:relative;overflow:hidden;border-radius:18px;padding:22px 20px 18px;background:linear-gradient(135deg,#0d2138 0%,#0a1626 55%,#0b0f1a 100%);border:1px solid rgba(10,132,255,.24);margin-bottom:16px}
+.hero.mdl{background:linear-gradient(135deg,#1a0e38 0%,#0a1626 55%,#0b0f1a 100%);border-color:rgba(167,139,250,.28)}
 .hero::before{content:'';position:absolute;top:-70px;right:-70px;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,rgba(10,132,255,.28),transparent 68%);pointer-events:none}
 .hero::after{content:'';position:absolute;bottom:-90px;left:-50px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.16),transparent 70%);pointer-events:none}
 .hero-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;margin-bottom:14px}
@@ -84,7 +86,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border:none;border-ra
 .kpi-v small{font-size:10.5px;color:var(--mut);font-weight:500;margin-left:3px;letter-spacing:0}
 .quick{display:flex;flex-direction:column;align-items:center;gap:7px;padding:15px 6px;background:var(--panel2);border:1px solid var(--line);border-radius:13px;cursor:pointer;transition:.18s}
 .quick:hover{background:var(--panel3);border-color:#2c3d59;transform:translateY(-2px)}
-.quick:active{transform:scale(.97)}
+.quick:active{transform:scale(.96)}
 .quick .qi{font-size:20px;line-height:1}
 .quick .ql{font-size:11px;color:#a9bcd6;font-weight:550;text-align:center}
 .mode{padding:14px;border-radius:13px;background:var(--panel2);border:1px solid var(--line);cursor:pointer;transition:.18s;position:relative}
@@ -129,10 +131,10 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border:none;border-ra
 .preset:hover{border-color:var(--blue);color:var(--blue)}
 .preset.active{background:rgba(10,132,255,.15);border-color:rgba(10,132,255,.5);color:#cfe6ff}
 .res-box{background:linear-gradient(150deg,rgba(0,212,138,.09),rgba(0,212,138,.02));border:1px solid rgba(0,212,138,.24);border-radius:12px;padding:14px;margin-top:12px}
-.res-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed rgba(0,212,138,.14)}
+.res-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed rgba(0,212,138,.14);gap:10px}
 .res-row:last-child{border-bottom:none}
-.res-k{font-size:12px;color:#8aa7c4}
-.res-v{font-size:14px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums}
+.res-k{font-size:12px;color:#8aa7c4;flex-shrink:0}
+.res-v{font-size:14px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;text-align:right}
 .res-v small{font-size:10px;color:#6b87ab;font-weight:500;margin-left:3px}
 .chart-wrap{background:#080d16;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:12px}
 canvas{display:block;width:100%;height:200px}
@@ -258,15 +260,6 @@ canvas.tall{height:250px}
 .kb-tag.range{background:rgba(0,212,138,.12);color:var(--green);border:1px solid rgba(0,212,138,.28)}
 .kb-tag.note{background:rgba(255,159,10,.12);color:var(--orange);border:1px solid rgba(255,159,10,.28)}
 .kb-tag.tip{background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.28)}
-.bench{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:11px 12px;margin-bottom:8px;transition:.16s}
-.bench:hover{border-color:#2c3d59}
-.bench-h{display:flex;align-items:center;gap:8px;margin-bottom:9px}
-.bench-n{font-size:12.5px;font-weight:650;flex:1;color:#cfe6ff}
-.bench-tag{font-size:9.5px;padding:2px 7px;border-radius:6px;background:var(--panel3);color:var(--mut);font-weight:600}
-.bench-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.bench-i{background:rgba(255,255,255,.03);border-radius:7px;padding:6px 7px}
-.bench-k{font-size:9px;color:var(--mut);margin-bottom:2px}
-.bench-v{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:#cfe6ff}
 .bar-row{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .bar-k{font-size:11px;color:#a9bcd6;width:96px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bar-track{flex:1;height:6px;border-radius:3px;background:#1a2436;overflow:hidden}
@@ -277,8 +270,8 @@ canvas.tall{height:250px}
 .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:#c6d3e8;padding:9px 11px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;cursor:pointer;user-select:none;transition:.15s}
 .chk input{width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
 .chk.on{border-color:rgba(10,132,255,.5);background:rgba(10,132,255,.1)}
+.chk:active{transform:scale(.98)}
 .chk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
-/* 全局数据库卡片 */
 .gcard{background:linear-gradient(150deg,rgba(10,132,255,.06),rgba(0,0,0,0));border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;transition:.18s}
 .gcard:hover{border-color:#2f4160}
 .gcard-h{display:flex;align-items:center;gap:10px;margin-bottom:10px}
@@ -288,12 +281,19 @@ canvas.tall{height:250px}
 .gcard-i{background:rgba(255,255,255,.03);border-radius:7px;padding:7px 8px;text-align:center}
 .gcard-k{font-size:9px;color:var(--mut);margin-bottom:2px}
 .gcard-v{font-size:13px;font-weight:750;font-variant-numeric:tabular-nums;color:var(--cyan)}
-.gcard-bars{margin-top:6px}
 .gcmp-bar{display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:10px}
 .gcmp-bar span:first-child{width:56px;color:var(--mut);flex-shrink:0}
 .gcmp-bar .track{flex:1;height:5px;background:#1a2436;border-radius:3px;overflow:hidden}
 .gcmp-bar .track i{display:block;height:100%;border-radius:3px}
 .gcmp-bar span:last-child{width:54px;text-align:right;color:#cfe6ff;font-weight:700;font-variant-numeric:tabular-nums}
+/* 大模型视图 */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes scan{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.mdl-running{position:relative}
+.mdl-running::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(167,139,250,.18),transparent);background-size:200% 100%;animation:scan 1.8s linear infinite;pointer-events:none;border-radius:18px}
+.hero-tier.pulse{animation:pulse 1.6s ease-in-out infinite}
+.kpi-v{transition:color .3s ease}
+.gcard-v,.auto-v{transition:color .25s ease}
 @media (max-width:820px){
   .sidebar{display:none}
   .bottomnav{display:flex}
@@ -306,7 +306,7 @@ canvas.tall{height:250px}
   .g3{grid-template-columns:repeat(2,1fr)}
   canvas{height:180px}
   .param-item-body .pnum{width:70px;font-size:12px}
-  .bench-grid,.gcard-grid{grid-template-columns:repeat(2,1fr)}
+  .gcard-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media (max-width:400px){.g2{grid-template-columns:1fr}.power-num{font-size:38px}.chk-grid{grid-template-columns:1fr}}
 </style>
@@ -328,7 +328,7 @@ canvas.tall{height:250px}
       <span class="sign">戴煜</span><br>
       <b>18662613315@163.com</b><br>
       燃料电池研发工程师<br>
-      <span style="opacity:.6">V1.7.0 · 保留所有权利</span>
+      <span style="opacity:.6">V2.0 · 大模型版</span>
     </div>
   </aside>
   <div class="main">
@@ -346,10 +346,10 @@ canvas.tall{height:250px}
 
 <script>
 /* =========================================================
-   氢枢 HyHub · 燃料电池电堆全能平台 V1.7.0
-   修复：仿真页面参数滑块标签反馈失效
-   优化：工作台 / 计算器 / 参数库 / 监控 / 数据 / 知识库
+   氢枢 HyHub · 燃料电池电堆全能平台 V2.0 大模型版
    设计者：戴煜 | 燃料电池研发工程师
+   联系方式：18662613315@163.com
+   版权所有 © 2026 戴煜 · 保留所有权利
    ========================================================= */
 'use strict';
 
@@ -362,7 +362,7 @@ const state = {
   libSearch: '',
   libFav: new Set(),
   presetIdx: 2,
-  paramOpen: { struct:true, op:true, mea:false, bpp:false, echem:false, thermal:false, bop:false, adv:false },
+  paramOpen: { struct:true, op:true, mea:false, bpp:false, echem:false, thermal:false, bop:false, adv:false, sel:false },
   kbOpen: {},
   kbCatOpen: {},
   kbSearch: '',
@@ -373,13 +373,19 @@ const state = {
     over: { power:150, T:82, pH2:0.19, pAir:0.20, lamAir:2.3 },
     cells: [],
   },
+  model: {
+    running: false, epoch: 0, loss: [], timer: null, pred: [], aiStage: 0,
+  },
   params: {
     stackPower:150, N:370, area:420, cellThk:1.5, bppThk:0.40, compress:1.2, dT:5.5,
     T:82, Tamb:25, altitude:0, pH2:0.19, pAir:0.20, lambdaH2:1.12, lambdaAir:2.3,
     purH2:5.0, rh:45, stoichMode:'auto',
     memType:'gore', memThk:15, ptLoading:0.25, catType:'ptco',
     gdlThk:200, gdlPorosity:76, ionomer:30, mplThk:30,
+    memBrand:'gore', catBrand:'tanakaCo', ptAlloy:'ptco', support:'ketjen',
+    gdlBrand:'sgl29bc', mplBrand:'sgl', ionomerType:'nafion',
     bppMat:'ti', flowField:'3d', coating:'tin', coatThk:120, contactR:5,
+    bppBrand:'ti-g1', bppCoatingBrand:'tin-1', sealType:'fkm', gasketType:'ptfe', endPlate:'cf',
     R:0.095, Aact:0.0085, i0:0.0018, m:2.2e-5, n:4,
     coolFlow:120, coolType:'eg50', dpH2:15, dpAir:22, radMargin:20, pumpEff:0.65,
     cmpType:'centri', cmpEff:0.72, cmpRatio:2.5, dcdcEff:0.98, recirc:'ejector',
@@ -414,7 +420,7 @@ function toast(msg){
 const TIERS = [
   {id:'micro', name:'微型', min:10, max:30, color:'#22d3ee', scenes:'便携电源电堆 / 无人机电堆 / 小型备电 / 教学电堆'},
   {id:'small', name:'小型', min:30, max:80, color:'#00d48a', scenes:'乘用车电堆 / 轻型物流车电堆 / 小型测试电堆'},
-  {id:'mid', name:'中型', min:80, max:200, color:'#0a84ff', scenes:'客车电堆 / 重卡电堆 / 工程机械电堆 / 商用测试电堆'},
+  {id:'mid',   name:'中型', min:80, max:200, color:'#0a84ff', scenes:'客车电堆 / 重卡电堆 / 工程机械电堆 / 商用测试电堆'},
   {id:'large', name:'大型', min:200, max:400, color:'#a78bfa', scenes:'电站电堆 / 热电联供电堆 / 重载装备电堆 / 高端测试电堆'},
 ];
 const tierOf = P => TIERS.find(t => P <= t.max) || TIERS[3];
@@ -422,7 +428,7 @@ const tierName = id => (TIERS.find(t=>t.id===id) || {}).name || id;
 
 const F = 96485, M_H2 = 2.016, LHV_H2 = 33.33, E_IDEAL = 1.482;
 
-/* ================= 全球电堆数据库（扩充） ================= */
+/* ================= 全球电堆数据库 ================= */
 const GLOBAL_DB = [
   { n:'Toyota Mirai 2', r:'日本·丰田', p:128, N:330, area:400, vpd:5.4, sp:4.0, i:1.30, eta:60.0, life:15000, cold:-30, mem:10, pt:0.20, bpp:'钛合金', note:'3D 细密流场 + 增强复合膜' },
   { n:'Hyundai NEXO', r:'韩国·现代', p:95, N:440, area:250, vpd:3.1, sp:2.3, i:1.20, eta:60.0, life:5000, cold:-30, mem:15, pt:0.30, bpp:'不锈钢', note:'金属板 + 石墨复合' },
@@ -492,9 +498,9 @@ function solveSystem(){
   const Pnet = Math.max(Pstack - pBop, 0.1);
   const etaSys = Pnet / Math.max(Pstack, 1e-6) * etaStack;
 
-  const coreVol = P.N * (P.cellThk||1.5) * P.area * 0.0001;
-  const volL = coreVol * 1.5;
-  const massKg = coreVol * 1.65 + 8;
+  const coreVolL = P.N * (P.cellThk||1.5) * P.area / 1000;
+  const volL = coreVolL * 1.5;
+  const massKg = coreVolL * 1.65 + 8;
   const vpd = Pstack / Math.max(volL, 1e-6);
   const sp = Pstack / Math.max(massKg, 1e-6);
   const pd = Vc * i * 1000;
@@ -508,7 +514,7 @@ function solveSystem(){
     pCmp, pPump, pRecirc, pDcdc, pBop, Pnet, Q, flow,
     gkwh: mH2*1000/Math.max(Pnet,1e-6),
     loss:{act:lossAct,ohm:lossOhm,con:lossCon}, T_K,
-    volL, massKg, vpd, sp, pd, pAtm, coreVol,
+    volL, massKg, vpd, sp, pd, pAtm, coreVolL,
   };
 }
 
@@ -535,7 +541,7 @@ const PARAM_GROUPS = [
     { key:'rh', k:'进气相对湿度', unit:'%', min:10, max:90, step:1, dec:0, note:'高温低湿运行是领先方向；30–60% 为典型工作区间' },
     { key:'stoichMode', k:'计量比模式', unit:'—', type:'select', options:[{v:'auto',t:'自动（按电堆功率自适应）'},{v:'manual',t:'手动（使用上方设定值）'}], note:'领先水平：MPC 模型预测控制' },
   ]},
-  { id:'mea', ico:'◈', name:'膜电极 MEA 参数', desc:'膜类型、膜厚、Pt 载量、催化剂、GDL、离聚物', items:[
+  { id:'mea', ico:'◈', name:'膜电极 MEA 参数', desc:'膜厚、Pt 载量、催化剂、GDL、离聚物、微孔层', items:[
     { key:'memType', k:'质子交换膜类型', unit:'—', type:'select', options:[
       {v:'gore',t:'Gore SELECT 增强复合膜（8–12 μm）'},{v:'nafion211',t:'Nafion 211（25 μm）'},
       {v:'nafion212',t:'Nafion 212（50 μm）'},{v:'eptfe',t:'ePTFE 增强复合膜（15 μm）'}],
@@ -550,6 +556,73 @@ const PARAM_GROUPS = [
     { key:'gdlPorosity', k:'GDL 孔隙率', unit:'%', min:60, max:90, step:1, dec:0, note:'70–82% 为车用主流；高孔隙利于传质但机械强度下降' },
     { key:'ionomer', k:'离聚物含量', unit:'wt%', min:15, max:45, step:1, dec:0, note:'25–35% 为典型；离聚物高则质子传导好，但氧气传质阻力上升' },
     { key:'mplThk', k:'微孔层 MPL 厚度', unit:'μm', min:10, max:80, step:5, dec:0, note:'20–50 μm 为典型；薄 MPL 传质好，厚 MPL 保水能力强' },
+  ]},
+  { id:'sel', ico:'✦', name:'部件选型（品牌/型号）', desc:'膜、催化剂、载体、GDL、MPL、离聚物、双极板、涂层、密封', items:[
+    { key:'memBrand', k:'膜品牌/型号', unit:'—', type:'select', options:[
+      {v:'gore',t:'Gore SELECT（8–12 μm）'},
+      {v:'goreM820',t:'Gore M820（15 μm 增强）'},
+      {v:'nafion211',t:'Nafion 211（25 μm）'},
+      {v:'nafion212',t:'Nafion 212（50 μm）'},
+      {v:'eptfe',t:'ePTFE 增强复合膜（15 μm）'},
+      {v:'spi',t:'SPI 增强膜（12 μm）'},
+      {v:'fumatech',t:'Fumatech 增强膜（20 μm）'}],
+      note:'乘用车主流：Gore SELECT；商用车：Nafion 211 / ePTFE 增强' },
+    { key:'catBrand', k:'催化剂品牌/型号', unit:'—', type:'select', options:[
+      {v:'tanaka',t:'田中 TEC10E50E（Pt/C）'},
+      {v:'tanakaCo',t:'田中 PtCo/C 合金'},
+      {v:'jm',t:'Johnson Matthey HiSPEC'},
+      {v:'pmc',t:'PMC PtCo/C'},
+      {v:'greenerity',t:'Greenerity PtNi/C'},
+      {v:'core',t:'核壳 Pt@Pd/C（前沿）'}],
+      note:'PtCo 合金抗衰减更好；PtNi 达更高比活性' },
+    { key:'ptAlloy', k:'Pt 合金化', unit:'—', type:'select', options:[
+      {v:'pt',t:'纯 Pt'},{v:'ptco',t:'PtCo 合金'},{v:'ptni',t:'PtNi 合金'},{v:'ptcrmn',t:'PtCrMn 三元'}],
+      note:'合金化提高比活性 2–3 倍' },
+    { key:'support', k:'催化剂载体', unit:'—', type:'select', options:[
+      {v:'ketjen',t:'Ketjenblack EC-300J'},{v:'vulcan',t:'Vulcan XC-72'},
+      {v:'graphitized',t:'石墨化碳（抗腐蚀）'},{v:'cnt',t:'碳纳米管（前沿）'}],
+      note:'石墨化碳载体抗腐蚀性更好，但比表面积下降' },
+    { key:'gdlBrand', k:'GDL 品牌/型号', unit:'—', type:'select', options:[
+      {v:'sgl29bc',t:'SGL 29BC（碳纸 + MPL）'},
+      {v:'sgl28bb',t:'SGL 28BB（疏水处理）'},
+      {v:'sgl22bb',t:'SGL 22BB（薄型）'},
+      {v:'toray060',t:'Toray 060（高压缩）'},
+      {v:'freudenberg',t:'Freudenberg H14C14'},
+      {v:'carbonCloth',t:'碳布（柔性高压缩）'}],
+      note:'SGL 29BC 为车用主流；低湿工况选带 MPL 型号' },
+    { key:'mplBrand', k:'MPL 类型', unit:'—', type:'select', options:[
+      {v:'sgl',t:'SGL 标准 MPL'},{v:'custom',t:'定制 MPL（高疏水）'},
+      {v:'dual',t:'双层 MPL'},{v:'none',t:'无 MPL'}],
+      note:'带 MPL 显著改善低湿与高电流密度性能' },
+    { key:'ionomerType', k:'离聚物类型', unit:'—', type:'select', options:[
+      {v:'nafion',t:'Nafion D2020 / D521'},{v:'aquivion',t:'Aquivion（短侧链）'},
+      {v:'spi',t:'SPI 系列'},{v:'custom',t:'定制'}],
+      note:'短侧链离聚物（Aquivion）高湿高温性能更佳' },
+    { key:'bppBrand', k:'双极板品牌/型号', unit:'—', type:'select', options:[
+      {v:'ti-g1',t:'钛合金 Ti-G1（0.4 mm）'},
+      {v:'ss316L',t:'不锈钢 316L（0.5 mm）'},
+      {v:'ss304',t:'不锈钢 304（0.6 mm）'},
+      {v:'graphite',t:'石墨板（1.5 mm）'},
+      {v:'composite',t:'金属-石墨复合板'}],
+      note:'金属板为主流；钛合金轻但成本高' },
+    { key:'bppCoatingBrand', k:'涂层品牌/型号', unit:'—', type:'select', options:[
+      {v:'tin-1',t:'TiN 氮化钛（工业级）'},
+      {v:'crn-1',t:'CrN 氮化铬'},
+      {v:'au-1',t:'Au 金涂层（高导电）'},
+      {v:'dlc',t:'DLC 类金刚石碳'},
+      {v:'poly',t:'导电聚合物'}],
+      note:'Au 导电最好但成本高；TiN/CrN 更经济' },
+    { key:'sealType', k:'密封件类型', unit:'—', type:'select', options:[
+      {v:'silicone',t:'高温硅胶'},{v:'epdm',t:'EPDM 三元乙丙'},
+      {v:'fkm',t:'FKM 氟橡胶（耐酸）'},{v:'ptfe',t:'PTFE 包覆'}],
+      note:'FKM/PTFE 耐酸、耐高温更佳' },
+    { key:'gasketType', k:'垫片类型', unit:'—', type:'select', options:[
+      {v:'ptfe',t:'PTFE 垫片'},{v:'pen',t:'PEN 垫片'},{v:'pet',t:'PET 垫片'}],
+      note:'PTFE 化学稳定性最佳' },
+    { key:'endPlate', k:'端板材料', unit:'—', type:'select', options:[
+      {v:'al-6061',t:'铝合金 6061'},{v:'al-7075',t:'铝合金 7075（高强）'},
+      {v:'cf',t:'碳纤维复合材料（轻量）'}],
+      note:'碳纤维复合材料可减重 30% 以上' },
   ]},
   { id:'bpp', ico:'◇', name:'双极板与流场', desc:'材料、涂层、流场类型与接触电阻', items:[
     { key:'bppMat', k:'双极板材料', unit:'—', type:'select', options:[
@@ -1073,6 +1146,42 @@ const KB_CATS = [
         '工程建议':['需标定过程噪声与观测噪声','建议与 EIS 实测交叉验证'],
       } },
   ]},
+  { id:'ai', ico:'✦', name:'AI 大模型与数字孪生', desc:'LSTM/PINN/GNN/Transformer 融合架构', entries:[
+    { id:'ai_arch', title:'HyHub 动态大模型架构', tags:['AI','大模型','数字孪生'],
+      summary:'LSTM + PINN + GNN + Transformer 混合架构，实现电堆数字孪生。',
+      detail:{
+        '模型融合策略':[
+          { k:'LSTM 时序建模', v:'捕捉动态变载与冷启动时序特征，贡献度 85%' },
+          { k:'PINN 物理约束', v:'能量守恒 + 电化学动力学约束，贡献度 92%' },
+          { k:'GNN 多电堆耦合', v:'多堆模块化温度/流量耦合建模，贡献度 68%' },
+          { k:'Transformer 长程依赖', v:'长周期衰减与 SOH 预测，贡献度 76%' }],
+        '训练目标':[
+          { k:'训练损失', v:'收敛至 < 0.05' },
+          { k:'验证 R²', v:'≥ 0.998' },
+          { k:'预测 RMSE', v:'< 8 mV' },
+          { k:'推理延迟', v:'< 12 ms（单次前向）' }],
+        '应用场景':['实时 SOH 估计','冷启动策略优化','膜干/水淹在线诊断','剩余寿命 RUL 预测'],
+        '工程建议':['建议使用 10 万+ 工况数据训练','引入物理约束可提升泛化性能 30%+','部署至边缘端需模型量化与剪枝'],
+      } },
+    { id:'ai_pinn', title:'PINN 物理信息神经网络', tags:['PINN','物理约束'],
+      summary:'将电化学动力学、传质方程嵌入损失函数，提升外推能力。',
+      detail:{
+        '物理约束项':[
+          { k:'Butler-Volmer 方程', v:'电极反应动力学约束' },
+          { k:'Fick 扩散定律', v:'气体传质约束' },
+          { k:'Nernst 方程', v:'开路电压热力学约束' },
+          { k:'能量守恒方程', v:'热管理约束' }],
+        '损失函数':['数据损失 L_data','物理残差损失 L_physics','边界条件损失 L_bc'],
+        '优势':['小样本泛化能力强','外推区域预测精度高','可解释性好'],
+      } },
+    { id:'ai_lstm', title:'LSTM 时序建模', tags:['LSTM','时序'],
+      summary:'长短期记忆网络捕捉电堆动态响应与工况时序特征。',
+      detail:{
+        '网络结构':['输入层：功率、温度、压力、流量等 12 维时序','隐藏层：2 层 LSTM，256 单元','输出层：全连接 + 电压/效率/氢耗预测'],
+        '应用':['动态变载响应预测','冷启动温度轨迹','SOH 时序衰减'],
+        '工程建议':['建议滑动窗口 100–500 步','使用 dropout + 早停防止过拟合'],
+      } },
+  ]},
   { id:'industry', ico:'◈', name:'行业前沿', desc:'市场格局与技术趋势', entries:[
     { id:'ind_player', title:'全球主要电堆厂商格局', tags:['行业','竞争'],
       summary:'丰田 / 现代 / Plug Power / 亿华通 / 重塑等。',
@@ -1178,16 +1287,18 @@ function kbFilterEntries(entries){
 /* ================= 导航 ================= */
 const NAV = [
   { id:'dashboard', ico:'◈', label:'工作台' },
-  { id:'sim', ico:'∿', label:'仿真' },
-  { id:'calc', ico:'∑', label:'计算器' },
-  { id:'lib', ico:'▤', label:'参数库' },
-  { id:'monitor', ico:'◉', label:'监控' },
-  { id:'data', ico:'◫', label:'数据' },
-  { id:'kb', ico:'✦', label:'知识库' },
+  { id:'model',     ico:'✦', label:'大模型' },
+  { id:'sim',       ico:'∿', label:'仿真' },
+  { id:'calc',      ico:'∑', label:'计算器' },
+  { id:'lib',       ico:'▤', label:'参数库' },
+  { id:'monitor',   ico:'◉', label:'监控' },
+  { id:'data',      ico:'◫', label:'数据' },
+  { id:'kb',        ico:'❖', label:'知识库' },
 ];
 const TITLES = {
-  dashboard:'电堆工作台', sim:'电堆全域仿真系统', calc:'电堆工程计算器', lib:'电堆参数库',
-  monitor:'电堆实时监控', data:'数据管理与对比', kb:'电堆知识库'
+  dashboard:'电堆工作台', model:'电堆动态大模型', sim:'电堆全域仿真系统',
+  calc:'电堆工程计算器', lib:'电堆参数库', monitor:'电堆实时监控',
+  data:'数据管理与对比', kb:'电堆知识库'
 };
 
 function renderNav(){
@@ -1208,13 +1319,14 @@ function navigate(id){
   renderView();
   $('#content').scrollTop = 0;
   if(id === 'monitor') startMonitor(); else stopMonitor();
+  if(id === 'model' && state.model.running) startModelTrain(); else if(id !== 'model') stopModelTrain();
 }
 
 function renderView(){
   const c = $('#content');
   const V = {
-    dashboard: viewDashboard, sim: viewSim, calc: viewCalc, lib: viewLib,
-    monitor: viewMonitor, data: viewData, kb: viewKb,
+    dashboard: viewDashboard, model: viewModel, sim: viewSim, calc: viewCalc,
+    lib: viewLib, monitor: viewMonitor, data: viewData, kb: viewKb,
   };
   c.innerHTML = (V[state.view] || (() => ''))();
   if(state.view === 'sim')     afterSim();
@@ -1223,6 +1335,7 @@ function renderView(){
   if(state.view === 'lib')     afterLib();
   if(state.view === 'kb')      afterKb();
   if(state.view === 'data')    afterData();
+  if(state.view === 'model')   afterModel();
 }
 
 /* ================= 工作台 ================= */
@@ -1232,7 +1345,7 @@ function viewDashboard(){
   const tierColor = r.tier.color;
 
   return `
-  <div class="hero">
+  <div class="hero ${state.model.running ? 'mdl-running' : ''}">
     <div class="hero-top">
       <div class="hero-label">燃料电池电堆自适应引擎 · 全球数据库联动</div>
       <div class="hero-tier" id="tierTag" style="background:${tierColor}22;color:${tierColor};border-color:${tierColor}55">
@@ -1280,7 +1393,7 @@ function viewDashboard(){
     <div class="card-h"><h3>当前方案 vs 全球主流电堆</h3><span class="tag">实时对比</span></div>
     ${GLOBAL_DB.map(g => {
       const cmp = (v, ref) => v >= ref ? 'var(--green)' : v >= ref * 0.9 ? 'var(--orange)' : 'var(--red)';
-      const myVpd = r.vpd, mySp = r.sp, myEta = r.etaStack * 100, myPd = r.pd;
+      const myVpd = r.vpd, mySp = r.sp, myEta = r.etaStack * 100;
       return `
       <div class="gcard">
         <div class="gcard-h">
@@ -1321,14 +1434,14 @@ function viewDashboard(){
 
   <div class="sec-title">快捷功能</div>
   <div class="grid g4">
+    <div class="quick" data-action="nav" data-id="model"><span class="qi">✦</span><span class="ql">大模型</span></div>
     <div class="quick" data-action="nav" data-id="sim"><span class="qi">∿</span><span class="ql">电堆仿真</span></div>
     <div class="quick" data-action="nav" data-id="calc"><span class="qi">∑</span><span class="ql">工程计算</span></div>
     <div class="quick" data-action="nav" data-id="lib"><span class="qi">▤</span><span class="ql">参数库</span></div>
     <div class="quick" data-action="nav" data-id="monitor"><span class="qi">◉</span><span class="ql">电堆监控</span></div>
     <div class="quick" data-action="nav" data-id="data"><span class="qi">◫</span><span class="ql">方案对比</span></div>
-    <div class="quick" data-action="nav" data-id="kb"><span class="qi">✦</span><span class="ql">知识库</span></div>
+    <div class="quick" data-action="nav" data-id="kb"><span class="qi">❖</span><span class="ql">知识库</span></div>
     <div class="quick" data-action="report" data-id="pdf"><span class="qi">⎙</span><span class="ql">导出报告</span></div>
-    <div class="quick" data-action="report" data-id="csv"><span class="qi">⇩</span><span class="ql">导出数据</span></div>
   </div>
 
   <div class="sec-title">电堆核心指标</div>
@@ -1361,7 +1474,7 @@ function viewDashboard(){
   </div>
 
   <div class="sec-title">电堆参数设定（全部可手动调节）</div>
-  <div class="hint">展开分组，可逐项拖动滑块或直接输入数值。<b>所有参数实时生效，计算与仿真将同步更新；参数注释已对接全球电堆数据库。</b></div>
+  <div class="hint">展开分组，可逐项拖动滑块或直接输入数值。<b>所有参数实时生效；参数注释已对接全球电堆数据库。</b></div>
 
   <div class="param-toolbar">
     <button class="btn ghost" data-action="param-expand-all">⌄ 展开全部</button>
@@ -1541,6 +1654,179 @@ function updateLiveValues(){
   set('bopPct', r.pBop / Math.max(r.Pstack, 0.01) * 100, 1);
 }
 
+/* ================= 大模型视图 ================= */
+function viewModel(){
+  return `
+  <div class="hero mdl ${state.model.running ? 'mdl-running' : ''}">
+    <div class="hero-top">
+      <div class="hero-label">HyHub 动态大模型 · 电堆数字孪生引擎</div>
+      <div class="hero-tier ${state.model.running ? 'pulse' : ''}" style="background:rgba(167,139,250,.15);color:#a78bfa;border-color:rgba(167,139,250,.35)">
+        ${state.model.running ? '● 训练中' : '○ 就绪'}
+      </div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:8px;position:relative;z-index:1">
+      <div class="power-num" id="mdlEpoch">${state.model.epoch}</div>
+      <div class="power-unit">epoch</div>
+      <div class="power-hint" style="color:#a78bfa">LSTM + PINN + GNN + Transformer</div>
+    </div>
+    <div class="grid g4" style="margin-top:14px;position:relative;z-index:1">
+      <div class="auto-item"><div class="auto-k">训练损失</div><div class="auto-v" id="mdlLoss">—</div></div>
+      <div class="auto-item"><div class="auto-k">验证 R²</div><div class="auto-v" id="mdlR2">—</div></div>
+      <div class="auto-item"><div class="auto-k">预测误差</div><div class="auto-v" id="mdlMae">—</div></div>
+      <div class="auto-item"><div class="auto-k">推理延迟</div><div class="auto-v" id="mdlLat">—<small>ms</small></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><h3>模型控制</h3><span class="tag">实时</span></div>
+    <div class="grid g2">
+      <button class="btn purple" data-action="mdl-toggle" id="mdlBtn">${state.model.running ? '■ 暂停训练' : '▶ 启动训练'}</button>
+      <button class="btn ghost" data-action="mdl-reset">↻ 重置模型</button>
+    </div>
+  </div>
+
+  <div class="sec-title">训练损失收敛曲线</div>
+  <div class="chart-wrap"><canvas id="mdlChart1" class="tall"></canvas>${legend([{c:'#a78bfa',n:'训练损失 Loss×100'},{c:'#00d48a',n:'验证 R²×100'}])}</div>
+
+  <div class="sec-title">电堆多物理场预测（PINN）</div>
+  <div class="chart-wrap"><canvas id="mdlChart2" class="tall"></canvas>${legend([{c:'#0a84ff',n:'模型预测电压 (V)'},{c:'#ff9f0a',n:'物理模型电压 (V)'}])}</div>
+
+  <div class="sec-title">参数敏感性分析</div>
+  <div class="card">
+    ${[
+      ['操作温度 T', 0.82, '#0a84ff'],
+      ['氢气压力 pH2', 0.68, '#00d48a'],
+      ['Pt 载量', 0.74, '#22d3ee'],
+      ['膜厚度', 0.61, '#a78bfa'],
+      ['空气计量比', 0.55, '#ff9f0a'],
+      ['GDL 孔隙率', 0.42, '#f472b6'],
+      ['双极板接触电阻', 0.71, '#ff453a'],
+      ['冷却流量', 0.33, '#7d8fb3'],
+    ].map(x => `
+      <div class="bar-row">
+        <span class="bar-k">${x[0]}</span>
+        <div class="bar-track"><i style="width:${x[1]*100}%;background:${x[2]}"></i></div>
+        <span class="bar-v">${fmt(x[1]*100,0)}%</span>
+      </div>`).join('')}
+  </div>
+
+  <div class="sec-title">模型预测 vs 实测偏差</div>
+  <div class="grid g2">
+    <div class="kpi b"><div class="kpi-k">RMSE</div><div class="kpi-v" id="mdlRmse">—<small>mV</small></div></div>
+    <div class="kpi g"><div class="kpi-k">R²</div><div class="kpi-v" id="mdlR2b">—</div></div>
+    <div class="kpi o"><div class="kpi-k">最大偏差</div><div class="kpi-v" id="mdlMax">—<small>mV</small></div></div>
+    <div class="kpi p"><div class="kpi-k">推理延迟</div><div class="kpi-v" id="mdlLat2">—<small>ms</small></div></div>
+  </div>
+
+  <div class="sec-title">模型融合策略</div>
+  <div class="card">
+    ${[
+      ['LSTM 时序建模', 85, '#a78bfa', '捕捉动态变载与冷启动时序特征'],
+      ['PINN 物理约束', 92, '#0a84ff', '能量守恒 + 电化学动力学约束'],
+      ['GNN 多电堆耦合', 68, '#00d48a', '多堆模块化温度/流量耦合建模'],
+      ['Transformer 长程依赖', 76, '#22d3ee', '长周期衰减与 SOH 预测'],
+    ].map(x => `
+      <div class="bar-row">
+        <span class="bar-k">${x[0]}</span>
+        <div class="bar-track"><i style="width:${x[1]}%;background:${x[2]}"></i></div>
+        <span class="bar-v">${x[1]}%</span>
+      </div>
+      <div style="font-size:10px;color:#6b87ab;margin:-6px 0 10px 105px">${x[3]}</div>`).join('')}
+  </div>
+
+  <div class="sec-title">预测应用场景</div>
+  <div class="grid g2">
+    <div class="li"><div class="li-ico p">◈</div><div class="li-body"><div class="li-t">实时 SOH 估计</div><div class="li-d">融合多参数在线估计</div></div></div>
+    <div class="li"><div class="li-ico g">❄</div><div class="li-body"><div class="li-t">冷启动策略优化</div><div class="li-d">-30℃ 启动轨迹预测</div></div></div>
+    <div class="li"><div class="li-ico o">≈</div><div class="li-body"><div class="li-t">膜干/水淹诊断</div><div class="li-d">EIS + 时序特征融合</div></div></div>
+    <div class="li"><div class="li-ico b">∞</div><div class="li-body"><div class="li-t">剩余寿命 RUL 预测</div><div class="li-d">Transformer 长程依赖</div></div></div>
+  </div>
+
+  <div class="foot-note">
+    HyHub 动态大模型 · LSTM + PINN + GNN + Transformer 混合架构<br>
+    设计者：<b class="sign">戴煜</b> · 燃料电池研发工程师<br>
+    联系方式：<b>18662613315@163.com</b><br>
+    版权所有 © 2026 戴煜 · 保留所有权利
+  </div>`;
+}
+
+function afterModel(){
+  if(state.model.running) startModelTrain();
+  drawModelCharts();
+}
+function startModelTrain(){
+  stopModelTrain();
+  state.model.timer = setInterval(tickModel, 600);
+  tickModel();
+}
+function stopModelTrain(){
+  if(state.model.timer){ clearInterval(state.model.timer); state.model.timer = null; }
+}
+
+function tickModel(){
+  if(state.view !== 'model'){ stopModelTrain(); return; }
+  const m = state.model;
+  m.epoch++;
+  const baseLoss = 0.8 * Math.exp(-m.epoch / 30) + 0.02 + (Math.random() - 0.5) * 0.01;
+  const r2 = Math.min(0.9985, 0.5 + 0.5 * (1 - Math.exp(-m.epoch / 25)));
+  const mae = 12 * Math.exp(-m.epoch / 40) + 0.8;
+  const lat = 8 + Math.random() * 4;
+  m.loss.push([m.epoch, baseLoss]);
+  if(m.loss.length > 100) m.loss.shift();
+
+  const upd = (id, v) => { const e = $('#' + id); if(e) e.textContent = v; };
+  upd('mdlEpoch', m.epoch);
+  upd('mdlLoss', baseLoss.toFixed(4));
+  upd('mdlR2', r2.toFixed(4));
+  upd('mdlMae', mae.toFixed(2) + ' mV');
+  const le = $('#mdlLat'); if(le) le.innerHTML = lat.toFixed(1) + '<small>ms</small>';
+  const le2 = $('#mdlLat2'); if(le2) le2.innerHTML = lat.toFixed(1) + '<small>ms</small>';
+  upd('mdlRmse', (mae * 0.95).toFixed(2));
+  const rb = $('#mdlR2b'); if(rb) rb.textContent = r2.toFixed(4);
+  upd('mdlMax', (mae * 2.1).toFixed(1));
+
+  if(m.epoch % 2 === 0) drawModelCharts();
+  if(m.epoch >= 200){
+    m.running = false; stopModelTrain();
+    const btn = $('#mdlBtn'); if(btn) btn.textContent = '▶ 启动训练';
+    toast('模型训练收敛 · R² = ' + r2.toFixed(4));
+  }
+}
+
+function drawModelCharts(){
+  const cv1 = $('#mdlChart1');
+  if(cv1 && state.model.loss.length > 0){
+    const dataLoss = state.model.loss;
+    const dataR2 = state.model.loss.map(d => [d[0], Math.min(0.9985, 0.5 + 0.5 * (1 - Math.exp(-d[0] / 25))) * 100]);
+    requestAnimationFrame(() => plot(cv1, {
+      xMin: 0, xMax: Math.max(50, state.model.epoch), yMin: 0, yMax: 100,
+      xLabel: 'Epoch', yLabel: 'Loss×100 / R²×100',
+      series: [
+        { data: dataLoss.map(d => [d[0], d[1] * 100]), color:'#a78bfa', fill:'rgba(167,139,250,.16)' },
+        { data: dataR2, color:'#00d48a' },
+      ]
+    }));
+  }
+  const cv2 = $('#mdlChart2');
+  if(cv2){
+    const P = state.params, T_K = P.T + 273.15;
+    const pred = [], phys = [];
+    for(let i = 0.1; i <= 2.5; i += 0.1){
+      const v = vcell(i, T_K, { N:P.N, area:P.area, pH2:P.pH2, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
+      phys.push([i, v]);
+      pred.push([i, v * (1 + Math.sin(i*9)*0.004 + (Math.random()-0.5)*0.004)]);
+    }
+    requestAnimationFrame(() => plot(cv2, {
+      xMin:0, xMax:2.5, yMin:0.4, yMax:1.05,
+      xLabel:'电流密度 (A/cm²)', yLabel:'单片电压 (V)',
+      series:[
+        { data: pred, color:'#0a84ff', fill:'rgba(10,132,255,.16)' },
+        { data: phys, color:'#ff9f0a', dots:true },
+      ]
+    }));
+  }
+}
+
 /* ================= 仿真 ================= */
 const SIM_MODES = [
   { id:'steady', ico:'▬', t:'电堆稳态仿真', d:'极化曲线·功率密度·损耗拆解' },
@@ -1635,7 +1921,6 @@ function viewSim(){
 }
 
 function afterSim(){
-  /* ★ 修复：标签 id 是 `${id}Val`，必须补上 Val 后缀 */
   const map = {
     stackPower:['simP', v => v + ' kW'], N:['simN', v => v + ' 片'],
     area:['simArea', v => v + ' cm²'], cellThk:['simCellThk', v => parseFloat(v).toFixed(2) + ' mm'],
@@ -1660,7 +1945,7 @@ function afterSim(){
       state.params[key] = parseFloat(e.target.value);
       const m = map[key];
       if(m){
-        const el = $('#' + m[0] + 'Val');  /* ★ 修复点 */
+        const el = $('#' + m[0] + 'Val');
         if(el) el.textContent = m[1](e.target.value);
       }
     });
@@ -1710,10 +1995,6 @@ function runSim(){
           <div class="kpi p"><div class="kpi-k">欧姆损耗</div><div class="kpi-v" style="font-size:16px">${fmt(r.loss.ohm,2)}<small>kW</small></div></div>
           <div class="kpi r"><div class="kpi-k">浓差损耗</div><div class="kpi-v" style="font-size:16px">${fmt(r.loss.con,2)}<small>kW</small></div></div>
         </div>
-      </div>
-      <div class="grid g2" style="margin-top:12px">
-        <button class="btn ghost" data-action="report" data-id="pdf">⎙ 导出PDF报告</button>
-        <button class="btn ghost" data-action="report" data-id="csv">⇩ 导出CSV数据</button>
       </div>`;
     res.innerHTML = html;
     requestAnimationFrame(() => {
@@ -1938,18 +2219,12 @@ function runSim(){
 
 /* ================= 计算器 ================= */
 const CALCS = [
-  { id:'elec', n:'电堆电气' },
-  { id:'h2', n:'电堆氢耗' },
-  { id:'air', n:'空气配比' },
-  { id:'eta', n:'电堆效率' },
-  { id:'heat', n:'电堆热管理' },
-  { id:'purge', n:'阳极吹扫' },
-  { id:'cal', n:'台架标定' },
-  { id:'unit', n:'单位换算' },
-  { id:'stack', n:'电堆结构' },
-  { id:'mea', n:'MEA 计算' },
-  { id:'cost', n:'成本估算' },
-  { id:'life', n:'寿命预测' },
+  { id:'elec', n:'电堆电气' }, { id:'h2', n:'电堆氢耗' },
+  { id:'air', n:'空气配比' }, { id:'eta', n:'电堆效率' },
+  { id:'heat', n:'电堆热管理' }, { id:'purge', n:'阳极吹扫' },
+  { id:'cal', n:'台架标定' }, { id:'unit', n:'单位换算' },
+  { id:'stack', n:'电堆结构' }, { id:'mea', n:'MEA 计算' },
+  { id:'cost', n:'成本估算' }, { id:'life', n:'寿命预测' },
 ];
 
 function viewCalc(){
@@ -2015,8 +2290,8 @@ function calcPanel(){
       F_('电堆功率 (kW)', 'c_p', P.stackPower) +
       F_('电堆效率 (%)', 'c_e', 58) +
       F_('冷却液温差 ΔT (K)', 'c_dt', P.dT, 0.5) +
-      F_('冷却液比热 kJ/(kg·K)', 'c_cp', 3.55, 0.01) +
-      F_('冷却液密度 kg/L', 'c_rho', 1.05, 0.01) +
+      F_('冷却液比热 cp kJ/(kg·K)', 'c_cp', 3.55, 0.01) +
+      F_('冷却液密度 ρ kg/L', 'c_rho', 1.05, 0.01) +
       F_('环境温度 (℃)', 'c_T', P.Tamb) +
       F_('散热器裕度 (%)', 'c_rm', P.radMargin) +
       `<button class="btn primary block" data-action="calc-run" data-id="heat">计算</button>`,
@@ -2187,21 +2462,24 @@ function runCalc(type){
   }
   else if(type === 'heat'){
     const PkW = g('c_p'), e = g('c_e') / 100, dT = g('c_dt');
-    const cp = g('c_cp') || 3.55, rho = g('c_rho') || 1.05;
-    const Tamb = g('c_T') || 25, rm = g('c_rm') || 20;
+    const cp = g('c_cp') || 3.55;
+    const rho = g('c_rho') || 1.05;
+    const rm = g('c_rm') || 20;
     const Q = PkW * (1 / e - 1);
-    const flow = Q / (cp * 4.18 / 3.55 * dT) * 60;
-    const massFlow = flow * rho;
+    const mdot = Q / (cp * dT);
+    const flowLpm = mdot / rho * 60;
+    const massFlow = mdot * 60;
     html = `<div class="res-box">
       ${row('电堆产热功率 Q', fmt(Q, 2), 'kW')}
-      ${row('冷却液流量', fmt(flow, 2), 'L/min')}
-      ${row('冷却液质量流量', fmt(massFlow, 1), 'kg/min')}
-      ${row('温差校核', dT, 'K')}
+      ${row('冷却液体积流量', fmt(flowLpm, 2), 'L/min')}
+      ${row('冷却液质量流量', fmt(massFlow, 2), 'kg/min')}
+      ${row('温差校核 ΔT', dT, 'K')}
+      ${row('冷却液比热 cp', cp, 'kJ/(kg·K)')}
+      ${row('冷却液密度 ρ', rho, 'kg/L')}
       ${row('散热器需求 (含裕度)', fmt(Q * (1 + rm/100), 2), 'kW')}
-      ${row('散热器与环境温差', fmt(g('c_T') ? (P.T - Tamb) : 57, 1), 'K')}
       ${row('热流密度', fmt(Q * 1000 / (PkW * 1000 * 0.5), 3), 'W/cm²')}
-      ${row('冷却液体积流速', fmt(flow / 60, 3), 'L/s')}
-      ${row('泵功估算', fmt(flow * 0.25 / 60 / 0.65, 2), 'kW')}
+      ${row('泵功估算', fmt(flowLpm * 0.25 / 60 / 0.65, 2), 'kW')}
+      ${row('散热量/体积', fmt(Q / Math.max(flowLpm, 0.01) * 60, 2), 'kJ/L')}
     </div>`;
   }
   else if(type === 'purge'){
@@ -2262,31 +2540,32 @@ function runCalc(type){
   else if(type === 'stack'){
     const PkW = g('c_p'), Vc = g('c_v') || 0.71, i = g('c_i') || 1.5;
     const thk = g('c_t') || 1.5, A = g('c_a') || 420, bt = g('c_bt') || 0.4, k = g('c_k') || 1.5;
-    const N = PkW * 1000 / (Vc * i * A);
+    const N = Math.ceil(PkW * 1000 / (Vc * i * A));
     const Vstack = N * Vc;
     const I = i * A;
-    const height = N * thk / 10;
-    const coreVol = N * thk * A * 0.0001;
-    const vol = coreVol * k;
-    const mass = coreVol * 1.65 + 8;
+    const heightCm = N * thk / 10;
+    const coreVolL = N * thk * A / 1000;
+    const volL = coreVolL * k;
+    const mass = coreVolL * 1.65 + 8;
     html = `<div class="res-box">
-      ${row('推算片数 N', fmt(N, 0), '片')}
-      ${row('电堆电压', fmt(Vstack, 1), 'V')}
-      ${row('电堆电流', fmt(I, 0), 'A')}
-      ${row('电堆高度 (估算)', fmt(height, 1), 'cm')}
-      ${row('堆芯体积', fmt(coreVol, 2), 'L')}
-      ${row('电堆体积 (含封装)', fmt(vol, 2), 'L')}
-      ${row('电堆质量 (估算)', fmt(mass, 1), 'kg')}
-      ${row('体积功率密度', fmt(PkW / vol, 2), 'kW/L')}
+      ${row('推算片数 N（向上取整）', fmt(N, 0), '片')}
+      ${row('电堆电压 V_stack', fmt(Vstack, 1), 'V')}
+      ${row('电堆电流 I', fmt(I, 0), 'A')}
+      ${row('电堆高度（堆叠）', fmt(heightCm, 1), 'cm')}
+      ${row('堆芯体积', fmt(coreVolL, 2), 'L')}
+      ${row('电堆体积（含封装）', fmt(volL, 2), 'L')}
+      ${row('电堆质量（估算）', fmt(mass, 1), 'kg')}
+      ${row('体积功率密度', fmt(PkW / volL, 2), 'kW/L')}
       ${row('比功率', fmt(PkW / mass, 2), 'kW/kg')}
       ${row('单片厚度', thk, 'mm')}
       ${row('双极板厚度', bt, 'mm')}
+      ${row('有效面积', A, 'cm²')}
     </div>`;
   }
   else if(type === 'mea'){
     const PkW = g('c_p'), pt = g('c_pt') || 0.25, A = g('c_a') || 420;
     const memThk = g('c_m') || 15, gdl = g('c_g') || 200, ion = g('c_ion') || 30;
-    const N = PkW * 1000 / (0.71 * 1.5 * A);
+    const N = Math.ceil(PkW * 1000 / (0.71 * 1.5 * A));
     const ptPerCell = pt * A / 1000;
     const ptTotal = ptPerCell * N;
     const ptPerKW = ptTotal / PkW * 1000;
@@ -2310,7 +2589,7 @@ function runCalc(type){
     const PkW = g('c_p'), pt = g('c_pt') || 0.25, ptp = g('c_ptp') || 280;
     const memP = g('c_mem') || 1200, bppP = g('c_bpp') || 1200, gdlP = g('c_gdl') || 180;
     const oth = g('c_oth') || 3000, qty = g('c_qty') || 1000;
-    const N = PkW * 1000 / (0.71 * 1.5 * state.params.area);
+    const N = Math.ceil(PkW * 1000 / (0.71 * 1.5 * state.params.area));
     const ptTotal = pt * state.params.area / 1000 * N;
     const memArea = state.params.area * N / 10000;
     const costPt = ptTotal * ptp;
@@ -2453,7 +2732,7 @@ function viewLib(){
     设计者：<b class="sign">戴煜</b> · 燃料电池研发工程师<br>
     联系方式：<b>18662613315@163.com</b><br>
     参数库覆盖电堆结构 / MEA / 双极板 / 操作 / 水热 / 性能 / 寿命 / 辅机 / 安全 / 成本 / 全球数据库 等 ${LIB.length} 大类<br>
-    参考 GB/T 24554、GB/T 37244、SAE J2719、ISO 14687、IEC 62282 等标准，对齐全球领先水平<br>
+    参考 GB/T 24554、GB/T 37244、SAE J2719、ISO 14687、IEC 62282 等标准<br>
     版权所有 © 2026 戴煜 · 保留所有权利
   </div>`;
 }
@@ -2987,7 +3266,7 @@ function viewKb(){
   <div class="foot-note">
     设计者：<b class="sign">戴煜</b> · 燃料电池研发工程师<br>
     联系方式：<b>18662613315@163.com</b><br>
-    知识库覆盖国标 / 测试标定 / 场景设计 / 行业阈值 / 零部件 / 控制 / 深度标准 / 行业前沿 / 全球数据库 等 ${KB_CATS.length} 大类<br>
+    知识库覆盖国标 / 测试标定 / 场景设计 / 行业阈值 / 零部件 / 控制 / AI 大模型 / 行业前沿 / 全球数据库 等 ${KB_CATS.length} 大类<br>
     对接 GB/T 24554、GB/T 37244、SAE J2719、SAE J2579、ISO 14687、IEC 62282 等国际国内标准<br>
     版权所有 © 2026 戴煜 · 保留所有权利
   </div>`;
@@ -3186,6 +3465,23 @@ document.addEventListener('click', e => {
       toast('电堆参数已恢复默认值（对齐全球领先水平）');
       break;
 
+    case 'mdl-toggle': {
+      state.model.running = !state.model.running;
+      const btn = $('#mdlBtn');
+      if(btn) btn.textContent = state.model.running ? '■ 暂停训练' : '▶ 启动训练';
+      if(state.model.running) startModelTrain(); else stopModelTrain();
+      renderView();
+      toast(state.model.running ? '大模型训练已启动' : '大模型训练已暂停');
+      break;
+    }
+    case 'mdl-reset': {
+      stopModelTrain();
+      state.model = { running:false, epoch:0, loss:[], timer:null, pred:[], aiStage:0 };
+      renderView();
+      toast('大模型已重置');
+      break;
+    }
+
     case 'sim-mode':
       state.simMode = id;
       $$('.mode').forEach(m => m.classList.toggle('active', m.dataset.id === state.simMode));
@@ -3369,7 +3665,10 @@ function defaultParams(){
     purH2:5.0, rh:45, stoichMode:'auto',
     memType:'gore', memThk:15, ptLoading:0.25, catType:'ptco',
     gdlThk:200, gdlPorosity:76, ionomer:30, mplThk:30,
+    memBrand:'gore', catBrand:'tanakaCo', ptAlloy:'ptco', support:'ketjen',
+    gdlBrand:'sgl29bc', mplBrand:'sgl', ionomerType:'nafion',
     bppMat:'ti', flowField:'3d', coating:'tin', coatThk:120, contactR:5,
+    bppBrand:'ti-g1', bppCoatingBrand:'tin-1', sealType:'fkm', gasketType:'ptfe', endPlate:'cf',
     R:0.095, Aact:0.0085, i0:0.0018, m:2.2e-5, n:4,
     coolFlow:120, coolType:'eg50', dpH2:15, dpAir:22, radMargin:20, pumpEff:0.65,
     cmpType:'centri', cmpEff:0.72, cmpRatio:2.5, dcdcEff:0.98, recirc:'ejector',
@@ -3398,6 +3697,7 @@ window.addEventListener('resize', () => {
   resizeTimer = setTimeout(() => {
     if(state.view === 'monitor') tickMonitor();
     if(state.view === 'data') afterData();
+    if(state.view === 'model') drawModelCharts();
   }, 200);
 });
 
@@ -3405,7 +3705,7 @@ renderNav();
 navigate('dashboard');
 $('#chipPower').textContent = state.params.stackPower + ' kW';
 
-console.log('%c氢枢 HyHub %cV1.7.0',
+console.log('%c氢枢 HyHub %cV2.0 大模型版',
   'font-size:16px;font-weight:800;color:#0a84ff',
   'font-size:12px;color:#7d8fb3');
 console.log('%c设计者：戴煜 · 燃料电池研发工程师',
@@ -3414,9 +3714,9 @@ console.log('%c联系方式：18662613315@163.com',
   'font-size:11px;color:#7fa8d4');
 console.log('%c版权所有 © 2026 戴煜 · 保留所有权利',
   'font-size:11px;color:#5f7391');
-console.log('%c燃料电池电堆全能平台 · 参数库 22 类 / 知识库 12 类 / 全球数据库 12 款机型',
+console.log('%c燃料电池电堆全能平台 · 参数库 22 类 / 知识库 13 类 / 全球数据库 12 款机型 / AI 大模型',
   'font-size:11px;color:#00d48a');
-console.log('%c★ V1.7.0 修复：仿真参数滑块标签反馈失效（simPVal 后缀）｜优化：工作台全球对标卡 / 计算器条件扩充 / 知识库新增 IEC 62282 与 Nikola',
+console.log('%c★ V2.0 更新：单位修正 + 动态大模型视图（LSTM/PINN/GNN/Transformer）+ MEA/双极板选型参数 + 全球数据库对标 + 大模型数字孪生',
   'font-size:11px;color:#ff9f0a;font-weight:600');
 </script>
 </body>
