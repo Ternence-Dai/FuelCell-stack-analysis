@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const html = fs.readFileSync('index.html', 'utf8');
+const html = fs.readFileSync('index.html', 'utf8') + '\n' + fs.readFileSync('assets/js/legacy-app.js', 'utf8');
 const match = html.match(/function nernstPotential\(T_K, p\)\s*\{[\s\S]*?\n\}/);
 if (!match) throw new Error('nernstPotential function not found');
 const nernstPotential = vm.runInNewContext('(' + match[0] + ')');
