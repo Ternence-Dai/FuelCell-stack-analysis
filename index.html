@@ -1193,8 +1193,8 @@ const KB_CATS = [
         '工程建议':['需标定过程噪声与观测噪声','建议与 EIS 实测交叉验证'],
       } },
   ]},
-  { id:'ai', ico:'✦', name:'AI 大模型与数字孪生', desc:'LSTM/PINN/GNN/Transformer 融合架构', entries:[
-    { id:'ai_arch', title:'HyHub 动态大模型架构', tags:['AI','大模型','数字孪生'],
+  { id:'ai', ico:'✦', name:'AI 架构规划与数字孪生', desc:'拟议的模型方法（尚未实现）', entries:[
+    { id:'ai_arch', title:'HyHub 规划架构（待实现）', tags:['AI','大模型','数字孪生'],
       summary:'拟议的 LSTM / PINN / GNN / Transformer 组合方案；当前仓库未实现真实神经网络训练或推理。',
       detail:{
         '模型融合策略':[
@@ -1202,7 +1202,7 @@ const KB_CATS = [
           { k:'PINN 物理约束', v:'拟引入能量守恒与电化学动力学约束（设计说明，未实测）' },
           { k:'GNN 多电堆耦合', v:'拟描述多堆模块的温度与流量耦合（设计说明，未实测）' },
           { k:'Transformer 长程依赖', v:'拟用于长周期衰减与 SOH 序列建模（设计说明，未实测）' }],
-        '训练目标':[
+        '建议验证目标（尚未验证）':[
           { k:'训练损失', v:'收敛至 < 0.05' },
           { k:'验证 R²', v:'≥ 0.998' },
           { k:'预测 RMSE', v:'< 8 mV' },
@@ -3513,17 +3513,17 @@ document.addEventListener('click', e => {
     case 'mdl-toggle': {
       state.model.running = !state.model.running;
       const btn = $('#mdlBtn');
-      if(btn) btn.textContent = state.model.running ? '■ 暂停训练' : '▶ 启动训练';
+      if(btn) btn.textContent = state.model.running ? '■ 暂停演示' : '▶ 启动演示';
       if(state.model.running) startModelTrain(); else stopModelTrain();
       renderView();
-      toast(state.model.running ? '大模型训练已启动' : '大模型训练已暂停');
+      toast(state.model.running ? '模拟演示已启动' : '模拟演示已暂停');
       break;
     }
     case 'mdl-reset': {
       stopModelTrain();
       state.model = { running:false, epoch:0, loss:[], timer:null, pred:[], aiStage:0 };
       renderView();
-      toast('大模型已重置');
+      toast('模拟演示已重置');
       break;
     }
 
