@@ -3685,17 +3685,28 @@ function defaultParams(){
 }
 
 function reportAction(id){
-  const msgs = {
-    pdf:'电堆工程报告已生成（含版权页与追溯码）',
-    csv:'电堆 CSV 原始数据已导出，可导入 Origin/MATLAB',
-    replay:'电堆数据回放已启动（1×–100× 可调）',
-    fault:'电堆故障报告已生成并附溯源快照',
-    export:'数据 / 参数库已批量导出',
-    bench:'电堆技术对标报告已生成（含全球数据库）',
-    trend:'参数趋势报告已生成',
-    trace:'数据溯源报告已生成',
+  // Only claim a file was created when the browser download is actually triggered.
+  if(id === 'csv' || id === 'export'){
+    const rows = [['参数','当前值']];
+    Object.entries(state.params || {}).forEach(([key,value]) => rows.push([key,value]));
+    const csv = '\uFEFF' + rows.map(row => row.map(v => '"' + String(v == null ? '' : v).replace(/"/g,'""') + '"').join(',')).join('\r\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'HyHub_当前工况参数.csv';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('当前工况参数 CSV 已触发下载');
+    return;
+  }
+  const names = {
+    pdf:'PDF 工程报告', replay:'历史数据回放', fault:'故障诊断报告',
+    bench:'全球电堆对标报告', trend:'运行趋势报告', trace:'数据溯源报告'
   };
-  toast(msgs[id] || '操作已完成');
+  toast((names[id] || '该功能') + '尚未接入真实数据或文件生成流程，当前未生成报告。');
 }
 
 let resizeTimer;
