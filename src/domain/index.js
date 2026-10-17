@@ -8,7 +8,9 @@ export function calculatePolarizationPoint({ reversibleVoltage, activationLoss, 
   const concentrationLoss = concentrationCoefficient * Math.log(1 / (1 - currentDensity / limitingCurrentDensity));
   const ohmicLoss = currentDensity * areaSpecificResistance;
   const cellVoltage = reversibleVoltage - activationLoss - ohmicLoss - concentrationLoss;
-  return Object.freeze({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss, currentDensity, powerDensity: cellVoltage * currentDensity });
+  const powerDensity = cellVoltage * currentDensity;
+  for (const [name, value] of Object.entries({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss, powerDensity })) finite(value, name);
+  return Object.freeze({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss, currentDensity, powerDensity });
 }
 
 export function calculateNernstPotential({ temperatureK, hydrogenPressureMPa, airPressureMPa }) {
@@ -17,8 +19,10 @@ export function calculateNernstPotential({ temperatureK, hydrogenPressureMPa, ai
   const referencePressureMPa = 0.101325;
   const hydrogenAtm = hydrogenPressureMPa / referencePressureMPa;
   const oxygenAtm = airPressureMPa * 0.21 / referencePressureMPa;
-  return 1.229 - 0.85e-3 * (temperatureK - 298.15)
+  const potential = 1.229 - 0.85e-3 * (temperatureK - 298.15)
     + 4.308e-5 * temperatureK * (Math.log(hydrogenAtm) + 0.5 * Math.log(oxygenAtm));
+  finite(potential, "Nernst potential");
+  return potential;
 }
 export function calculateCellVoltage({ reversibleVoltage, activationCoefficient, currentDensity, exchangeCurrentDensity, areaSpecificResistance, concentrationCoefficient, concentrationExponent }) {
   for (const [name, value] of Object.entries({ reversibleVoltage, activationCoefficient, currentDensity, exchangeCurrentDensity, areaSpecificResistance, concentrationCoefficient, concentrationExponent })) finite(value, name);
