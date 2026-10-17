@@ -30,5 +30,5 @@ test("rejects finite inputs whose derived Nernst potential overflows",()=>{
  assert.throws(()=>calculateNernstPotential({temperatureK:355.15,hydrogenPressureMPa:Number.MAX_VALUE,airPressureMPa:0.2}),TypeError);
 });
 test("rejects finite inputs whose calculated power density overflows",()=>{
- assert.throws(()=>calculatePolarizationPoint({...base,activationLoss:0,currentDensity:1e308,areaSpecificResistance:0,limitingCurrentDensity:Number.MAX_VALUE,concentrationCoefficient:0}),TypeError);
+ assert.throws(()=>calculatePolarizationPoint({...base,activationLoss:0,currentDensity:1.7e308,areaSpecificResistance:0,limitingCurrentDensity:Number.MAX_VALUE,concentrationCoefficient:0}),TypeError);
 });
