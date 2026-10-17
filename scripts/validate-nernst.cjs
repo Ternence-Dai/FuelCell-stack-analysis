@@ -4,7 +4,7 @@ const vm = require('node:vm');
 const html = fs.readFileSync('index.html', 'utf8') + '\n' + fs.readFileSync('assets/js/legacy-app.js', 'utf8');
 const match = html.match(/function nernstPotential\(T_K, p\)\s*\{[\s\S]*?\n\}/);
 if (!match) throw new Error('nernstPotential function not found');
-const nernstPotential = vm.runInNewContext('(' + match[0] + ')');
+async function main(){\nconst domain = await import('../src/domain/index.js');\nconst nernstPotential = vm.runInNewContext('(' + match[0] + ')', {window:{FuelCellDomain:domain}});
 
 const T = 82 + 273.15;
 const p = { pH2: 0.19, pAir: 0.20 };
@@ -21,4 +21,4 @@ if (!(nernstPotential(T, {pH2: p.pH2, pAir: 0.25}) > actual))
   throw new Error('Increasing air inlet pressure should increase reversible voltage');
 if (!(nernstPotential(T, {pH2: 0.25, pAir: p.pAir}) > actual))
   throw new Error('Increasing hydrogen inlet pressure should increase reversible voltage');
-console.log('Nernst model OK: MPa pressure normalization and pressure sensitivity');
+console.log('Nernst model OK: domain core MPa normalization and pressure sensitivity');\n}\nmain().catch(error=>{console.error(error);process.exitCode=1;});
