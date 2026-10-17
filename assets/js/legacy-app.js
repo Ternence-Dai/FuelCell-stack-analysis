@@ -84,19 +84,21 @@ const F = 96485, M_H2 = 2.016, LHV_H2 = 33.33, E_IDEAL = 1.482;
 
 /* ================= 电堆求解内核 ================= */
 function nernstPotential(T_K, p){
-  // pH2 / pAir are entered in MPa; Nernst logarithms require dimensionless
-  // partial-pressure ratios relative to 1 atm (0.101325 MPa).
-  const p0 = 0.101325;
-  const pH2Atm = Math.max(Number(p.pH2) / p0, 1e-9);
-  const airMPa = Number.isFinite(Number(p.pAir)) ? Number(p.pAir) : p0;
-  const pO2Atm = Math.max(airMPa * 0.21 / p0, 1e-9);
-  return 1.229 - 0.85e-3*(T_K - 298.15)
-    + 4.308e-5 * T_K * (Math.log(pH2Atm) + 0.5*Math.log(pO2Atm));
+  return window.FuelCellDomain.calculateNernstPotential({
+    temperatureK:T_K, hydrogenPressureMPa:Number(p.pH2), airPressureMPa:Number(p.pAir)
+  });
 }
 function vcell(i, T_K, p){
-  if(i < 0.005) i = 0.005;
-  const E = nernstPotential(T_K, p);
-  return E - p.Aact*Math.log(i/p.i0) - p.R*i - p.m*Math.exp(p.n*i);
+  const point = window.FuelCellDomain.calculateCellVoltage({
+    reversibleVoltage:nernstPotential(T_K,p),
+    activationCoefficient:p.Aact,
+    currentDensity:Math.max(i,0.005),
+    exchangeCurrentDensity:p.i0,
+    areaSpecificResistance:p.R,
+    concentrationCoefficient:p.m,
+    concentrationExponent:p.n
+  });
+  return point.cellVoltage;
 }
 function solveCurrentDensity(targetP_kW, p){
   const target = Number(targetP_kW) * 1000;
@@ -3014,9 +3016,18 @@ window.addEventListener('resize', () => {
   }, 200);
 });
 
-renderNav();
-navigate('dashboard');
-$('#chipPower').textContent = state.params.stackPower + ' kW';
+(async function bootWithDomainCore(){
+  try{
+    window.FuelCellDomain = await import('../../src/domain/index.js');
+  }catch(error){
+    console.error('FuelCell domain core failed to load',error);
+    toast('科学计算核心加载失败，请刷新页面或检查网络');
+    return;
+  }
+  renderNav();
+  navigate('dashboard');
+  $('#chipPower').textContent = state.params.stackPower + ' kW';
+})();
 
 console.log('%c氢枢 HyHub %cV2.0 大模型版',
   'font-size:16px;font-weight:800;color:#0a84ff',
