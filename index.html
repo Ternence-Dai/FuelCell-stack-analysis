@@ -1833,7 +1833,7 @@ function drawModelCharts(){
     const P = state.params, T_K = P.T + 273.15;
     const pred = [], phys = [];
     for(let i = 0.1; i <= 2.5; i += 0.1){
-      const v = vcell(i, T_K, { N:P.N, area:P.area, pH2:P.pH2, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
+      const v = vcell(i, T_K, { N:P.N, area:P.area, pH2:P.pH2, pAir:P.pAir, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
       phys.push([i, v]);
       pred.push([i, v * (1 + Math.sin(i*9)*0.004 + (Math.random()-0.5)*0.004)]);
     }
@@ -1988,7 +1988,7 @@ function runSim(){
   if(state.simMode === 'steady'){
     const data = [];
     for(let i = 0.05; i <= 3.0; i += 0.05){
-      const v = vcell(i, T_K, { N:P.N, area:P.area, pH2:P.pH2, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
+      const v = vcell(i, T_K, { N:P.N, area:P.area, pH2:P.pH2, pAir:P.pAir, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
       if(v < 0.15) break;
       data.push([i, v]);
     }
@@ -2114,7 +2114,7 @@ function runSim(){
   else if(state.simMode === 'bench'){
     const sim = [], mea = [], resid = [];
     for(let i = 0.1; i <= 2.5; i += 0.1){
-      const v = vcell(i, T_K, { N:P.N, area:P.area, pH2:P.pH2, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
+      const v = vcell(i, T_K, { N:P.N, area:P.area, pH2:P.pH2, pAir:P.pAir, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
       const m = v * (0.99 + (Math.sin(i*7) * 0.006));
       sim.push([i, v]); mea.push([i, m]); resid.push([i, (m - v) * 1000]);
     }
@@ -2217,7 +2217,7 @@ function runSim(){
       const d = [];
       const T2 = tempC + 273.15;
       for(let i = 0.05; i <= 3.0; i += 0.07){
-        const v = vcell(i, T2, { N:P.N, area:P.area, pH2:P.pH2, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
+        const v = vcell(i, T2, { N:P.N, area:P.area, pH2:P.pH2, pAir:P.pAir, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
         if(v < 0.12) break;
         d.push([i, v]);
       }
