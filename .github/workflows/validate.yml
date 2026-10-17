@@ -16,6 +16,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Validate current-density solver branch
+        run: node scripts/validate-solver.cjs
       - name: Parse embedded JavaScript
         run: |
           node <<'NODE'
