@@ -64,3 +64,14 @@ img,svg,canvas{max-width:100%}
   body{background:#fff!important;color:#111!important}
   :where(.card,.panel,.stat-card,.metric-card){box-shadow:none!important;break-inside:avoid}
 }
+
+
+/* V2: selectors intentionally carry application-level specificity so this layer wins over legacy inline styles. */
+body .app .sidebar{background:linear-gradient(180deg,#0b1727,#08111e);border-right-color:rgba(148,190,220,.16);box-shadow:10px 0 36px rgba(0,0,0,.18)}
+body .app .topbar{background:rgba(8,17,30,.92);border-bottom-color:rgba(148,190,220,.16)}
+body .app .content{padding:clamp(16px,2vw,28px);scrollbar-gutter:stable}
+body .app .card{border-radius:18px;border-color:rgba(148,190,220,.15);box-shadow:0 12px 34px rgba(0,0,0,.16)}
+body .app .nav-item{border-radius:11px;margin:2px 0}
+body .app .nav-item.active{background:linear-gradient(100deg,rgba(56,189,248,.2),rgba(14,165,233,.06));border-color:rgba(56,189,248,.28);color:#e8f7ff}
+body .app .btn{font-weight:650;letter-spacing:.01em}
+body .app .btn-primary{background:linear-gradient(135deg,#0284c7,#38bdf8);box-shadow:0 7px 18px rgba(14,165,233,.2)}
