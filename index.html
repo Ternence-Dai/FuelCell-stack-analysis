@@ -316,6 +316,9 @@ button:focus:not(:focus-visible),a:focus:not(:focus-visible){outline:none}
 img,svg,canvas,video{max-width:100%}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 @media print{*{box-shadow:none!important;text-shadow:none!important}body{overflow:visible!important;height:auto!important;min-height:0!important;background:#fff!important;color:#111!important}.sidebar,.bottomnav,.bottomnav,.tabbar,.toast,.toast-container,.modal-backdrop{display:none!important}.main,.main-content,.content,.view{overflow:visible!important;height:auto!important;min-height:0!important;margin:0!important;width:100%!important;color:#111!important;background:#fff!important}}
+
+/* HyHub product redesign v1 */
+.hyhub-intro{--intro-accent:#38bdf8;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 22px;margin:0 0 16px;border:1px solid rgba(56,189,248,.24);border-radius:18px;background:radial-gradient(circle at 88% 12%,rgba(34,211,238,.16),transparent 30%),linear-gradient(115deg,#10243a,#0c1727 65%,#101b2b);box-shadow:0 12px 32px rgba(0,0,0,.18)}.hyhub-intro .eyebrow{font-size:10px;letter-spacing:1.8px;color:#7dd3fc;font-weight:800;text-transform:uppercase}.hyhub-intro h2{font-size:clamp(19px,2.2vw,27px);letter-spacing:-.5px;margin:5px 0 6px;color:#eff8ff}.hyhub-intro p{font-size:12px;line-height:1.7;color:#9bb4cf;max-width:620px}.hyhub-intro .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.hyhub-intro .chips span{font-size:10px;color:#b9e8ff;border:1px solid rgba(56,189,248,.25);background:rgba(56,189,248,.08);padding:5px 9px;border-radius:99px}.hyhub-intro .mark{flex:0 0 112px;width:112px;height:112px;border-radius:28px;display:grid;place-items:center;font-size:36px;font-weight:800;color:#a5f3fc;background:linear-gradient(145deg,rgba(56,189,248,.18),rgba(34,211,238,.04));border:1px solid rgba(56,189,248,.28);box-shadow:inset 0 0 30px rgba(34,211,238,.08)}@media(max-width:680px){.hyhub-intro{padding:16px}.hyhub-intro .mark{display:none}}
 </style>
 </head>
 <body>
@@ -344,6 +347,7 @@ img,svg,canvas,video{max-width:100%}
       <div class="top-chip b" id="chipPower">150 kW</div>
       <div class="top-chip" id="chipStatus">● 在线</div>
     </header>
+    <div class="hyhub-intro"><div><div class="eyebrow">HYHUB · ENGINEERING WORKSPACE</div><h2>燃料电池电堆工程工作台</h2><p>从工况设定、模型计算到性能监控与数据导出，集中管理电堆研发过程。请区分模型计算结果与真实台架测试数据。</p><div class="chips"><span>参数驱动计算</span><span>性能指标分析</span><span>工况数据导出</span><span>模型结果需验证</span></div></div><div class="mark">H₂</div></div>
     <div class="content" id="content"></div>
   </div>
 </div>
