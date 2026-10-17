@@ -22,4 +22,12 @@ assert.ok(solved<peakI,'solver must choose the first/upward operating branch');
 assert.ok(Math.abs(powerAt(solved)-80)<0.05,'solver should converge to requested power');
 const limited=sandbox.solveCurrentDensity(peakPower*2,p);
 assert.ok(Math.abs(limited-peakI)<0.01,'unattainable target must return the modeled peak-power point');
+assert.match(html, /没有加载训练数据、执行神经网络训练或真实推理/,
+  'model page must disclose that its metrics are simulated');
+assert.match(html, /规划模块（尚未实现）/,
+  'unimplemented neural-network architecture must be labeled as a plan');
+assert.doesNotMatch(html, /贡献度 85%|贡献度 92%|贡献度 68%|贡献度 76%/,
+  'fabricated model contribution percentages must not be displayed');
+assert.match(html, /启动演示/,
+  'synthetic model activity must be presented as a demo, not real training');
 console.log('Fuel-cell solver branch and power-limit regression checks passed.');
