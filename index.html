@@ -1421,6 +1421,7 @@ function viewDashboard(){
         </div>`).join('')}
     </div>
   </div>
+  ${r.powerLimited ? '<div class="hint" role="alert" style="border-color:rgba(255,159,10,.45);color:#ffcc80">当前目标功率超出此参数组合下模型可达到的最大值。页面已显示模型峰值功率点，不应将其视为达到额定目标。</div>' : ''}
 
   <div class="sec-title">电堆功率分段</div>
   <div class="card">
