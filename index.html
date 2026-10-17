@@ -456,9 +456,19 @@ const GLOBAL_DB = [
 ];
 
 /* ================= 电堆求解内核 ================= */
+function nernstPotential(T_K, p){
+  // pH2 / pAir are entered in MPa; Nernst logarithms require dimensionless
+  // partial-pressure ratios relative to 1 atm (0.101325 MPa).
+  const p0 = 0.101325;
+  const pH2Atm = Math.max(Number(p.pH2) / p0, 1e-9);
+  const airMPa = Number.isFinite(Number(p.pAir)) ? Number(p.pAir) : p0;
+  const pO2Atm = Math.max(airMPa * 0.21 / p0, 1e-9);
+  return 1.229 - 0.85e-3*(T_K - 298.15)
+    + 4.308e-5 * T_K * (Math.log(pH2Atm) + 0.5*Math.log(pO2Atm));
+}
 function vcell(i, T_K, p){
   if(i < 0.005) i = 0.005;
-  const E = 1.229 - 0.85e-3*(T_K - 298.15) + 4.308e-5 * T_K * (Math.log(Math.max(p.pH2, 1e-6)) + 0.5*Math.log(0.21));
+  const E = nernstPotential(T_K, p);
   return E - p.Aact*Math.log(i/p.i0) - p.R*i - p.m*Math.exp(p.n*i);
 }
 function solveCurrentDensity(targetP_kW, p){
@@ -477,7 +487,7 @@ function solveSystem(){
   const t = tierOf(P.stackPower);
   const T_K = P.T + 273.15;
   const pAtm = 0.1013 * Math.pow(Math.max(1 - 2.25577e-5 * (P.altitude||0), 0.05), 5.2559);
-  const p = { N:P.N, area:P.area, T_K, pH2:P.pH2, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n };
+  const p = { N:P.N, area:P.area, T_K, pH2:P.pH2, pAir:P.pAir, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n };
   const i = solveCurrentDensity(P.stackPower, p);
   const Vc = vcell(i, T_K, p);
   const Vstack = P.N * Vc;
@@ -2266,6 +2276,7 @@ function calcPanel(){
       F_('浓差指数 n', 'c_nn', P.n, 0.5) +
       F_('工作温度 (℃)', 'c_T', P.T) +
       F_('氢气压力 (MPa)', 'c_ph', P.pH2, 0.01) +
+      F_('空气压力 (MPa)', 'c_pa', P.pAir, 0.01) +
       F_('界面接触电阻 (mΩ·cm²)', 'c_cr', P.contactR, 0.5) +
       F_('双极板单板厚度 (mm)', 'c_bt', P.bppThk, 0.05) +
       `<button class="btn primary block" data-action="calc-run" data-id="elec">计算</button>`,
@@ -2390,8 +2401,8 @@ function runCalc(type){
     const PkW = g('c_p'), N = g('c_n'), A = g('c_a'), R = g('c_r') || 0.095;
     const Aact = g('c_aa') || 0.0085, i0 = g('c_i0') || 0.0018;
     const mm = g('c_m') || 2.2e-5, nn = g('c_nn') || 4;
-    const T = g('c_T') || 82, pH2 = g('c_ph') || 0.19, cr = g('c_cr') || 5;
-    const p = { N, area:A, T_K:T+273.15, pH2, R, Aact, i0, m:mm, n:nn };
+    const T = g('c_T') || 82, pH2 = g('c_ph') || 0.19, pAir = g('c_pa') || 0.20, cr = g('c_cr') || 5;
+    const p = { N, area:A, T_K:T+273.15, pH2, pAir, R, Aact, i0, m:mm, n:nn };
     const i = solveCurrentDensity(PkW, p);
     const V = vcell(i, p.T_K, p);
     html = `<div class="res-box">
@@ -2399,7 +2410,7 @@ function runCalc(type){
       ${row('单片电压 V', fmt(V, 4), 'V')}
       ${row('电堆电流 I', fmt(i * A, 1), 'A')}
       ${row('电堆电压 V_stack', fmt(V * N, 1), 'V')}
-      ${row('理论电压 E', fmt(1.229 - 0.85e-3*(p.T_K-298.15) + 4.308e-5*p.T_K*(Math.log(pH2)+0.5*Math.log(0.21)), 4), 'V')}
+      ${row('理论电压 E', fmt(nernstPotential(p.T_K, p), 4), 'V')}
       ${row('活化过电位', fmt(Aact*Math.log(i/i0), 4), 'V/cell')}
       ${row('欧姆过电位', fmt(R*i, 4), 'V/cell')}
       ${row('浓差过电位', fmt(mm*Math.exp(nn*i), 4), 'V/cell')}
