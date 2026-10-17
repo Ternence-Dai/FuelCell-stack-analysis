@@ -1739,7 +1739,7 @@ function viewModel(){
   <div class="chart-wrap"><canvas id="mdlChart1" class="tall"></canvas>${legend([{c:'#a78bfa',n:'模拟损失 Loss×100'},{c:'#00d48a',n:'模拟 R²×100'}])}</div>
 
   <div class="sec-title">物理模型对比示意（非 PINN 推理）</div>
-  <div class="chart-wrap"><canvas id="mdlChart2" class="tall"></canvas>${legend([{c:'#0a84ff',n:'模型预测电压 (V)'},{c:'#ff9f0a',n:'物理模型电压 (V)'}])}</div>
+  <div class="chart-wrap"><canvas id="mdlChart2" class="tall"></canvas>${legend([{c:'#0a84ff',n:'扰动示意电压 (V)'},{c:'#ff9f0a',n:'公式模型电压 (V)'}])}</div>
 
   <div class="sec-title">参数敏感性示意（未由训练模型拟合）</div>
   <div class="card">
@@ -1762,29 +1762,22 @@ function viewModel(){
 
   <div class="sec-title">模拟误差指标（非实测偏差）</div>
   <div class="grid g2">
-    <div class="kpi b"><div class="kpi-k">RMSE</div><div class="kpi-v" id="mdlRmse">—<small>mV</small></div></div>
-    <div class="kpi g"><div class="kpi-k">R²</div><div class="kpi-v" id="mdlR2b">—</div></div>
-    <div class="kpi o"><div class="kpi-k">最大偏差</div><div class="kpi-v" id="mdlMax">—<small>mV</small></div></div>
-    <div class="kpi p"><div class="kpi-k">推理延迟</div><div class="kpi-v" id="mdlLat2">—<small>ms</small></div></div>
+    <div class="kpi b"><div class="kpi-k">模拟 RMSE</div><div class="kpi-v" id="mdlRmse">—<small>mV</small></div></div>
+    <div class="kpi g"><div class="kpi-k">模拟 R²</div><div class="kpi-v" id="mdlR2b">—</div></div>
+    <div class="kpi o"><div class="kpi-k">模拟最大偏差</div><div class="kpi-v" id="mdlMax">—<small>mV</small></div></div>
+    <div class="kpi p"><div class="kpi-k">模拟延迟</div><div class="kpi-v" id="mdlLat2">—<small>ms</small></div></div>
   </div>
 
-  <div class="sec-title">模型融合策略</div>
+  <div class="sec-title">规划模块（尚未实现）</div>
   <div class="card">
-    ${[
-      ['LSTM 时序建模', 85, '#a78bfa', '捕捉动态变载与冷启动时序特征'],
-      ['PINN 物理约束', 92, '#0a84ff', '能量守恒 + 电化学动力学约束'],
-      ['GNN 多电堆耦合', 68, '#00d48a', '多堆模块化温度/流量耦合建模'],
-      ['Transformer 长程依赖', 76, '#22d3ee', '长周期衰减与 SOH 预测'],
-    ].map(x => `
-      <div class="bar-row">
-        <span class="bar-k">${x[0]}</span>
-        <div class="bar-track"><i style="width:${x[1]}%;background:${x[2]}"></i></div>
-        <span class="bar-v">${x[1]}%</span>
-      </div>
-      <div style="font-size:10px;color:#6b87ab;margin:-6px 0 10px 105px">${x[3]}</div>`).join('')}
+    <div class="bar-row"><span class="bar-k">LSTM</span><span class="bar-v">拟用于动态时序特征建模</span></div>
+    <div class="bar-row"><span class="bar-k">PINN</span><span class="bar-v">拟引入电化学与能量守恒约束</span></div>
+    <div class="bar-row"><span class="bar-k">GNN</span><span class="bar-v">拟描述多堆温度与流量耦合</span></div>
+    <div class="bar-row"><span class="bar-k">Transformer</span><span class="bar-v">拟用于长周期衰减序列分析</span></div>
+    <div class="hint">以上为研发规划，不代表当前软件已实现这些网络、训练结果或性能权重。</div>
   </div>
 
-  <div class="sec-title">预测应用场景</div>
+  <div class="sec-title">规划应用场景（待实现与验证）</div>
   <div class="grid g2">
     <div class="li"><div class="li-ico p">◈</div><div class="li-body"><div class="li-t">实时 SOH 估计</div><div class="li-d">融合多参数在线估计</div></div></div>
     <div class="li"><div class="li-ico g">❄</div><div class="li-body"><div class="li-t">冷启动策略优化</div><div class="li-d">-30℃ 启动轨迹预测</div></div></div>
@@ -1838,7 +1831,7 @@ function tickModel(){
   if(m.epoch % 2 === 0) drawModelCharts();
   if(m.epoch >= 200){
     m.running = false; stopModelTrain();
-    const btn = $('#mdlBtn'); if(btn) btn.textContent = '▶ 启动训练';
+    const btn = $('#mdlBtn'); if(btn) btn.textContent = '▶ 启动演示';
     toast('演示结束 · 模拟 R² = ' + r2.toFixed(4) + '（非真实验证结果）');
   }
 }
