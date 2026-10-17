@@ -27,6 +27,7 @@ export function calculateNernstPotential({ temperatureK, hydrogenPressureMPa, ai
 export function calculateCellVoltage({ reversibleVoltage, activationCoefficient, currentDensity, exchangeCurrentDensity, areaSpecificResistance, concentrationCoefficient, concentrationExponent }) {
   for (const [name, value] of Object.entries({ reversibleVoltage, activationCoefficient, currentDensity, exchangeCurrentDensity, areaSpecificResistance, concentrationCoefficient, concentrationExponent })) finite(value, name);
   if (reversibleVoltage <= 0 || activationCoefficient < 0 || currentDensity <= 0 || exchangeCurrentDensity <= 0 || areaSpecificResistance < 0 || concentrationCoefficient < 0 || concentrationExponent < 0) throw new RangeError("polarization parameters are outside their physical domain");
+  if (currentDensity < exchangeCurrentDensity) throw new RangeError("currentDensity must be at least exchangeCurrentDensity for the Tafel approximation");
   const activationLoss = activationCoefficient * Math.log(currentDensity / exchangeCurrentDensity);
   const ohmicLoss = areaSpecificResistance * currentDensity;
   const concentrationLoss = concentrationCoefficient * Math.exp(concentrationExponent * currentDensity);
