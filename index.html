@@ -1705,41 +1705,43 @@ function updateLiveValues(){
 /* ================= 大模型视图 ================= */
 function viewModel(){
   return `
+  <div role="note" style="margin:12px 0;padding:12px 15px;border:1px solid rgba(255,159,10,.45);border-radius:10px;background:rgba(120,75,0,.12);color:#ffd18a;font-size:12px;line-height:1.7"><b>重要说明：</b>本页只用预设公式和随机数模拟指标变化；没有加载训练数据、执行神经网络训练或真实推理。R²、误差、延迟及曲线均为演示数值，不是验证结果或实测性能。真实研发使用前必须接入训练框架、标注数据和独立验证集。</div>
+
   <div class="hero mdl ${state.model.running ? 'mdl-running' : ''}">
     <div class="hero-top">
-      <div class="hero-label">HyHub 动态大模型 · 电堆数字孪生引擎</div>
+      <div class="hero-label">HyHub 模型流程演示 · 非真实训练</div>
       <div class="hero-tier ${state.model.running ? 'pulse' : ''}" style="background:rgba(167,139,250,.15);color:#a78bfa;border-color:rgba(167,139,250,.35)">
-        ${state.model.running ? '● 训练中' : '○ 就绪'}
+        ${state.model.running ? '● 演示运行' : '○ 演示就绪'}
       </div>
     </div>
     <div style="display:flex;align-items:baseline;gap:8px;position:relative;z-index:1">
       <div class="power-num" id="mdlEpoch">${state.model.epoch}</div>
       <div class="power-unit">epoch</div>
-      <div class="power-hint" style="color:#a78bfa">LSTM + PINN + GNN + Transformer</div>
+      <div class="power-hint" style="color:#a78bfa">规划架构：LSTM / PINN / GNN / Transformer（尚未接入）</div>
     </div>
     <div class="grid g4" style="margin-top:14px;position:relative;z-index:1">
-      <div class="auto-item"><div class="auto-k">训练损失</div><div class="auto-v" id="mdlLoss">—</div></div>
-      <div class="auto-item"><div class="auto-k">验证 R²</div><div class="auto-v" id="mdlR2">—</div></div>
-      <div class="auto-item"><div class="auto-k">预测误差</div><div class="auto-v" id="mdlMae">—</div></div>
-      <div class="auto-item"><div class="auto-k">推理延迟</div><div class="auto-v" id="mdlLat">—<small>ms</small></div></div>
+      <div class="auto-item"><div class="auto-k">模拟损失</div><div class="auto-v" id="mdlLoss">—</div></div>
+      <div class="auto-item"><div class="auto-k">模拟 R²（非验证）</div><div class="auto-v" id="mdlR2">—</div></div>
+      <div class="auto-item"><div class="auto-k">模拟误差</div><div class="auto-v" id="mdlMae">—</div></div>
+      <div class="auto-item"><div class="auto-k">模拟延迟</div><div class="auto-v" id="mdlLat">—<small>ms</small></div></div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-h"><h3>模型控制</h3><span class="tag">实时</span></div>
     <div class="grid g2">
-      <button class="btn purple" data-action="mdl-toggle" id="mdlBtn">${state.model.running ? '■ 暂停训练' : '▶ 启动训练'}</button>
+      <button class="btn purple" data-action="mdl-toggle" id="mdlBtn">${state.model.running ? '■ 暂停演示' : '▶ 启动演示'}</button>
       <button class="btn ghost" data-action="mdl-reset">↻ 重置模型</button>
     </div>
   </div>
 
-  <div class="sec-title">训练损失收敛曲线</div>
-  <div class="chart-wrap"><canvas id="mdlChart1" class="tall"></canvas>${legend([{c:'#a78bfa',n:'训练损失 Loss×100'},{c:'#00d48a',n:'验证 R²×100'}])}</div>
+  <div class="sec-title">模拟指标变化曲线（非真实训练）</div>
+  <div class="chart-wrap"><canvas id="mdlChart1" class="tall"></canvas>${legend([{c:'#a78bfa',n:'模拟损失 Loss×100'},{c:'#00d48a',n:'模拟 R²×100'}])}</div>
 
-  <div class="sec-title">电堆多物理场预测（PINN）</div>
+  <div class="sec-title">物理模型对比示意（非 PINN 推理）</div>
   <div class="chart-wrap"><canvas id="mdlChart2" class="tall"></canvas>${legend([{c:'#0a84ff',n:'模型预测电压 (V)'},{c:'#ff9f0a',n:'物理模型电压 (V)'}])}</div>
 
-  <div class="sec-title">参数敏感性分析</div>
+  <div class="sec-title">参数敏感性示意（未由训练模型拟合）</div>
   <div class="card">
     ${[
       ['操作温度 T', 0.82, '#0a84ff'],
@@ -1758,7 +1760,7 @@ function viewModel(){
       </div>`).join('')}
   </div>
 
-  <div class="sec-title">模型预测 vs 实测偏差</div>
+  <div class="sec-title">模拟误差指标（非实测偏差）</div>
   <div class="grid g2">
     <div class="kpi b"><div class="kpi-k">RMSE</div><div class="kpi-v" id="mdlRmse">—<small>mV</small></div></div>
     <div class="kpi g"><div class="kpi-k">R²</div><div class="kpi-v" id="mdlR2b">—</div></div>
@@ -1837,7 +1839,7 @@ function tickModel(){
   if(m.epoch >= 200){
     m.running = false; stopModelTrain();
     const btn = $('#mdlBtn'); if(btn) btn.textContent = '▶ 启动训练';
-    toast('模型训练收敛 · R² = ' + r2.toFixed(4));
+    toast('演示结束 · 模拟 R² = ' + r2.toFixed(4) + '（非真实验证结果）');
   }
 }
 
