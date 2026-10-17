@@ -2,13 +2,13 @@
 const fs = require('node:fs');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
-const html = fs.readFileSync('index.html', 'utf8') + '\n' + fs.readFileSync('assets/js/legacy-app.js', 'utf8');
+const html = fs.readFileSync('index.html', 'utf8') + '\n' + fs.readFileSync('assets/js/legacy-app.js', 'utf8');\n
 function extract(name) {
   const match = html.match(new RegExp('function ' + name + '\\([^)]*\\)\\s*\\{[\\s\\S]*?\\n\\}'));
   if (!match) throw new Error(name + ' function not found');
   return match[0];
 }
-const sandbox = {Math, Number};
+async function main(){\nconst domain = await import('../src/domain/index.js');\nconst sandbox = {Math, Number, window:{FuelCellDomain:domain}};
 sandbox.nernstPotential = vm.runInNewContext('(' + extract('nernstPotential') + ')', sandbox);
 sandbox.vcell = vm.runInNewContext('(' + extract('vcell') + ')', sandbox);
 sandbox.solveCurrentDensity = vm.runInNewContext('(' + extract('solveCurrentDensity') + ')', sandbox);
