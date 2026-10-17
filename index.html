@@ -472,15 +472,40 @@ function vcell(i, T_K, p){
   return E - p.Aact*Math.log(i/p.i0) - p.R*i - p.m*Math.exp(p.n*i);
 }
 function solveCurrentDensity(targetP_kW, p){
-  const target = targetP_kW * 1000;
-  let lo = 0.01, hi = 3.0;
-  for(let k=0;k<80;k++){
-    const mid = (lo + hi) / 2;
-    const v = vcell(mid, p.T_K, p);
-    const pw = p.N * v * mid * p.area;
-    if(pw > target) hi = mid; else lo = mid;
+  const target = Number(targetP_kW) * 1000;
+  const minI = 0.01, maxI = 3.0, steps = 600;
+  const powerAt = current => p.N * vcell(current, p.T_K, p) * current * p.area;
+  let previousI = minI;
+  let previousPower = powerAt(previousI);
+  let peakI = previousI;
+  let peakPower = previousPower;
+  if(!Number.isFinite(target) || target <= previousPower) return minI;
+
+  // Find the first upward crossing. Stack power is not monotonic over the
+  // entire current-density range; a single wide bisection can converge to
+  // the high-current descending branch and report an unstable operating point.
+  for(let step=1; step<=steps; step++){
+    const current = minI + (maxI-minI)*step/steps;
+    const power = powerAt(current);
+    if(Number.isFinite(power) && power > peakPower){
+      peakPower = power;
+      peakI = current;
+    }
+    if(Number.isFinite(power) && power >= target){
+      let lo = previousI, hi = current;
+      for(let k=0;k<60;k++){
+        const mid = (lo+hi)/2;
+        if(powerAt(mid) >= target) hi = mid;
+        else lo = mid;
+      }
+      return (lo+hi)/2;
+    }
+    previousI = current;
+    previousPower = power;
   }
-  return (lo + hi) / 2;
+  // Requested power exceeds the modelled maximum: return the peak-power
+  // operating point. solveSystem exposes a powerLimited flag to the UI.
+  return peakI;
 }
 function solveSystem(){
   const P = state.params;
@@ -493,6 +518,7 @@ function solveSystem(){
   const Vstack = P.N * Vc;
   const I = i * P.area;
   const Pstack = P.N * Vc * I / 1000;
+  const powerLimited = Pstack < P.stackPower * 0.995;
   const etaStack = Vc / E_IDEAL;
 
   const lamH2 = P.stoichMode === 'auto' ? 1.05 + 0.10*Math.sqrt(P.stackPower/400) : P.lambdaH2;
@@ -531,7 +557,7 @@ function solveSystem(){
   const lossCon = P.N * I * P.m * Math.exp(P.n*i) / 1000;
 
   return {
-    tier:t, i, Vc, Vstack, I, Pstack, etaStack, etaSys, lamH2, lamAir, mH2, mAir,
+    tier:t, i, Vc, Vstack, I, Pstack, powerLimited, etaStack, etaSys, lamH2, lamAir, mH2, mAir,
     pCmp, pPump, pRecirc, pDcdc, pBop, Pnet, Q, flow,
     gkwh: mH2*1000/Math.max(Pnet,1e-6),
     loss:{act:lossAct,ohm:lossOhm,con:lossCon}, T_K,
