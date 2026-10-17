@@ -32,3 +32,9 @@ test("rejects finite inputs whose derived Nernst potential overflows",()=>{
 test("rejects finite inputs whose calculated power density overflows",()=>{
  assert.throws(()=>calculatePolarizationPoint({...base,activationLoss:0,currentDensity:1.7e308,areaSpecificResistance:0,limitingCurrentDensity:Number.MAX_VALUE,concentrationCoefficient:0}),TypeError);
 });
+
+test("Tafel polarization rejects current below the exchange-current reference",()=>{
+ const params={reversibleVoltage:1.18,activationCoefficient:0.0085,currentDensity:0.0005,exchangeCurrentDensity:0.0018,areaSpecificResistance:0.095,concentrationCoefficient:2.2e-5,concentrationExponent:4};
+ assert.throws(()=>calculateCellVoltage(params),RangeError);
+ assert.ok(calculateCellVoltage({...params,currentDensity:params.exchangeCurrentDensity}).activationLoss===0);
+});
