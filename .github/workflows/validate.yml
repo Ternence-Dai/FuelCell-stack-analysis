@@ -38,3 +38,5 @@ jobs:
           });
           console.log(`Syntax OK: ${executable.length} inline script(s)`);
           NODE
+      - name: Validate Nernst pressure units
+        run: node scripts/validate-nernst.cjs
