@@ -3033,7 +3033,8 @@ function projMetrics(p){
 
 function viewData(){
   return `
-  <div class="sec-title">已保存电堆方案</div>
+  <div class="sec-title">内置参考方案（示例参数 · 非实测项目记录）</div>
+  <div class="card" style="margin-bottom:12px;border-color:rgba(255,159,10,.35);background:rgba(255,159,10,.06);font-size:12px;color:var(--mut);line-height:1.65">下列预置方案及效率、氢耗、SOH、日期均为软件内置演示值，不代表真实试验报告、客户项目或经第三方验证的性能数据。用于方案对比前，请替换为有来源的实测数据。</div>
   ${state.projects.map((p, i) => `
     <div class="li">
       <div class="li-ico ${i % 2 ? 'g' : ''}">◫</div>
