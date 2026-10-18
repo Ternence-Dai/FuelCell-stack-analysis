@@ -27,10 +27,10 @@ test("rejects nonphysical Nernst and polarization inputs",()=>{
 });
 
 test("rejects finite inputs whose derived Nernst potential overflows",()=>{
- assert.throws(()=>calculateNernstPotential({temperatureK:355.15,hydrogenPressureMPa:Number.MAX_VALUE,airPressureMPa:0.2}),TypeError);
+ assert.throws(()=>calculateNernstPotential({temperatureK:355.15,hydrogenPressureMPa:Number.MAX_VALUE,airPressureMPa:0.2}),RangeError);
 });
 test("rejects finite inputs whose calculated power density overflows",()=>{
- assert.throws(()=>calculatePolarizationPoint({...base,activationLoss:0,currentDensity:1.7e308,areaSpecificResistance:0,limitingCurrentDensity:Number.MAX_VALUE,concentrationCoefficient:0}),TypeError);
+ assert.throws(()=>calculatePolarizationPoint({...base,activationLoss:0,currentDensity:1.7e308,areaSpecificResistance:0,limitingCurrentDensity:Number.MAX_VALUE,concentrationCoefficient:0}),RangeError);
 });
 
 test("Tafel polarization rejects current below the exchange-current reference",()=>{
@@ -49,4 +49,9 @@ test("polarization point is continuous at zero current density",()=>{
  assert.equal(p.ohmicLoss,0);
  assert.equal(p.concentrationLoss,0);
  assert.equal(p.cellVoltage,base.reversibleVoltage-base.activationLoss);
+});
+
+test("derived Tafel losses report numeric overflow as a range error",()=>{
+ const params={reversibleVoltage:1.18,activationCoefficient:Number.MAX_VALUE,currentDensity:Number.MAX_VALUE,exchangeCurrentDensity:Number.MIN_VALUE,areaSpecificResistance:0,concentrationCoefficient:0,concentrationExponent:0};
+ assert.throws(()=>calculateCellVoltage(params),RangeError);
 });
