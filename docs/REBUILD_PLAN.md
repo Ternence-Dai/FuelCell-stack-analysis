@@ -27,6 +27,19 @@ Every equation must cite its source or derivation, declare units and valid range
 6. Validate with reference datasets and document known limitations.
 7. Review deployment, backup, recovery, and release process before production use.
 
+## Delivered vertical slices
+
+- [x] Shared electrochemical polarization and Nernst model with reference and extreme-value tests
+- [x] First/upward operating-branch solver with explicit maximum-power limitation
+- [x] Minimum-current floor disclosure when a requested power is below the modeled scan range
+- [x] Shared coolant-flow units and thermal-calculator integration
+- [ ] Traceable calibration of electrochemical parameters against stack datasets
+- [ ] Uncertainty and source references for fitted parameter values
+- [ ] Water-management, transient and degradation models with reference datasets
+- [ ] Data provenance, reproducible result exports and browser-level acceptance
+
+The current solver status only describes feasibility within its static model and scan range. It is not a dynamic control or safety guarantee.
+
 ## Open-source adoption policy
 
 For each dependency or reference project, record its repository URL, license, maintenance activity, security posture, exact component being reused or adapted, and attribution obligations. Prefer stable standards and small interoperable components over copying whole applications.
