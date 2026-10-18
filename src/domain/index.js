@@ -38,6 +38,30 @@ export function calculateNernstPotential({ temperatureK, hydrogenPressureMPa, ai
   finiteResult(potential, "Nernst potential");
   return potential;
 }
+export function calculateCoolantFlow({ heatPowerKw, deltaTemperatureK, specificHeatKJPerKgK, densityKgPerL }) {
+  for (const [name, value] of Object.entries({ heatPowerKw, deltaTemperatureK, specificHeatKJPerKgK, densityKgPerL })) {
+    finite(value, name);
+  }
+  if (heatPowerKw < 0 || deltaTemperatureK <= 0 ||
+      specificHeatKJPerKgK <= 0 || densityKgPerL <= 0) {
+    throw new RangeError("heat power must be non-negative; temperature rise, specific heat and density must be positive");
+  }
+  if (heatPowerKw === 0) {
+    return Object.freeze({ massFlowKgPerSecond:0, massFlowKgPerMinute:0, volumeFlowLPerMinute:0 });
+  }
+  // kW is kJ/s. Use logarithms to avoid an avoidable overflow in cp*ΔT
+  // when the final mass or volume flow is still representable.
+  const logMassFlowPerSecond = Math.log(heatPowerKw) -
+    Math.log(specificHeatKJPerKgK) - Math.log(deltaTemperatureK);
+  const massFlowKgPerSecond = Math.exp(logMassFlowPerSecond);
+  const massFlowKgPerMinute = Math.exp(logMassFlowPerSecond + Math.log(60));
+  const volumeFlowLPerMinute = Math.exp(logMassFlowPerSecond + Math.log(60) - Math.log(densityKgPerL));
+  for (const [name, value] of Object.entries({ massFlowKgPerSecond, massFlowKgPerMinute, volumeFlowLPerMinute })) {
+    finiteResult(value, name);
+  }
+  return Object.freeze({ massFlowKgPerSecond, massFlowKgPerMinute, volumeFlowLPerMinute });
+}
+
 export function calculateCellVoltage({ reversibleVoltage, activationCoefficient, currentDensity, exchangeCurrentDensity, areaSpecificResistance, concentrationCoefficient, concentrationExponent }) {
   for (const [name, value] of Object.entries({ reversibleVoltage, activationCoefficient, currentDensity, exchangeCurrentDensity, areaSpecificResistance, concentrationCoefficient, concentrationExponent })) finite(value, name);
   if (reversibleVoltage <= 0 || activationCoefficient < 0 || currentDensity <= 0 || exchangeCurrentDensity <= 0 || areaSpecificResistance < 0 || concentrationCoefficient < 0 || concentrationExponent < 0) throw new RangeError("polarization parameters are outside their physical domain");
