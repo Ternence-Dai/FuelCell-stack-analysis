@@ -42,8 +42,8 @@ assert.ok(heat.includes('coolantFlow.volumeFlowLPerMinute') &&
   'standalone thermal calculator must display correctly converted L/min and kg/min');
 assert.ok(heat.includes('catch (error)') && heat.includes('检查输入后重试'),
   'invalid thermal inputs must display a recoverable message instead of breaking the calculator');
-assert.ok(html.includes('冷却液比热 cp kJ/(kg·K)') &&
-          html.includes('冷却液密度 ρ kg/L'),
+assert.ok(app.includes('冷却液比热 cp kJ/(kg·K)') &&
+          app.includes('冷却液密度 ρ kg/L'),
   'thermal calculator UI must label specific heat and density with their units');
 
 console.log('Fuel-cell coolant thermal-flow integration checks passed.');
