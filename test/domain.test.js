@@ -64,6 +64,16 @@ test("Tafel loss remains finite when the current-to-exchange ratio overflows",()
  assert.equal(p.concentrationLoss,0);
  assert.ok(Number.isFinite(p.cellVoltage));
 });
+test("concentration loss remains representable when the current ratio underflows",()=>{
+ const p=calculatePolarizationPoint({
+  reversibleVoltage:1.18,activationLoss:0,currentDensity:Number.MIN_VALUE,
+  areaSpecificResistance:0,limitingCurrentDensity:Number.MAX_VALUE,
+  concentrationCoefficient:Number.MAX_VALUE
+ });
+ assert.equal(p.concentrationLoss,Number.MIN_VALUE);
+ assert.ok(Number.isFinite(p.cellVoltage));
+});
+
 test("zero concentration coefficient suppresses exponential overflow",()=>{
  const p=calculateCellVoltage({reversibleVoltage:1,activationCoefficient:0,currentDensity:1e308,exchangeCurrentDensity:1,areaSpecificResistance:0,concentrationCoefficient:0,concentrationExponent:10});
  assert.equal(p.concentrationLoss,0);
