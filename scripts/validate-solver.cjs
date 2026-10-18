@@ -19,6 +19,7 @@ async function main() {
     Math, Number, window:sandbox.window, cellVoltagePoint:sandbox.cellVoltagePoint
   });
   sandbox.solveCurrentDensity = vm.runInNewContext('(' + extract('solveCurrentDensity') + ')', sandbox);
+  sandbox.classifyPowerTarget = vm.runInNewContext('(' + extract('classifyPowerTarget') + ')', sandbox);
   const p = { N:370, area:420, T_K:355.15, pH2:0.19, pAir:0.20, R:0.095, Aact:0.0085, i0:0.0018, m:2.2e-5, n:4 };
   const point = sandbox.cellVoltagePoint(0.7, p.T_K, p);
   const direct = domain.calculateCellVoltage({
@@ -62,6 +63,43 @@ async function main() {
   assert.ok(Math.abs(powerAt(solved)-80) < 0.05, 'solver should converge to requested power');
   const limited = sandbox.solveCurrentDensity(peakPower*2, p);
   assert.ok(Math.abs(limited-peakI) < 0.01, 'unattainable target must return the modeled peak-power point');
+  const minimumPowerKw = powerAt(0.01);
+  const belowFloor = sandbox.solveCurrentDensity(minimumPowerKw*0.5, p);
+  assert.equal(belowFloor, 0.01, 'a target below the lowest modeled current point must select the documented current-density floor');
+  assert.equal(sandbox.classifyPowerTarget(minimumPowerKw*0.5, minimumPowerKw, minimumPowerKw),
+    'below-minimum', 'the target below the scan floor must be identified as an over-target floor-limited condition');
+  assert.equal(sandbox.classifyPowerTarget(peakPower*2, peakPower, minimumPowerKw),
+    'above-maximum', 'a target above peak stack power must be identified as maximum-limited');
+  assert.equal(sandbox.classifyPowerTarget(80, 80, minimumPowerKw),
+    'attained', 'a matched feasible target must not be flagged as limited');
+  assert.throws(()=>sandbox.classifyPowerTarget(NaN,80,minimumPowerKw),TypeError);
+  assert.throws(()=>sandbox.classifyPowerTarget(-1,80,minimumPowerKw),RangeError);
+
+  const system = extract('solveSystem');
+  assert.ok(system.includes('powerFloorLimited') && system.includes('minimumFeasiblePowerKw'),
+    'main system solver must expose a lower-current-density floor warning separately from a peak-power shortfall');
+  assert.ok(system.includes("powerTargetStatus === 'below-minimum'") &&
+            system.includes("powerTargetStatus === 'above-maximum'"),
+    'main system solver must classify both directions of an unreachable target');
+
+  const appRunCalcStart = html.indexOf('function runCalc(type)');
+  const appElecStart = html.indexOf("if(type === 'elec')", appRunCalcStart);
+  const appElecEnd = html.indexOf("else if(type === 'h2')", appElecStart);
+  assert.ok(appRunCalcStart >= 0 && appElecStart > appRunCalcStart && appElecEnd > appElecStart,
+    'standalone electrochemical calculator branch must be available');
+  const elecCalculator = html.slice(appElecStart, appElecEnd);
+  assert.ok(elecCalculator.includes('cellVoltagePoint(i, p.T_K, p)') &&
+            elecCalculator.includes('cell.activationLoss') &&
+            elecCalculator.includes('cell.ohmicLoss') &&
+            elecCalculator.includes('cell.concentrationLoss'),
+    'standalone calculator must report the same domain loss outputs as the stack solver');
+  assert.ok(!elecCalculator.includes('Math.exp(nn*i)') &&
+            !elecCalculator.includes('Aact*Math.log(i/i0)') &&
+            !elecCalculator.includes('R*i'),
+    'standalone calculator must not duplicate legacy polarization equations');
+  assert.ok(elecCalculator.includes('classifyPowerTarget(PkW, actualPowerKw, minimumFeasiblePowerKw)') &&
+            elecCalculator.includes('目标低于求解器下限'),
+    'standalone calculator must disclose both minimum-current and peak-power limits');
   assert.match(html, /没有加载训练数据、执行神经网络训练或真实推理/, 'model metrics must be disclosed as simulated');
   assert.match(html, /规划模块（尚未实现）/, 'unimplemented neural-network architecture must be labeled as a plan');
   assert.doesNotMatch(html, /贡献度 85%|贡献度 92%|贡献度 68%|贡献度 76%/, 'fabricated model contribution percentages must not be displayed');
