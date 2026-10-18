@@ -38,6 +38,35 @@ export function calculateNernstPotential({ temperatureK, hydrogenPressureMPa, ai
   finiteResult(potential, "Nernst potential");
   return potential;
 }
+export function calculateReactantMassFlows({
+  cellCount,
+  stackCurrentA,
+  hydrogenStoichRatio,
+  airStoichRatio
+}) {
+  for (const [name, value] of Object.entries({
+    cellCount, stackCurrentA, hydrogenStoichRatio, airStoichRatio
+  })) finite(value, name);
+  if (!Number.isSafeInteger(cellCount) || cellCount <= 0 ||
+      stackCurrentA < 0 || hydrogenStoichRatio < 1 || airStoichRatio < 1) {
+    throw new RangeError("cell count must be positive; current must be non-negative; stoichiometric ratios must be at least 1");
+  }
+  // Faraday's law gives the electrochemically consumed H2 independently of
+  // the anode excess-feed ratio. λH2 affects fresh H2 feed only; λair is
+  // applied separately to the theoretical cathode air requirement.
+  const hydrogenConsumedKgPerHour =
+    cellCount * stackCurrentA * 2.016 * 3.6 / (2 * 96485);
+  const hydrogenFeedKgPerHour = hydrogenConsumedKgPerHour * hydrogenStoichRatio;
+  // Approximate dry-air/H2 stoichiometric mass ratio: about 34.3 kg air/kg H2,
+  // based on 23.2% oxygen by mass in dry air.
+  const airFeedKgPerHour = hydrogenConsumedKgPerHour * 34.3 * airStoichRatio;
+  return Object.freeze(finiteResult({
+    hydrogenConsumedKgPerHour,
+    hydrogenFeedKgPerHour,
+    airFeedKgPerHour
+  }, "reactant mass flow"));
+}
+
 export function calculateCoolantFlow({ heatPowerKw, deltaTemperatureK, specificHeatKJPerKgK, densityKgPerL }) {
   for (const [name, value] of Object.entries({ heatPowerKw, deltaTemperatureK, specificHeatKJPerKgK, densityKgPerL })) {
     finite(value, name);
