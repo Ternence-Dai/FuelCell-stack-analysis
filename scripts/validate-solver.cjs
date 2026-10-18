@@ -33,6 +33,14 @@ async function main() {
   assert.equal(point.ohmicLoss,direct.ohmicLoss);
   assert.equal(point.concentrationLoss,direct.concentrationLoss);
   assert.equal(sandbox.vcell(0.7,p.T_K,p),point.cellVoltage);
+  assert.match(html, /key:'pH2', k:'氢气分压（干气近似）'/,
+    'Nernst hydrogen input must be labelled as dry-basis hydrogen partial pressure');
+  assert.match(html, /key:'pAir', k:'干空气入口总绝对压力'/,
+    'Nernst air input must be labelled as dry-air total absolute pressure');
+  assert.match(html, /Nernst 模型使用干气等效氢分压/,
+    'the hydrogen pressure control must disclose the dry-gas basis');
+  assert.match(html, /Nernst 按干空气氧摩尔分数 0\.21 估算氧分压/,
+    'the air pressure control must disclose the oxygen-fraction assumption');
   const system = extract('solveSystem');
   assert.ok(system.includes('const cell = cellVoltagePoint(i, T_K, p);'),
     'system diagnostics must use the same domain point as cell voltage');
