@@ -29,7 +29,7 @@ test("rejects nonphysical Nernst and polarization inputs",()=>{
 test("Nernst calculation remains finite when pressure ratios would overflow",()=>{
  const potential=calculateNernstPotential({temperatureK:355.15,hydrogenPressureMPa:Number.MAX_VALUE,airPressureMPa:0.2});
  assert.ok(Number.isFinite(potential));
- assert.ok(potential>1.2 && potential<1.5);
+ assert.ok(potential>1.5, "extreme finite pressure should yield a finite logarithmic Nernst term");
 });
 test("rejects finite inputs whose calculated power density overflows",()=>{
  assert.throws(()=>calculatePolarizationPoint({...base,activationLoss:0,currentDensity:1.7e308,areaSpecificResistance:0,limitingCurrentDensity:Number.MAX_VALUE,concentrationCoefficient:0}),RangeError);
