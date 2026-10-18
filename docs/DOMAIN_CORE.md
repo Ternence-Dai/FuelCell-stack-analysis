@@ -11,6 +11,16 @@ The first rebuild slice extracts a deterministic PEM polarization calculation fr
 
 The two polarization helpers use different concentration-loss parameterisations. Their coefficients must not be interchanged without fitting and dimensional review.
 
+## Power-target feasibility and solver boundary
+
+The current-density solver searches the upward branch over the documented scan interval of 0.01–3.0 A/cm². It intentionally does not extrapolate below the Tafel model's minimum current density or above the modeled peak-power point.
+
+- If the target lies below the minimum scan point's power, the solver uses the 0.01 A/cm² floor and labels the result `below-minimum`; calculated output is higher than the requested target.
+- If the target exceeds the modeled peak, it uses the peak-power point and labels the result `above-maximum`; calculated output is lower than the request.
+- Only a result labelled `attained` is within the solver's 0.5% target tolerance.
+
+The standalone electrochemical calculator and main stack dashboard both consume the same domain-computed activation, ohmic and concentration-loss terms. The status is a numerical feasibility disclosure, not a guarantee of dynamic stability, durability, or safe operating limits.
+
 ## Correctness boundary
 - This is a model component, not a validated electrochemical parameter set.
 - Calibration, parameter provenance, temperature/pressure correction and literature citations are required before engineering decisions.
