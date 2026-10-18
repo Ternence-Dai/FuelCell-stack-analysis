@@ -165,7 +165,14 @@ function solveSystem(){
   const pCmp = (mAir/3600) * 1.005 * 293 * (Math.pow(ratio, gamma) - 1) / cmpEff;
 
   const Q = Pstack * (1/etaStack - 1);
-  const flow = P.coolFlow || Math.max(Q / (3.55*4.18*(P.dT||5)) * 60, 10);
+  const autoCoolantFlow = window.FuelCellDomain.calculateCoolantFlow({
+    heatPowerKw:Q,
+    deltaTemperatureK:P.dT || 5,
+    specificHeatKJPerKgK:3.55,
+    densityKgPerL:1.05
+  }).volumeFlowLPerMinute;
+  const flow = Number.isFinite(P.coolFlow) && P.coolFlow > 0
+    ? P.coolFlow : Math.max(autoCoolantFlow, 10);
   const pPump = flow * 0.25 / 60 / (P.pumpEff || 0.65);
 
   const pRecirc = P.recirc === 'ejector' ? P.stackPower * 0.004
@@ -1774,9 +1781,18 @@ function runCalc(type){
     const rho = g('c_rho') || 1.05;
     const rm = g('c_rm') || 20;
     const Q = PkW * (1 / e - 1);
-    const mdot = Q / (cp * dT);
-    const flowLpm = mdot / rho * 60;
-    const massFlow = mdot * 60;
+    let coolantFlow;
+    try {
+      coolantFlow = window.FuelCellDomain.calculateCoolantFlow({
+        heatPowerKw:Q, deltaTemperatureK:dT,
+        specificHeatKJPerKgK:cp, densityKgPerL:rho
+      });
+    } catch (error) {
+      out.innerHTML = '<div class="hint" role="alert">产热功率、温差、冷却液比热和密度必须是有效的物理数值，请检查输入后重试。</div>';
+      return;
+    }
+    const flowLpm = coolantFlow.volumeFlowLPerMinute;
+    const massFlow = coolantFlow.massFlowKgPerMinute;
     html = `<div class="res-box">
       ${row('电堆产热功率 Q', fmt(Q, 2), 'kW')}
       ${row('冷却液体积流量', fmt(flowLpm, 2), 'L/min')}
