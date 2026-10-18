@@ -43,6 +43,13 @@ async function main() {
   assert.match(html, /Nernst 按干空气氧摩尔分数 0\.21 估算氧分压/,
     'the air pressure control must disclose the oxygen-fraction assumption');
   const system = extract('solveSystem');
+  assert.ok(system.includes('window.FuelCellDomain.calculateReactantMassFlows'),
+    'main stack solver must use the shared Faraday/stoichiometric reactant-flow model');
+  assert.ok(system.includes('reactantFlows.hydrogenFeedKgPerHour') &&
+    system.includes('reactantFlows.airFeedKgPerHour'),
+    'stack hydrogen and air feeds must come from the shared unit-explicit calculation');
+  assert.ok(!system.includes('mAir = mH2 * 34.3'),
+    'legacy air-feed scaling must not multiply the hydrogen excess-feed ratio into cathode air demand');
   assert.ok(system.includes('const cell = cellVoltagePoint(i, T_K, p);'),
     'system diagnostics must use the same domain point as cell voltage');
   assert.ok(system.includes('cell.activationLoss') && system.includes('cell.ohmicLoss') &&
