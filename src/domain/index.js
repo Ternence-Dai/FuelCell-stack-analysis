@@ -9,7 +9,7 @@ export function calculatePolarizationPoint({ reversibleVoltage, activationLoss, 
   for (const [name, value] of Object.entries({ reversibleVoltage, activationLoss, currentDensity, areaSpecificResistance, limitingCurrentDensity, concentrationCoefficient })) finite(value, name);
   if (reversibleVoltage <= 0 || activationLoss < 0 || currentDensity < 0 || areaSpecificResistance < 0 || limitingCurrentDensity <= 0 || concentrationCoefficient < 0) throw new RangeError("Polarization inputs are outside their physical domain");
   if (currentDensity >= limitingCurrentDensity) throw new RangeError("currentDensity must be below limitingCurrentDensity");
-  const concentrationLoss = concentrationCoefficient * Math.log(1 / (1 - currentDensity / limitingCurrentDensity));
+  const concentrationLoss = concentrationCoefficient === 0 ? 0 : concentrationCoefficient * -Math.log1p(-currentDensity / limitingCurrentDensity);
   const ohmicLoss = currentDensity * areaSpecificResistance;
   const cellVoltage = reversibleVoltage - activationLoss - ohmicLoss - concentrationLoss;
   const powerDensity = cellVoltage * currentDensity;
@@ -34,9 +34,14 @@ export function calculateCellVoltage({ reversibleVoltage, activationCoefficient,
   for (const [name, value] of Object.entries({ reversibleVoltage, activationCoefficient, currentDensity, exchangeCurrentDensity, areaSpecificResistance, concentrationCoefficient, concentrationExponent })) finite(value, name);
   if (reversibleVoltage <= 0 || activationCoefficient < 0 || currentDensity <= 0 || exchangeCurrentDensity <= 0 || areaSpecificResistance < 0 || concentrationCoefficient < 0 || concentrationExponent < 0) throw new RangeError("polarization parameters are outside their physical domain");
   if (currentDensity < exchangeCurrentDensity) throw new RangeError("currentDensity must be at least exchangeCurrentDensity for the Tafel approximation");
-  const activationLoss = activationCoefficient * Math.log(currentDensity / exchangeCurrentDensity);
+  // Subtract logarithms instead of dividing: current/exchange can overflow
+  // although the logarithmic Tafel loss is still finite.
+  const activationLoss = activationCoefficient === 0 ? 0
+    : activationCoefficient * (Math.log(currentDensity) - Math.log(exchangeCurrentDensity));
   const ohmicLoss = areaSpecificResistance * currentDensity;
-  const concentrationLoss = concentrationCoefficient * Math.exp(concentrationExponent * currentDensity);
+  // A zero coefficient means no concentration loss, even at extreme current.
+  const concentrationLoss = concentrationCoefficient === 0 ? 0
+    : concentrationCoefficient * Math.exp(concentrationExponent * currentDensity);
   const cellVoltage = reversibleVoltage - activationLoss - ohmicLoss - concentrationLoss;
   for (const [name, value] of Object.entries({ activationLoss, ohmicLoss, concentrationLoss, cellVoltage })) finiteResult(value, name);
   return Object.freeze({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss });
