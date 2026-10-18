@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow } from "../src/domain/index.js";
+import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow, calculateReactantMassFlows } from "../src/domain/index.js";
 const base = { reversibleVoltage:1.18, activationLoss:0.04, currentDensity:0.5, areaSpecificResistance:0.12, limitingCurrentDensity:2, concentrationCoefficient:0.03 };
 test("polarization losses sum to reversible voltage minus cell voltage", () => {
  const p = calculatePolarizationPoint(base);
@@ -80,6 +80,45 @@ test("zero concentration coefficient suppresses exponential overflow",()=>{
  assert.equal(p.activationLoss,0);
  assert.equal(p.cellVoltage,1);
 });
+test("reactant flows apply hydrogen and air stoichiometric ratios independently",()=>{
+ const base=calculateReactantMassFlows({
+  cellCount:370,stackCurrentA:300,hydrogenStoichRatio:1,airStoichRatio:2
+ });
+ const excessHydrogen=calculateReactantMassFlows({
+  cellCount:370,stackCurrentA:300,hydrogenStoichRatio:1.2,airStoichRatio:2
+ });
+ const excessAir=calculateReactantMassFlows({
+  cellCount:370,stackCurrentA:300,hydrogenStoichRatio:1,airStoichRatio:2.5
+ });
+ assert.ok(base.hydrogenConsumedKgPerHour>0);
+ assert.ok(Math.abs(excessHydrogen.hydrogenConsumedKgPerHour/base.hydrogenConsumedKgPerHour-1)<1e-12,
+  "hydrogen stoichiometry must not change Faradaic reaction consumption");
+ assert.ok(Math.abs(excessHydrogen.hydrogenFeedKgPerHour/base.hydrogenFeedKgPerHour-1.2)<1e-12,
+  "hydrogen stoichiometry must scale the fresh hydrogen feed");
+ assert.ok(Math.abs(excessHydrogen.airFeedKgPerHour/base.airFeedKgPerHour-1)<1e-12,
+  "hydrogen stoichiometry must not inflate cathode air demand");
+ assert.ok(Math.abs(excessAir.airFeedKgPerHour/base.airFeedKgPerHour-1.25)<1e-12,
+  "air stoichiometry must scale cathode air independently");
+ assert.ok(Math.abs(excessAir.hydrogenFeedKgPerHour/base.hydrogenFeedKgPerHour-1)<1e-12,
+  "air stoichiometry must not change hydrogen feed");
+ assert.ok(Object.isFrozen(base));
+});
+test("reactant flow model rejects invalid cell, current and stoichiometric inputs",()=>{
+ const valid={cellCount:370,stackCurrentA:300,hydrogenStoichRatio:1.1,airStoichRatio:2.2};
+ assert.throws(()=>calculateReactantMassFlows({...valid,cellCount:0}),RangeError);
+ assert.throws(()=>calculateReactantMassFlows({...valid,cellCount:1.5}),RangeError);
+ assert.throws(()=>calculateReactantMassFlows({...valid,stackCurrentA:-1}),RangeError);
+ assert.throws(()=>calculateReactantMassFlows({...valid,hydrogenStoichRatio:0.9}),RangeError);
+ assert.throws(()=>calculateReactantMassFlows({...valid,airStoichRatio:0.9}),RangeError);
+ assert.throws(()=>calculateReactantMassFlows({...valid,stackCurrentA:NaN}),TypeError);
+});
+test("reactant flows reject unrepresentable derived mass rates",()=>{
+ assert.throws(()=>calculateReactantMassFlows({
+  cellCount:Number.MAX_SAFE_INTEGER,stackCurrentA:Number.MAX_VALUE,
+  hydrogenStoichRatio:Number.MAX_VALUE,airStoichRatio:Number.MAX_VALUE
+ }),RangeError);
+});
+
 test("coolant flow converts heat load to mass and volume flow with consistent SI units",()=>{
  const flow=calculateCoolantFlow({
   heatPowerKw:10,deltaTemperatureK:5,
