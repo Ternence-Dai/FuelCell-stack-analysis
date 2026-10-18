@@ -21,10 +21,12 @@ export function calculateNernstPotential({ temperatureK, hydrogenPressureMPa, ai
   for (const [name, value] of Object.entries({ temperatureK, hydrogenPressureMPa, airPressureMPa })) finite(value, name);
   if (temperatureK <= 0 || hydrogenPressureMPa <= 0 || airPressureMPa <= 0) throw new RangeError("temperature and inlet pressures must be positive");
   const referencePressureMPa = 0.101325;
-  const hydrogenAtm = hydrogenPressureMPa / referencePressureMPa;
-  const oxygenAtm = airPressureMPa * 0.21 / referencePressureMPa;
+  // Work in log-pressure space: forming pressure ratios first can overflow
+  // even when their logarithms and the final Nernst potential are finite.
+  const logHydrogenAtm = Math.log(hydrogenPressureMPa) - Math.log(referencePressureMPa);
+  const logOxygenAtm = Math.log(airPressureMPa) + Math.log(0.21) - Math.log(referencePressureMPa);
   const potential = 1.229 - 0.85e-3 * (temperatureK - 298.15)
-    + 4.308e-5 * temperatureK * (Math.log(hydrogenAtm) + 0.5 * Math.log(oxygenAtm));
+    + 4.308e-5 * temperatureK * (logHydrogenAtm + 0.5 * logOxygenAtm);
   finiteResult(potential, "Nernst potential");
   return potential;
 }
