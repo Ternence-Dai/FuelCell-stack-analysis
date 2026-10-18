@@ -9,7 +9,15 @@ export function calculatePolarizationPoint({ reversibleVoltage, activationLoss, 
   for (const [name, value] of Object.entries({ reversibleVoltage, activationLoss, currentDensity, areaSpecificResistance, limitingCurrentDensity, concentrationCoefficient })) finite(value, name);
   if (reversibleVoltage <= 0 || activationLoss < 0 || currentDensity < 0 || areaSpecificResistance < 0 || limitingCurrentDensity <= 0 || concentrationCoefficient < 0) throw new RangeError("Polarization inputs are outside their physical domain");
   if (currentDensity >= limitingCurrentDensity) throw new RangeError("currentDensity must be below limitingCurrentDensity");
-  const concentrationLoss = concentrationCoefficient === 0 ? 0 : concentrationCoefficient * -Math.log1p(-currentDensity / limitingCurrentDensity);
+  let concentrationLoss = 0;
+  if (concentrationCoefficient > 0) {
+    const ratio = currentDensity / limitingCurrentDensity;
+    // Preserve a representable loss when the pressure-independent current
+    // ratio underflows to zero before multiplication by a large coefficient.
+    concentrationLoss = ratio === 0
+      ? Math.exp(Math.log(concentrationCoefficient) + Math.log(currentDensity) - Math.log(limitingCurrentDensity))
+      : concentrationCoefficient * -Math.log1p(-ratio);
+  }
   const ohmicLoss = currentDensity * areaSpecificResistance;
   const cellVoltage = reversibleVoltage - activationLoss - ohmicLoss - concentrationLoss;
   const powerDensity = cellVoltage * currentDensity;
