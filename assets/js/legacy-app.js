@@ -88,8 +88,8 @@ function nernstPotential(T_K, p){
     temperatureK:T_K, hydrogenPressureMPa:Number(p.pH2), airPressureMPa:Number(p.pAir)
   });
 }
-function vcell(i, T_K, p){
-  const point = window.FuelCellDomain.calculateCellVoltage({
+function cellVoltagePoint(i, T_K, p){
+  return window.FuelCellDomain.calculateCellVoltage({
     reversibleVoltage:nernstPotential(T_K,p),
     activationCoefficient:p.Aact,
     currentDensity:Math.max(i,0.005),
@@ -98,7 +98,9 @@ function vcell(i, T_K, p){
     concentrationCoefficient:p.m,
     concentrationExponent:p.n
   });
-  return point.cellVoltage;
+}
+function vcell(i, T_K, p){
+  return cellVoltagePoint(i, T_K, p).cellVoltage;
 }
 function solveCurrentDensity(targetP_kW, p){
   const target = Number(targetP_kW) * 1000;
@@ -143,7 +145,8 @@ function solveSystem(){
   const pAtm = 0.1013 * Math.pow(Math.max(1 - 2.25577e-5 * (P.altitude||0), 0.05), 5.2559);
   const p = { N:P.N, area:P.area, T_K, pH2:P.pH2, pAir:P.pAir, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n };
   const i = solveCurrentDensity(P.stackPower, p);
-  const Vc = vcell(i, T_K, p);
+  const cell = cellVoltagePoint(i, T_K, p);
+  const Vc = cell.cellVoltage;
   const Vstack = P.N * Vc;
   const I = i * P.area;
   const Pstack = P.N * Vc * I / 1000;
@@ -181,9 +184,11 @@ function solveSystem(){
   const sp = Pstack / Math.max(massKg, 1e-6);
   const pd = Vc * i * 1000;
 
-  const lossAct = P.N * I * P.Aact * Math.log(i/P.i0) / 1000;
-  const lossOhm = P.N * I * P.R * i / 1000;
-  const lossCon = P.N * I * P.m * Math.exp(P.n*i) / 1000;
+  // Use the same domain-calculated loss terms that produced Vc.
+  // This prevents UI diagnostics from drifting away from the solver model.
+  const lossAct = P.N * I * cell.activationLoss / 1000;
+  const lossOhm = P.N * I * cell.ohmicLoss / 1000;
+  const lossCon = P.N * I * cell.concentrationLoss / 1000;
 
   return {
     tier:t, i, Vc, Vstack, I, Pstack, powerLimited, etaStack, etaSys, lamH2, lamAir, mH2, mAir,
