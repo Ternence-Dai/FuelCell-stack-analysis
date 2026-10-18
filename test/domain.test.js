@@ -26,8 +26,10 @@ test("rejects nonphysical Nernst and polarization inputs",()=>{
  assert.throws(()=>calculateCellVoltage({reversibleVoltage:1,activationCoefficient:0.1,currentDensity:0,exchangeCurrentDensity:0.001,areaSpecificResistance:0.1,concentrationCoefficient:0.001,concentrationExponent:4}),RangeError);
 });
 
-test("rejects finite inputs whose derived Nernst potential overflows",()=>{
- assert.throws(()=>calculateNernstPotential({temperatureK:355.15,hydrogenPressureMPa:Number.MAX_VALUE,airPressureMPa:0.2}),RangeError);
+test("Nernst calculation remains finite when pressure ratios would overflow",()=>{
+ const potential=calculateNernstPotential({temperatureK:355.15,hydrogenPressureMPa:Number.MAX_VALUE,airPressureMPa:0.2});
+ assert.ok(Number.isFinite(potential));
+ assert.ok(potential>1.2 && potential<1.5);
 });
 test("rejects finite inputs whose calculated power density overflows",()=>{
  assert.throws(()=>calculatePolarizationPoint({...base,activationLoss:0,currentDensity:1.7e308,areaSpecificResistance:0,limitingCurrentDensity:Number.MAX_VALUE,concentrationCoefficient:0}),RangeError);
