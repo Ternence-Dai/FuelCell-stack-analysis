@@ -72,8 +72,8 @@ async function main() {
     'above-maximum', 'a target above peak stack power must be identified as maximum-limited');
   assert.equal(sandbox.classifyPowerTarget(80, 80, minimumPowerKw),
     'attained', 'a matched feasible target must not be flagged as limited');
-  assert.throws(()=>sandbox.classifyPowerTarget(NaN,80,minimumPowerKw),TypeError);
-  assert.throws(()=>sandbox.classifyPowerTarget(-1,80,minimumPowerKw),RangeError);
+  assert.throws(()=>sandbox.classifyPowerTarget(NaN,80,minimumPowerKw),/targetKw must be finite/);
+  assert.throws(()=>sandbox.classifyPowerTarget(-1,80,minimumPowerKw),/targetKw must be non-negative/);
 
   assert.ok(system.includes('powerFloorLimited') && system.includes('minimumFeasiblePowerKw'),
     'main system solver must expose a lower-current-density floor warning separately from a peak-power shortfall');
