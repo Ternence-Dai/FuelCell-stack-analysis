@@ -4,6 +4,24 @@ const assert = require('node:assert/strict');
 const app = fs.readFileSync('assets/js/legacy-app.js', 'utf8');
 const domain = fs.readFileSync('src/domain/index.js', 'utf8');
 const html = fs.readFileSync('index.html', 'utf8');
+const productCss = fs.readFileSync('assets/css/product-system.css', 'utf8');
+assert.ok(html.includes('product-system.css?v=20261018-v3'),
+  'HyHub must load the current V3 engineering workspace stylesheet');
+assert.ok(html.includes('viewport-fit=cover') && !html.includes('user-scalable=no'),
+  'HyHub must retain mobile safe-area support and browser zoom accessibility');
+assert.ok(productCss.includes('HyHub V3') || productCss.includes('visible product interface refresh'),
+  'HyHub V3 product interface layer must be present');
+for (const selector of [
+  '.sidebar{', '.topbar{', '.hyhub-intro{', '.hero{', '.kpi{',
+  '.param-group{', '.lib-categories-grid{', '.lib-cat.open .lib-cat-body'
+]) assert.ok(productCss.includes(selector),
+  'HyHub V3 must style the main engineering workspace surface: ' + selector);
+assert.ok(productCss.includes('@media(max-width:760px)') &&
+          productCss.includes('@media(max-width:420px)'),
+  'HyHub V3 must include tablet/mobile responsive layouts');
+assert.ok(productCss.includes('prefers-reduced-motion:reduce'),
+  'HyHub V3 must respect reduced-motion preferences');
+
 
 assert.match(domain, /export function calculateCoolantFlow\(/,
   'coolant mass/volume conversion must live in the shared domain core');
