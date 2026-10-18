@@ -5,7 +5,7 @@ const app = fs.readFileSync('assets/js/legacy-app.js', 'utf8');
 const domain = fs.readFileSync('src/domain/index.js', 'utf8');
 const html = fs.readFileSync('index.html', 'utf8');
 const productCss = fs.readFileSync('assets/css/product-system.css', 'utf8');
-assert.ok(html.includes('product-system.css?v=20261018-v3'),
+assert.ok(html.includes('product-system.css?v=20261018-v3.1'),
   'HyHub must load the current V3 engineering workspace stylesheet');
 assert.ok(html.includes('viewport-fit=cover') && !html.includes('user-scalable=no'),
   'HyHub must retain mobile safe-area support and browser zoom accessibility');
