@@ -25,8 +25,8 @@ Every equation must cite its source or derivation, declare units and valid range
 
 ## Delivery status
 
-The modernization work is being applied directly to `main`. The current baseline includes a domain-core module, automated domain tests, standalone-app validation, and a GitHub Pages deployment workflow. These checks passing confirms the current baseline is buildable; it does **not** mean the full product rebuild is complete.
+The modernization work is being applied directly to `main`. The verified slice now includes shared Nernst/polarization/cell-voltage calculations, a branch-aware current-density solver with a power-limited state, and a shared coolant-flow calculation used by both the stack solver and thermal calculator. The domain tests cover pressure normalization, polarization boundaries, extreme numeric cases, and coolant mass/volume-flow units. The current Pages build and CI checks pass; this confirms a buildable slice, not a fully validated engineering product.
 
-Remaining delivery work includes validating the existing application workflows and data, extracting maintainable modules from the legacy entry point, adding migration-safe persistence and import/export checks, and documenting verified domain rules. Existing user data and the legacy application must be preserved while these changes are introduced.
+Remaining delivery work includes calibration against traceable stack datasets, source references and uncertainty for the fitted electrochemical parameters, deeper water/thermal and transient models, data provenance/import-export, and browser-level tests for critical workflows. Built-in project examples remain demonstrations, not measured customer or laboratory results.
 
 See [the rebuild plan](docs/REBUILD_PLAN.md) and [domain rules, units and validation boundaries](docs/DOMAIN_CORE.md).
