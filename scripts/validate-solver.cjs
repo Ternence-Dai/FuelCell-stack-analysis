@@ -15,7 +15,9 @@ async function main() {
   const sandbox = { Math, Number, window: { FuelCellDomain: domain } };
   sandbox.nernstPotential = vm.runInNewContext('(' + extract('nernstPotential') + ')', sandbox);
   sandbox.cellVoltagePoint = vm.runInNewContext('(' + extract('cellVoltagePoint') + ')', sandbox);
-  sandbox.vcell = vm.runInNewContext('(' + extract('vcell') + ')', sandbox);
+  sandbox.vcell = vm.runInNewContext('(' + extract('vcell') + ')', {
+    Math, Number, window:sandbox.window, cellVoltagePoint:sandbox.cellVoltagePoint
+  });
   sandbox.solveCurrentDensity = vm.runInNewContext('(' + extract('solveCurrentDensity') + ')', sandbox);
   const p = { N:370, area:420, T_K:355.15, pH2:0.19, pAir:0.20, R:0.095, Aact:0.0085, i0:0.0018, m:2.2e-5, n:4 };
   const point = sandbox.cellVoltagePoint(0.7, p.T_K, p);
@@ -32,11 +34,13 @@ async function main() {
   assert.equal(point.concentrationLoss,direct.concentrationLoss);
   assert.equal(sandbox.vcell(0.7,p.T_K,p),point.cellVoltage);
   const system = extract('solveSystem');
-  assert.match(system,/const cell = cellVoltagePoint\\(i, T_K, p\\)/,
+  assert.ok(system.includes('const cell = cellVoltagePoint(i, T_K, p);'),
     'system diagnostics must use the same domain point as cell voltage');
-  assert.match(system,/cell\\.activationLoss[\\s\\S]*cell\\.ohmicLoss[\\s\\S]*cell\\.concentrationLoss/,
+  assert.ok(system.includes('cell.activationLoss') && system.includes('cell.ohmicLoss') &&
+    system.includes('cell.concentrationLoss'),
     'stack loss diagnostics must be aggregated from the domain-calculated loss terms');
-  assert.doesNotMatch(system,/Math\\.log\\(i\\/P\\.i0\\)|P\\.R\\s*\\*\\s*i|P\\.m\\s*\\*\\s*Math\\.exp/,
+  assert.ok(!system.includes('Math.log(i/P.i0)') &&
+    !system.includes('P.R * i') && !system.includes('P.m * Math.exp'),
     'legacy UI loss equations must not be duplicated');
   const powerAt = i => p.N * sandbox.vcell(i, p.T_K, p) * i * p.area / 1000;
   let peakI = 0.01, peakPower = powerAt(peakI);
