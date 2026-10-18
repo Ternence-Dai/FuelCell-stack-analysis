@@ -102,6 +102,17 @@ function cellVoltagePoint(i, T_K, p){
 function vcell(i, T_K, p){
   return cellVoltagePoint(i, T_K, p).cellVoltage;
 }
+function classifyPowerTarget(targetKw, actualKw, minimumFeasibleKw){
+  for(const [name,value] of Object.entries({targetKw,actualKw,minimumFeasibleKw})){
+    if(!Number.isFinite(value)) throw new TypeError(name + ' must be finite');
+    if(value < 0) throw new RangeError(name + ' must be non-negative');
+  }
+  if(targetKw < minimumFeasibleKw * 0.995 && actualKw > targetKw * 1.005){
+    return 'below-minimum';
+  }
+  if(actualKw < targetKw * 0.995) return 'above-maximum';
+  return 'attained';
+}
 function solveCurrentDensity(targetP_kW, p){
   const target = Number(targetP_kW) * 1000;
   const minI = 0.01, maxI = 3.0, steps = 600;
@@ -150,7 +161,13 @@ function solveSystem(){
   const Vstack = P.N * Vc;
   const I = i * P.area;
   const Pstack = P.N * Vc * I / 1000;
-  const powerLimited = Pstack < P.stackPower * 0.995;
+  const minimumCurrentDensity = 0.01;
+  const minimumCellVoltage = vcell(minimumCurrentDensity, T_K, p);
+  const minimumFeasiblePowerKw =
+    P.N * minimumCellVoltage * minimumCurrentDensity * P.area / 1000;
+  const powerTargetStatus = classifyPowerTarget(P.stackPower, Pstack, minimumFeasiblePowerKw);
+  const powerLimited = powerTargetStatus === 'above-maximum';
+  const powerFloorLimited = powerTargetStatus === 'below-minimum';
   const etaStack = Vc / E_IDEAL;
 
   const lamH2 = P.stoichMode === 'auto' ? 1.05 + 0.10*Math.sqrt(P.stackPower/400) : P.lambdaH2;
@@ -198,7 +215,8 @@ function solveSystem(){
   const lossCon = P.N * I * cell.concentrationLoss / 1000;
 
   return {
-    tier:t, i, Vc, Vstack, I, Pstack, powerLimited, etaStack, etaSys, lamH2, lamAir, mH2, mAir,
+    tier:t, i, Vc, Vstack, I, Pstack, powerLimited, powerFloorLimited,
+    powerTargetStatus, minimumFeasiblePowerKw, etaStack, etaSys, lamH2, lamAir, mH2, mAir,
     pCmp, pPump, pRecirc, pDcdc, pBop, Pnet, Q, flow,
     gkwh: mH2*1000/Math.max(Pnet,1e-6),
     loss:{act:lossAct,ohm:lossOhm,con:lossCon}, T_K,
@@ -692,7 +710,8 @@ function viewDashboard(){
         </div>`).join('')}
     </div>
   </div>
-  ${r.powerLimited ? '<div class="hint" role="alert" style="border-color:rgba(255,159,10,.45);color:#ffcc80">当前目标功率超出此参数组合下模型可达到的最大值。页面已显示模型峰值功率点，不应将其视为达到额定目标。</div>' : ''}
+  ${r.powerLimited ? '<div class="hint" role="alert" style="border-color:rgba(255,159,10,.45);color:#ffcc80">当前目标功率超过此参数组合下的模型峰值；页面显示的是模型峰值工况，不代表达到额定目标。</div>' :
+    r.powerFloorLimited ? '<div class="hint" role="alert" style="border-color:rgba(255,159,10,.45);color:#ffcc80">当前目标低于求解器最低扫描电流密度下的最小可行功率；为避免使用 Tafel 模型无效区间，页面采用最低扫描电流工况，因此实际计算功率会高于目标。</div>' : ''}
 
   <div class="sec-title">电堆功率分段</div>
   <div class="card">
@@ -1698,19 +1717,29 @@ function runCalc(type){
     const T = g('c_T') || 82, pH2 = g('c_ph') || 0.19, pAir = g('c_pa') || 0.20, cr = g('c_cr') || 5;
     const p = { N, area:A, T_K:T+273.15, pH2, pAir, R, Aact, i0, m:mm, n:nn };
     const i = solveCurrentDensity(PkW, p);
-    const V = vcell(i, p.T_K, p);
+    const cell = cellVoltagePoint(i, p.T_K, p);
+    const V = cell.cellVoltage;
+    const actualPowerKw = N * V * i * A / 1000;
+    const minimumFeasiblePowerKw = N * vcell(0.01, p.T_K, p) * 0.01 * A / 1000;
+    const powerTargetStatus = classifyPowerTarget(PkW, actualPowerKw, minimumFeasiblePowerKw);
+    const powerTargetLabel = powerTargetStatus === 'below-minimum'
+      ? '目标低于求解器下限，当前结果高于目标'
+      : powerTargetStatus === 'above-maximum'
+        ? '目标超过模型峰值，当前结果为峰值工况'
+        : '模型扫描范围内已找到目标功率工况';
     html = `<div class="res-box">
       ${row('电流密度 i', fmt(i, 3), 'A/cm²')}
       ${row('单片电压 V', fmt(V, 4), 'V')}
       ${row('电堆电流 I', fmt(i * A, 1), 'A')}
       ${row('电堆电压 V_stack', fmt(V * N, 1), 'V')}
       ${row('理论电压 E', fmt(nernstPotential(p.T_K, p), 4), 'V')}
-      ${row('活化过电位', fmt(Aact*Math.log(i/i0), 4), 'V/cell')}
-      ${row('欧姆过电位', fmt(R*i, 4), 'V/cell')}
-      ${row('浓差过电位', fmt(mm*Math.exp(nn*i), 4), 'V/cell')}
+      ${row('活化过电位', fmt(cell.activationLoss, 4), 'V/cell')}
+      ${row('欧姆过电位', fmt(cell.ohmicLoss, 4), 'V/cell')}
+      ${row('浓差过电位', fmt(cell.concentrationLoss, 4), 'V/cell')}
       ${row('界面接触电阻', fmt(cr, 1), 'mΩ·cm²')}
       ${row('电堆效率', fmt(V/E_IDEAL*100, 2), '%')}
-      ${row('功率校验', fmt(N * V * i * A / 1000, 2), 'kW')}
+      ${row('功率校验', fmt(actualPowerKw, 2), 'kW')}
+      ${row('目标功率可达性', powerTargetLabel, '')}
     </div>`;
   }
   else if(type === 'h2'){
