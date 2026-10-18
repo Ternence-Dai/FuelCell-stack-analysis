@@ -824,6 +824,7 @@ function viewDashboard(){
       </div>
     </div>`;
   }).join('')}
+  </div>
 
   <div class="foot-note">
     设计者：<b class="sign">戴煜</b> · 燃料电池研发工程师<br>
@@ -2010,6 +2011,7 @@ function viewLib(){
       <div style="font-size:11px;color:#5f7391;margin-top:6px">请尝试调整筛选条件或搜索关键词</div>
     </div>` : ''}
 
+  <div class="lib-categories-grid">
   ${catData.map(({ cat, items }) => {
     const isOpen = state.libOpen === cat.id;
     return `
