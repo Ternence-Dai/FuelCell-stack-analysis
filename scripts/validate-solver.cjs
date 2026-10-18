@@ -75,7 +75,6 @@ async function main() {
   assert.throws(()=>sandbox.classifyPowerTarget(NaN,80,minimumPowerKw),TypeError);
   assert.throws(()=>sandbox.classifyPowerTarget(-1,80,minimumPowerKw),RangeError);
 
-  const system = extract('solveSystem');
   assert.ok(system.includes('powerFloorLimited') && system.includes('minimumFeasiblePowerKw'),
     'main system solver must expose a lower-current-density floor warning separately from a peak-power shortfall');
   assert.ok(system.includes("powerTargetStatus === 'below-minimum'") &&
