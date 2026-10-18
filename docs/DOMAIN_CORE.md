@@ -25,3 +25,8 @@ The standalone electrochemical calculator and main stack dashboard both consume 
 - This is a model component, not a validated electrochemical parameter set.
 - Calibration, parameter provenance, temperature/pressure correction and literature citations are required before engineering decisions.
 - The model rejects the limiting-current singularity rather than silently clamping it.
+
+
+## Reactant-feed mass basis
+
+Hydrogen consumption follows Faraday's law. Fresh hydrogen feed is scaled only by the hydrogen stoichiometric ratio; cathode air feed is calculated independently as 8 kg O₂ per kg H₂ divided by the declared dry-air oxygen mass fraction 0.232, then multiplied by the air stoichiometric ratio. This gives 34.4827586 kg dry air per kg hydrogen at λair = 1. The value is a stated composition assumption, not a measured site-specific air composition.
