@@ -103,6 +103,15 @@ test("reactant flows apply hydrogen and air stoichiometric ratios independently"
   "air stoichiometry must not change hydrogen feed");
  assert.ok(Object.isFrozen(base));
 });
+test("reactant air feed uses the declared 23.2% dry-air oxygen mass fraction",()=>{
+ const flow=calculateReactantMassFlows({
+  cellCount:370,stackCurrentA:300,hydrogenStoichRatio:1,airStoichRatio:1
+ });
+ const expectedHydrogenKgPerHour=370*300*2.016*3.6/(2*96485);
+ const expectedAirKgPerHour=expectedHydrogenKgPerHour*(8/0.232);
+ assert.ok(Math.abs(flow.hydrogenConsumedKgPerHour-expectedHydrogenKgPerHour)<1e-12);
+ assert.ok(Math.abs(flow.airFeedKgPerHour-expectedAirKgPerHour)<1e-12);
+});
 test("reactant flow model rejects invalid cell, current and stoichiometric inputs",()=>{
  const valid={cellCount:370,stackCurrentA:300,hydrogenStoichRatio:1.1,airStoichRatio:2.2};
  assert.throws(()=>calculateReactantMassFlows({...valid,cellCount:0}),RangeError);
