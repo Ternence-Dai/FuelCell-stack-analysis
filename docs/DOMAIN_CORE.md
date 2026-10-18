@@ -30,3 +30,21 @@ The standalone electrochemical calculator and main stack dashboard both consume 
 ## Reactant-feed mass basis
 
 Hydrogen consumption follows Faraday's law. Fresh hydrogen feed is scaled only by the hydrogen stoichiometric ratio; cathode air feed is calculated independently as 8 kg O₂ per kg H₂ divided by the declared dry-air oxygen mass fraction 0.232, then multiplied by the air stoichiometric ratio. This gives 34.4827586 kg dry air per kg hydrogen at λair = 1. The value is a stated composition assumption, not a measured site-specific air composition.
+
+## Reference implementations and parameter provenance
+
+The model architecture is benchmarked against the public [ECSIM/OPEM PEMFC simulator](https://github.com/ECSIM/opem), which separates several published static and dynamic model families and documents input units, test vectors, outputs, and literature references. OPEM is a reference implementation for comparison and reproducibility; its fitted coefficients must not be copied into this project without confirming the same model family, units, cell geometry, operating conditions, and calibration basis.
+
+Relevant primary model references identified by OPEM include:
+
+- Amphlett et al. (1995), *Performance Modeling of the Ballard Mark IV Solid Polymer Electrolyte Fuel Cell*, Journal of The Electrochemical Society 142(1), 9–15, [doi:10.1149/1.2043959](https://doi.org/10.1149/1.2043959).
+- Correa et al. (2005), *Sensitivity Analysis of the Modeling Parameters Used in Simulation of Proton Exchange Membrane Fuel Cells*, IEEE Transactions on Energy Conversion 20(1), 211–218, [doi:10.1109/TEC.2004.842382](https://doi.org/10.1109/TEC.2004.842382).
+- Kim et al. (1995), *Modeling of Proton Exchange Membrane Fuel Cell Performance with an Empirical Equation*, Journal of The Electrochemical Society 142(8), 2670–2674, [doi:10.1149/1.2050072](https://doi.org/10.1149/1.2050072).
+
+Parameter and composition safeguards:
+
+- The 0.21 oxygen fraction used by the simplified Nernst calculation is a dry-air **mole fraction**. The 0.232 oxygen fraction used for dry-air mass-flow conversion is a **mass fraction**. They represent different bases and must never be interchanged.
+- The Faraday feed calculation uses the declared hydrogen molar mass of 2.016 g/mol and Faraday constant of 96,485 C/mol. The resulting stoichiometric feed is a theoretical calculation, not a measured consumption rate.
+- Activation coefficient, exchange current density, area-specific resistance, concentration coefficient, concentration exponent, coolant properties, and operating limits remain stack- or coolant-specific inputs. They require a source, calibration record, uncertainty, and valid operating range before use for engineering decisions.
+- A comparison with OPEM is valid only after selecting a matching model family and aligning temperature, pressure basis, active area, membrane properties, current-density range, and parameter definitions. Similar-looking polarization curves alone do not establish model equivalence.
+
