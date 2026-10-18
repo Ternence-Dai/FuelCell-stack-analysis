@@ -42,3 +42,5 @@ jobs:
           NODE
       - name: Validate Nernst pressure units
         run: node scripts/validate-nernst.cjs
+      - name: Validate coolant thermal-flow units
+        run: node scripts/validate-thermal-flow.cjs
