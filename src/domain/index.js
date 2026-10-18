@@ -60,11 +60,13 @@ export function calculateReactantMassFlows({
   // Approximate dry-air/H2 stoichiometric mass ratio: about 34.3 kg air/kg H2,
   // based on 23.2% oxygen by mass in dry air.
   const airFeedKgPerHour = hydrogenConsumedKgPerHour * 34.3 * airStoichRatio;
-  return Object.freeze(finiteResult({
+  const result = {
     hydrogenConsumedKgPerHour,
     hydrogenFeedKgPerHour,
     airFeedKgPerHour
-  }, "reactant mass flow"));
+  };
+  for (const [name, value] of Object.entries(result)) finiteResult(value, name);
+  return Object.freeze(result);
 }
 
 export function calculateCoolantFlow({ heatPowerKw, deltaTemperatureK, specificHeatKJPerKgK, densityKgPerL }) {
