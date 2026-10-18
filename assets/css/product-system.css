@@ -317,3 +317,131 @@ input[type=range]::-moz-range-thumb{background:radial-gradient(circle at 35% 30%
   body,.main,.content{background:#fff!important;color:#111!important;overflow:visible!important}
   .card,.lib-cat,.kpi,.param-group{box-shadow:none!important;break-inside:avoid}
 }
+
+
+/* HyHub V3.2 · explicit parameter-library surface refresh
+   This layer replaces the residual dark list treatment, not just grid geometry. */
+body,.app,.main,.content{background:#f2f7fb!important;color:#172f45}
+.sidebar{
+  background:linear-gradient(180deg,#102d47 0%,#0c2034 100%);
+}
+.topbar{
+  background:rgba(255,255,255,.97)!important;
+  border-bottom:1px solid #dce7ef!important;
+  box-shadow:0 3px 14px rgba(29,67,92,.045)!important;
+}
+.hyhub-intro{
+  min-height:150px;
+  margin:0 0 18px;
+  padding:24px clamp(20px,2.5vw,36px);
+  border:1px solid #d6e6ed;
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 88% 5%,rgba(49,176,186,.12),transparent 24%),
+    linear-gradient(112deg,#fff 0%,#f2f9fc 58%,#eef8f6 100%);
+  box-shadow:0 8px 24px rgba(28,73,96,.045);
+}
+.lib-toolbar{margin:0 0 12px}
+.search-wrap{
+  min-height:42px;
+  border-radius:11px;
+  background:#fff;
+  border:1px solid #d6e4ec;
+  box-shadow:0 4px 14px rgba(30,66,89,.04);
+}
+.lib-stats{
+  border:1px solid #dce7ef;
+  background:#fff;
+  border-radius:14px;
+  box-shadow:0 7px 22px rgba(30,65,89,.045);
+}
+.lib-categories-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:14px!important;
+  align-items:start;
+}
+.lib-cat{
+  min-width:0;
+  overflow:hidden;
+  margin:0!important;
+  border:1px solid #dbe6ed!important;
+  border-radius:15px!important;
+  background:#fff!important;
+  box-shadow:0 6px 18px rgba(30,65,89,.045)!important;
+}
+.lib-cat:hover{
+  border-color:#b6d2df!important;
+  box-shadow:0 11px 25px rgba(30,83,108,.085)!important;
+  transform:translateY(-1px);
+}
+.lib-cat.open{
+  grid-column:1/-1!important;
+  border-color:#9dc9da!important;
+  box-shadow:0 12px 28px rgba(28,80,105,.075)!important;
+}
+.lib-cat-head{
+  min-height:86px;
+  padding:17px 19px;
+  background:linear-gradient(105deg,#fff,#f6fafc);
+  cursor:pointer;
+}
+.lib-cat-head h3{color:#1b3d55!important;font-size:14px;font-weight:760}
+.lib-cat-head .desc{color:#71899b!important;font-size:10.5px}
+.lib-cat-head .ci{
+  background:#eaf5fa!important;
+  border:1px solid #d2e7ef!important;
+  color:#12799a!important;
+}
+.lib-cat-head .badge.info{
+  background:#edf6fa!important;
+  color:#34758e!important;
+  border:1px solid #d7eaf0!important;
+}
+.lib-cat-body{
+  border-top:1px solid #e5edf2;
+  background:#f7fafc;
+  padding:14px;
+  gap:11px;
+}
+.lib-cat.open .lib-cat-body{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.lib-item{
+  min-width:0;
+  padding:15px;
+  border:1px solid #e0e9ef!important;
+  border-radius:12px;
+  background:#fff!important;
+  box-shadow:0 3px 10px rgba(35,71,92,.025);
+}
+.lib-item:hover{
+  background:#f9fcfe!important;
+  border-color:#bed8e3!important;
+}
+.lib-item-v b{color:#087f9e!important;font-size:19px}
+.lib-item-note{color:#5d7689!important}
+.lib-item-range{color:#71899a!important}
+.foot-note{
+  margin-top:22px;
+  padding:17px;
+  border:1px solid #dce7ed;
+  border-radius:13px;
+  background:#fff;
+  color:#748a98;
+}
+@media(max-width:1120px){
+  .lib-categories-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .lib-cat.open .lib-cat-body{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:760px){
+  .hyhub-intro{margin:0 0 13px;padding:18px 16px}
+  .lib-categories-grid{grid-template-columns:1fr!important}
+  .lib-cat.open{grid-column:auto!important}
+  .lib-cat.open .lib-cat-body{grid-template-columns:1fr!important}
+  .lib-item{padding:13px}
+}
+@media(max-width:420px){
+  .lib-cat-head{min-height:72px;padding:13px}
+}
