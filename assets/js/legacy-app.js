@@ -173,8 +173,14 @@ function solveSystem(){
   const lamH2 = P.stoichMode === 'auto' ? 1.05 + 0.10*Math.sqrt(P.stackPower/400) : P.lambdaH2;
   const lamAir = P.stoichMode === 'auto' ? 1.8 + 1.0*Math.pow(P.stackPower/400, 0.7) : P.lambdaAir;
 
-  const mH2 = P.N * I * M_H2 * 3.6 / (2 * F) * lamH2;
-  const mAir = mH2 * 34.3 * lamAir;
+  const reactantFlows = window.FuelCellDomain.calculateReactantMassFlows({
+    cellCount:P.N,
+    stackCurrentA:I,
+    hydrogenStoichRatio:lamH2,
+    airStoichRatio:lamAir
+  });
+  const mH2 = reactantFlows.hydrogenFeedKgPerHour;
+  const mAir = reactantFlows.airFeedKgPerHour;
 
   const gamma = 0.2857;
   const cmpEff = P.cmpEff || 0.72;
