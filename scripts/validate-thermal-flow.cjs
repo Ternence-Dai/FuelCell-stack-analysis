@@ -5,7 +5,7 @@ const app = fs.readFileSync('assets/js/legacy-app.js', 'utf8');
 const domain = fs.readFileSync('src/domain/index.js', 'utf8');
 const html = fs.readFileSync('index.html', 'utf8');
 const productCss = fs.readFileSync('assets/css/product-system.css', 'utf8');
-assert.ok(html.includes('product-system.css?v=20261018-v3.1'),
+assert.ok(html.includes('product-system.css?v=20261018-v3.2'),
   'HyHub must load the current V3 engineering workspace stylesheet');
 assert.ok(html.includes('viewport-fit=cover') && !html.includes('user-scalable=no'),
   'HyHub must retain mobile safe-area support and browser zoom accessibility');
@@ -19,6 +19,21 @@ for (const selector of [
 assert.ok(productCss.includes('@media(max-width:760px)') &&
           productCss.includes('@media(max-width:420px)'),
   'HyHub V3 must include tablet/mobile responsive layouts');
+
+assert.ok(html.includes('product-system.css?v=20261018-v3.2'),
+  'HyHub must load the cache-busted V3.2 parameter library theme');
+for (const selector of [
+  '.lib-categories-grid{', '.lib-cat{', '.lib-cat-head{', '.lib-cat-body{',
+  '.lib-cat.open .lib-cat-body{', '.lib-item{', '.hyhub-intro{'
+]) assert.ok(productCss.includes(selector),
+  'HyHub V3.2 must explicitly style parameter library component: ' + selector);
+assert.ok(productCss.includes('grid-template-columns:repeat(2,minmax(0,1fr))!important') &&
+          productCss.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'),
+  'desktop category and expanded parameter cards must use two/three-column layouts');
+assert.ok(productCss.includes('background:#fff!important') &&
+          productCss.includes('background:#f7fafc'),
+  'the library cards and expansion surface must use the new light engineering palette');
+
 assert.ok(productCss.includes('prefers-reduced-motion:reduce'),
   'HyHub V3 must respect reduced-motion preferences');
 
