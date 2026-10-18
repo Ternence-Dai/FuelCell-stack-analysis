@@ -38,3 +38,15 @@ test("Tafel polarization rejects current below the exchange-current reference",(
  assert.throws(()=>calculateCellVoltage(params),RangeError);
  assert.ok(calculateCellVoltage({...params,currentDensity:params.exchangeCurrentDensity}).activationLoss===0);
 });
+
+test("Nernst reference case at 25 C and 1 atm hydrogen/air is stable",()=>{
+ const voltage=calculateNernstPotential({temperatureK:298.15,hydrogenPressureMPa:0.101325,airPressureMPa:0.101325});
+ assert.ok(Math.abs(voltage-1.2189772845028344)<1e-12);
+});
+test("polarization point is continuous at zero current density",()=>{
+ const p=calculatePolarizationPoint({...base,currentDensity:0});
+ assert.equal(p.powerDensity,0);
+ assert.equal(p.ohmicLoss,0);
+ assert.equal(p.concentrationLoss,0);
+ assert.equal(p.cellVoltage,base.reversibleVoltage-base.activationLoss);
+});
