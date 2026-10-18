@@ -1,6 +1,10 @@
 const finite = (value, name) => {
   if (!Number.isFinite(value)) throw new TypeError(`${name} must be a finite number`);
 };
+const finiteResult = (value, name) => {
+  if (!Number.isFinite(value)) throw new RangeError(`${name} exceeds the finite numeric range`);
+  return value;
+};
 export function calculatePolarizationPoint({ reversibleVoltage, activationLoss, currentDensity, areaSpecificResistance, limitingCurrentDensity, concentrationCoefficient }) {
   for (const [name, value] of Object.entries({ reversibleVoltage, activationLoss, currentDensity, areaSpecificResistance, limitingCurrentDensity, concentrationCoefficient })) finite(value, name);
   if (reversibleVoltage <= 0 || activationLoss < 0 || currentDensity < 0 || areaSpecificResistance < 0 || limitingCurrentDensity <= 0 || concentrationCoefficient < 0) throw new RangeError("Polarization inputs are outside their physical domain");
@@ -9,7 +13,7 @@ export function calculatePolarizationPoint({ reversibleVoltage, activationLoss, 
   const ohmicLoss = currentDensity * areaSpecificResistance;
   const cellVoltage = reversibleVoltage - activationLoss - ohmicLoss - concentrationLoss;
   const powerDensity = cellVoltage * currentDensity;
-  for (const [name, value] of Object.entries({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss, powerDensity })) finite(value, name);
+  for (const [name, value] of Object.entries({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss, powerDensity })) finiteResult(value, name);
   return Object.freeze({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss, currentDensity, powerDensity });
 }
 
@@ -21,7 +25,7 @@ export function calculateNernstPotential({ temperatureK, hydrogenPressureMPa, ai
   const oxygenAtm = airPressureMPa * 0.21 / referencePressureMPa;
   const potential = 1.229 - 0.85e-3 * (temperatureK - 298.15)
     + 4.308e-5 * temperatureK * (Math.log(hydrogenAtm) + 0.5 * Math.log(oxygenAtm));
-  finite(potential, "Nernst potential");
+  finiteResult(potential, "Nernst potential");
   return potential;
 }
 export function calculateCellVoltage({ reversibleVoltage, activationCoefficient, currentDensity, exchangeCurrentDensity, areaSpecificResistance, concentrationCoefficient, concentrationExponent }) {
@@ -32,6 +36,6 @@ export function calculateCellVoltage({ reversibleVoltage, activationCoefficient,
   const ohmicLoss = areaSpecificResistance * currentDensity;
   const concentrationLoss = concentrationCoefficient * Math.exp(concentrationExponent * currentDensity);
   const cellVoltage = reversibleVoltage - activationLoss - ohmicLoss - concentrationLoss;
-  if (!Number.isFinite(cellVoltage)) throw new RangeError("cell voltage is not finite");
+  for (const [name, value] of Object.entries({ activationLoss, ohmicLoss, concentrationLoss, cellVoltage })) finiteResult(value, name);
   return Object.freeze({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss });
 }
