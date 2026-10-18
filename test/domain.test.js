@@ -57,3 +57,16 @@ test("derived Tafel losses report numeric overflow as a range error",()=>{
  const params={reversibleVoltage:1.18,activationCoefficient:Number.MAX_VALUE,currentDensity:Number.MAX_VALUE,exchangeCurrentDensity:Number.MIN_VALUE,areaSpecificResistance:0,concentrationCoefficient:0,concentrationExponent:0};
  assert.throws(()=>calculateCellVoltage(params),RangeError);
 });
+
+test("Tafel loss remains finite when the current-to-exchange ratio overflows",()=>{
+ const p=calculateCellVoltage({reversibleVoltage:1,activationCoefficient:1e-308,currentDensity:Number.MAX_VALUE,exchangeCurrentDensity:Number.MIN_VALUE,areaSpecificResistance:0,concentrationCoefficient:0,concentrationExponent:1});
+ assert.ok(Number.isFinite(p.activationLoss));
+ assert.equal(p.concentrationLoss,0);
+ assert.ok(Number.isFinite(p.cellVoltage));
+});
+test("zero concentration coefficient suppresses exponential overflow",()=>{
+ const p=calculateCellVoltage({reversibleVoltage:1,activationCoefficient:0,currentDensity:1e308,exchangeCurrentDensity:1,areaSpecificResistance:0,concentrationCoefficient:0,concentrationExponent:10});
+ assert.equal(p.concentrationLoss,0);
+ assert.equal(p.activationLoss,0);
+ assert.equal(p.cellVoltage,1);
+});
