@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage } from "../src/domain/index.js";
+import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow } from "../src/domain/index.js";
 const base = { reversibleVoltage:1.18, activationLoss:0.04, currentDensity:0.5, areaSpecificResistance:0.12, limitingCurrentDensity:2, concentrationCoefficient:0.03 };
 test("polarization losses sum to reversible voltage minus cell voltage", () => {
  const p = calculatePolarizationPoint(base);
@@ -80,6 +80,38 @@ test("zero concentration coefficient suppresses exponential overflow",()=>{
  assert.equal(p.activationLoss,0);
  assert.equal(p.cellVoltage,1);
 });
+test("coolant flow converts heat load to mass and volume flow with consistent SI units",()=>{
+ const flow=calculateCoolantFlow({
+  heatPowerKw:10,deltaTemperatureK:5,
+  specificHeatKJPerKgK:3.55,densityKgPerL:1.05
+ });
+ assert.ok(Math.abs(flow.massFlowKgPerSecond-(10/(3.55*5)))<1e-12);
+ assert.ok(Math.abs(flow.massFlowKgPerMinute-flow.massFlowKgPerSecond*60)<1e-12);
+ assert.ok(Math.abs(flow.volumeFlowLPerMinute-flow.massFlowKgPerMinute/1.05)<1e-12);
+ assert.ok(Math.abs(flow.volumeFlowLPerMinute-32.19)<0.02);
+ assert.ok(Object.isFrozen(flow));
+});
+test("coolant flow handles zero heat and rejects nonphysical properties",()=>{
+ const zero=calculateCoolantFlow({
+  heatPowerKw:0,deltaTemperatureK:5,
+  specificHeatKJPerKgK:3.55,densityKgPerL:1.05
+ });
+ assert.deepEqual({...zero},{massFlowKgPerSecond:0,massFlowKgPerMinute:0,volumeFlowLPerMinute:0});
+ assert.throws(()=>calculateCoolantFlow({heatPowerKw:-1,deltaTemperatureK:5,specificHeatKJPerKgK:3.55,densityKgPerL:1.05}),RangeError);
+ assert.throws(()=>calculateCoolantFlow({heatPowerKw:1,deltaTemperatureK:0,specificHeatKJPerKgK:3.55,densityKgPerL:1.05}),RangeError);
+ assert.throws(()=>calculateCoolantFlow({heatPowerKw:1,deltaTemperatureK:5,specificHeatKJPerKgK:0,densityKgPerL:1.05}),RangeError);
+ assert.throws(()=>calculateCoolantFlow({heatPowerKw:1,deltaTemperatureK:5,specificHeatKJPerKgK:3.55,densityKgPerL:0}),RangeError);
+ assert.throws(()=>calculateCoolantFlow({heatPowerKw:1,deltaTemperatureK:5,specificHeatKJPerKgK:NaN,densityKgPerL:1.05}),TypeError);
+});
+test("coolant flow avoids an overflowing heat-capacity product when final flow is finite",()=>{
+ const flow=calculateCoolantFlow({
+  heatPowerKw:1e308,deltaTemperatureK:1e308,
+  specificHeatKJPerKgK:1e308,densityKgPerL:1e-308
+ });
+ assert.ok(Number.isFinite(flow.massFlowKgPerSecond) && flow.massFlowKgPerSecond>0);
+ assert.ok(Math.abs(flow.volumeFlowLPerMinute/60-1)<1e-12);
+});
+
 test("tiny concentration coefficient offsets raw exponential overflow",()=>{
  const p=calculateCellVoltage({
   reversibleVoltage:1,activationCoefficient:0,currentDensity:1,
