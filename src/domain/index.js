@@ -48,8 +48,10 @@ export function calculateCellVoltage({ reversibleVoltage, activationCoefficient,
     : activationCoefficient * (Math.log(currentDensity) - Math.log(exchangeCurrentDensity));
   const ohmicLoss = areaSpecificResistance * currentDensity;
   // A zero coefficient means no concentration loss, even at extreme current.
+  // Combine logarithms before exponentiation so a tiny coefficient can offset
+  // exp() overflow while the mathematically scaled loss is still representable.
   const concentrationLoss = concentrationCoefficient === 0 ? 0
-    : concentrationCoefficient * Math.exp(concentrationExponent * currentDensity);
+    : Math.exp(Math.log(concentrationCoefficient) + concentrationExponent * currentDensity);
   const cellVoltage = reversibleVoltage - activationLoss - ohmicLoss - concentrationLoss;
   for (const [name, value] of Object.entries({ activationLoss, ohmicLoss, concentrationLoss, cellVoltage })) finiteResult(value, name);
   return Object.freeze({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss });
