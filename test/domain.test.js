@@ -80,3 +80,14 @@ test("zero concentration coefficient suppresses exponential overflow",()=>{
  assert.equal(p.activationLoss,0);
  assert.equal(p.cellVoltage,1);
 });
+test("tiny concentration coefficient offsets raw exponential overflow",()=>{
+ const p=calculateCellVoltage({
+  reversibleVoltage:1,activationCoefficient:0,currentDensity:1,
+  exchangeCurrentDensity:1,areaSpecificResistance:0,
+  concentrationCoefficient:Number.MIN_VALUE,concentrationExponent:720
+ });
+ assert.ok(Number.isFinite(p.concentrationLoss));
+ assert.ok(p.concentrationLoss>0);
+ assert.ok(Math.abs(p.concentrationLoss-Math.exp(Math.log(Number.MIN_VALUE)+720))<1e-25);
+ assert.ok(Number.isFinite(p.cellVoltage));
+});
