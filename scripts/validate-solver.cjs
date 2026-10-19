@@ -44,6 +44,14 @@ async function main() {
     'the air pressure control must disclose the oxygen-fraction assumption');
   const system = extract('solveSystem');
   assert.ok(system.includes('calculateCoolantPumpPower') && system.includes('pressureDropKPa:P.dpCool ?? 250'), 'coolant pump power must use the configured coolant-loop pressure drop and shared hydraulic-power calculation');
+  assert.ok(system.includes("P.coolFlowMode === 'auto'") &&
+    system.includes("P.coolFlowMode === 'auto'\n    ? Math.max(autoCoolantFlow, 10)") &&
+    html.includes("coolFlowMode:'manual'") &&
+    html.includes("key:'coolFlowMode', k:'冷却流量模式'"),
+    'coolant flow must distinguish manual setpoint from heat-load-based automatic estimation, with legacy-safe manual default');
+  assert.ok(html.includes('比热 3.55 kJ/(kg·K)') &&
+    html.includes('密度 1.05 kg/L'),
+    'automatic coolant sizing must disclose its fixed coolant-property assumptions');
   assert.ok(system.includes('calculateNetElectricalPower') && system.includes('netPowerDeficit') &&
     !system.includes('Math.max(Pstack - pBop, 0.1)'),
     'net output must clamp at zero and expose an explicit BOP power deficit instead of inventing a positive floor');
