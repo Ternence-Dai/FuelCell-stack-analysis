@@ -28,7 +28,7 @@
 
 ## 可选 AI 专业编辑
 
-可选新增 `GEMINI_API_KEY` 仓库机密。默认模型为 `gemini-3.6-flash`，每天最多发起一次编辑请求。使用前请自行查看 Google 当前免费额度、速率限制、隐私及数据使用条款。该功能不使用 Google Search grounding。没有 API Key 时仍能运行，但不会声称完成了 AI 中文翻译或专业编辑。
+可选新增 `GEMINI_API_KEY` 仓库机密。默认模型为 `gemini-3.8-flash`，每天最多发起一次编辑请求。使用前请自行查看 Google 当前免费额度、速率限制、隐私及数据使用条款。该功能不使用 Google Search grounding。没有 API Key 时仍能运行，但不会声称完成了 AI 中文翻译或专业编辑。
 
 ## 正式定时发送
 
