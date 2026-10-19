@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow, calculateReactantMassFlows, calculateAltitudeAdjustedPressureRatio, calculateFuelToElectricEfficiency } from "../src/domain/index.js";
+import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow, calculateReactantMassFlows, calculateAltitudeAdjustedPressureRatio, calculateFuelToElectricEfficiency, calculateCoolantPumpPower } from "../src/domain/index.js";
 const base = { reversibleVoltage:1.18, activationLoss:0.04, currentDensity:0.5, areaSpecificResistance:0.12, limitingCurrentDensity:2, concentrationCoefficient:0.03 };
 test("altitude compensation raises compressor pressure ratio as inlet pressure falls",()=>{
  const seaLevel=calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0.1013});
@@ -10,6 +10,21 @@ test("altitude compensation raises compressor pressure ratio as inlet pressure f
  assert.ok(Math.abs(altitude-(2.5*0.1013/0.054))<1e-12);
  assert.throws(()=>calculateAltitudeAdjustedPressureRatio({basePressureRatio:1,ambientPressureMPa:0.1}),RangeError);
  assert.throws(()=>calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0}),RangeError);
+});
+test("coolant pump power uses flow pressure drop and efficiency with SI conversion",()=>{
+ const power=calculateCoolantPumpPower({
+  volumeFlowLPerMinute:120,pressureDropKPa:250,pumpEfficiency:0.65
+ });
+ assert.ok(Math.abs(power-(250*120/60000/0.65))<1e-12);
+ assert.equal(calculateCoolantPumpPower({
+  volumeFlowLPerMinute:0,pressureDropKPa:250,pumpEfficiency:0.65
+ }),0);
+ assert.throws(()=>calculateCoolantPumpPower({
+  volumeFlowLPerMinute:120,pressureDropKPa:250,pumpEfficiency:0
+ }),RangeError);
+ assert.throws(()=>calculateCoolantPumpPower({
+  volumeFlowLPerMinute:120,pressureDropKPa:250,pumpEfficiency:1.1
+ }),RangeError);
 });
 test("net system efficiency uses actual hydrogen feed chemical energy",()=>{
  const efficiency=calculateFuelToElectricEfficiency({
