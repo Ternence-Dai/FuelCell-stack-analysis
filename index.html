@@ -16,12 +16,28 @@
 <body data-workspace="fuelcell">
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="brand-logo">H₂</div><div><div class="brand-name">氢枢 HyHub</div><div class="brand-sub">电堆全能平台</div></div></div>
+    <div class="brand">
+      <div class="brand-logo">H₂</div>
+      <div>
+        <div class="brand-name">氢枢 HyHub</div>
+        <div class="brand-sub">电堆全能平台</div>
+      </div>
+    </div>
     <nav class="nav" id="sideNav"></nav>
-    <div class="copyright">版权所有 © 2026<br><span class="sign">戴煜</span><br><b>18662613315@163.com</b><br>燃料电池研发工程师<br><span style="opacity:.6">V2.0 · 大模型版</span></div>
+    <div class="copyright">
+      版权所有 © 2026<br>
+      <span class="sign">戴煜</span><br>
+      <b>18662613315@163.com</b><br>
+      燃料电池研发工程师<br>
+      <span style="opacity:.6">V2.0 · 大模型版</span>
+    </div>
   </aside>
   <div class="main">
-    <header class="topbar"><h1 id="pageTitle">工作台</h1><div class="top-chip b" id="chipPower">150 kW</div><div class="top-chip" id="chipStatus">● 在线</div></header>
+    <header class="topbar">
+      <h1 id="pageTitle">工作台</h1>
+      <div class="top-chip b" id="chipPower">150 kW</div>
+      <div class="top-chip" id="chipStatus">● 在线</div>
+    </header>
     <div class="hyhub-intro"><div><div class="eyebrow">HYHUB · ENGINEERING WORKSPACE</div><h2>燃料电池电堆工程工作台</h2><p>从工况设定、模型计算到性能监控与数据导出，集中管理电堆研发过程。请区分模型计算结果与真实台架测试数据。</p><div class="chips"><span>参数驱动计算</span><span>性能指标分析</span><span>工况数据导出</span><span>模型结果需验证</span></div></div><div class="mark">H₂</div></div>
     <section class="product-workflow" aria-label="工程工作流快捷入口">
       <div class="product-workflow__head"><div><span class="eyebrow">ENGINEERING CONTROL CENTER</span><h3>工程任务流</h3><p>从模型训练、工况仿真到工程计算与运行监控，按研发路径进入对应工作区。</p></div><span class="product-workflow__mode">MODEL · SIMULATE · VALIDATE</span></div>
@@ -29,13 +45,18 @@
         <button class="product-workflow__item" type="button" onclick="navigate('model')"><i>01</i><b>模型分析</b><small>参数辨识 · 模型训练</small><span>进入工作区 ↗</span></button>
         <button class="product-workflow__item" type="button" onclick="navigate('sim')"><i>02</i><b>工况仿真</b><small>稳态 · 动态 · 边界工况</small><span>进入工作区 ↗</span></button>
         <button class="product-workflow__item" type="button" onclick="navigate('calc')"><i>03</i><b>工程计算</b><small>电化学 · 热管理 · 辅机</small><span>进入工作区 ↗</span></button>
-        <button class="product-workflow__item" type="button" onclick="navigate('monitor')"><i>04</i><b>运行监控</b><small>指标趋势 · 异常追踪</small><span>进入工作区 ↗</span></button>
-      </div>
+        <button class="product-workflow__item" type="button" onclick="navigate('monitor')"><i>04</i><b>运行监控</b><small>模型输出与实测状态分层</small><span>进入工作区 ↗</span></button>
+      </div><div class="product-workflow__foot">对标参照：ECSIM/OPEM · 工况、模型输出与验证状态分层；此处监控数据仍须以实际设备接入状态为准。</div>
     </section>
-    <div id="pageContent"></div>
+    <div class="content" id="content"></div>
   </div>
 </div>
+<nav class="bottomnav" id="bottomNav"></nav>
+<div class="toast" id="toast"></div>
 <script src="./assets/js/reference-data.js"></script>
-<script src="./assets/js/app.js"></script>
+<script src="./assets/js/legacy-app.js"></script>
+<script src="./assets/js/workspace-v5.js?v=20261019-v5"></script>
+<script src="./assets/js/workspace-v5-context.js?v=20261019-v51"></script>
+<script src="./assets/js/workspace-v5-model-assurance.js?v=20261019-v53"></script>
 </body>
 </html>
