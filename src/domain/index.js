@@ -1,3 +1,54 @@
+export function solveFirstPowerCrossing({ targetPower, minCurrentDensity, maxCurrentDensity, steps = 600, powerAt }) {
+  for (const [name, value] of Object.entries({ targetPower, minCurrentDensity, maxCurrentDensity })) {
+    if (!Number.isFinite(value)) throw new TypeError(name + " must be finite");
+  }
+  if (targetPower < 0 || minCurrentDensity < 0 || maxCurrentDensity <= minCurrentDensity) {
+    throw new RangeError("power target and current-density interval must be non-negative and increasing");
+  }
+  if (!Number.isSafeInteger(steps) || steps < 1 || steps > 100000) {
+    throw new RangeError("steps must be a positive safe integer no greater than 100000");
+  }
+  if (typeof powerAt !== "function") throw new TypeError("powerAt must be a function");
+
+  const evaluate = current => {
+    const power = powerAt(current);
+    if (!Number.isFinite(power) || power < 0) {
+      throw new RangeError("powerAt must return a finite non-negative power");
+    }
+    return power;
+  };
+  let previousCurrent = minCurrentDensity;
+  const initialPower = evaluate(previousCurrent);
+  let peakCurrent = previousCurrent;
+  let peakPower = initialPower;
+  if (targetPower <= initialPower) return minCurrentDensity;
+
+  for (let step = 1; step <= steps; step++) {
+    const current = minCurrentDensity +
+      (maxCurrentDensity - minCurrentDensity) * step / steps;
+    const power = evaluate(current);
+    if (power > peakPower) {
+      peakPower = power;
+      peakCurrent = current;
+    }
+    // Return the first upward crossing, not a later crossing on the
+    // descending branch of the non-monotonic stack power curve.
+    if (power >= targetPower) {
+      let low = previousCurrent;
+      let high = current;
+      for (let iteration = 0; iteration < 60; iteration++) {
+        const middle = (low + high) / 2;
+        if (evaluate(middle) >= targetPower) high = middle;
+        else low = middle;
+      }
+      return (low + high) / 2;
+    }
+    previousCurrent = current;
+  }
+  // An unattainable target resolves to the sampled maximum-power point.
+  return peakCurrent;
+}
+
 const finite = (value, name) => {
   if (!Number.isFinite(value)) throw new TypeError(`${name} must be a finite number`);
 };
