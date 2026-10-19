@@ -346,11 +346,11 @@ const PARAM_GROUPS = [
     { key:'coatThk', k:'涂层厚度', unit:'nm', min:20, max:500, step:10, dec:0, note:'50–200 nm 为典型区间' },
     { key:'contactR', k:'界面接触电阻', unit:'mΩ·cm²', min:3, max:20, step:0.5, dec:1, note:'领先水平 < 6 mΩ·cm²；直接影响欧姆损耗' },
   ]},
-  { id:'echem', ico:'⚡', name:'电化学性能参数', desc:'内阻、活化系数、交换电流、浓差系数', items:[
+  { id:'echem', ico:'⚡', name:'电化学性能参数', desc:'Tafel 活化 + 欧姆内阻 + 经验指数浓差项（非完整 Amphlett 模型）', items:[
     { key:'R', k:'单片内阻 R', unit:'Ω·cm²', min:0.06, max:0.20, step:0.001, dec:3, note:'领先水平 0.075–0.095 Ω·cm²；Mirai 2 约 0.085' },
     { key:'Aact', k:'活化系数', unit:'V', min:0.006, max:0.014, step:0.0001, dec:4, note:'领先水平 0.0075–0.009 V' },
     { key:'i0', k:'交换电流密度', unit:'A/cm²', min:0.0001, max:0.005, step:0.0001, dec:4, note:'领先水平 0.0015–0.0025 A/cm²' },
-    { key:'m', k:'浓差系数', unit:'V', min:1e-5, max:6e-5, step:1e-6, dec:6, note:'领先水平 1.8e-5–2.5e-5 V' },
+    { key:'m', k:'浓差系数（经验项）', unit:'V', min:1e-5, max:6e-5, step:1e-6, dec:6, note:'用于 m·exp(n·i) 经验近似；未显式建模极限电流密度与反应物传质状态，不应视为 Amphlett 浓差项或实测参数' },
     { key:'n', k:'浓差指数', unit:'—', min:2, max:6, step:0.5, dec:1, note:'控制浓差损耗上升陡峭度；典型 4' },
   ]},
   { id:'thermal', ico:'❄', name:'水热管理参数', desc:'冷却液、流量、压降、散热裕度', items:[
