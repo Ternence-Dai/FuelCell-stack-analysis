@@ -119,6 +119,8 @@ async function main() {
   assert.ok(elecCalculator.includes('classifyPowerTarget(PkW, actualPowerKw, minimumFeasiblePowerKw)') &&
             elecCalculator.includes('目标低于求解器下限'),
     'standalone calculator must disclose both minimum-current and peak-power limits');
+  assert.match(html, /经验指数浓差项（非完整 Amphlett 模型）/, 'the electrochemical parameter group must disclose that its concentration-loss model is empirical and not a full Amphlett implementation');
+  assert.match(html, /未显式建模极限电流密度与反应物传质状态/, 'the concentration-loss parameter must disclose omitted limiting-current and reactant-transport physics');
   assert.match(html, /没有加载训练数据、执行神经网络训练或真实推理/, 'model metrics must be disclosed as simulated');
   assert.match(html, /规划模块（尚未实现）/, 'unimplemented neural-network architecture must be labeled as a plan');
   assert.doesNotMatch(html, /贡献度 85%|贡献度 92%|贡献度 68%|贡献度 76%/, 'fabricated model contribution percentages must not be displayed');
