@@ -41,6 +41,20 @@ test("net system efficiency uses actual hydrogen feed chemical energy",()=>{
   netPowerKw:50,hydrogenFeedKgPerHour:0
  }),RangeError);
 });
+// Independent cross-check against ECSIM/OPEM test/test_Amphlett.py:
+// Enernst_Calc(T=343.15 K, PH2=1 atm, PO2=1 atm) = 1.19075 V.
+// This app accepts dry-air total pressure, so PO2=1 atm maps to
+// Pair=1/0.21 atm; all pressures are then converted to MPa.
+test("Nernst potential matches the published OPEM Amphlett reference vector",()=>{
+ const voltage=calculateNernstPotential({
+  temperatureK:343.15,
+  hydrogenPressureMPa:0.101325,
+  airPressureMPa:0.101325/0.21
+ });
+ assert.ok(Math.abs(voltage-1.19075)<1e-12,
+  "MPa and dry-air-to-oxygen partial-pressure conversion must reproduce OPEM's 1 atm reference case");
+});
+
 test("polarization losses sum to reversible voltage minus cell voltage", () => {
  const p = calculatePolarizationPoint(base);
  assert.ok(p.cellVoltage > 0 && p.cellVoltage < base.reversibleVoltage);
