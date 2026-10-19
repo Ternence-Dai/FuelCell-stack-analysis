@@ -5,6 +5,25 @@ const finiteResult = (value, name) => {
   if (!Number.isFinite(value)) throw new RangeError(`${name} exceeds the finite numeric range`);
   return value;
 };
+
+export function calculateAltitudeAdjustedPressureRatio({
+  basePressureRatio,
+  ambientPressureMPa,
+  referencePressureMPa = 0.1013
+}) {
+  for (const [name, value] of Object.entries({
+    basePressureRatio, ambientPressureMPa, referencePressureMPa
+  })) finite(value, name);
+  if (basePressureRatio <= 1 || ambientPressureMPa <= 0 || referencePressureMPa <= 0) {
+    throw new RangeError("compressor pressure ratio must exceed 1 and absolute pressures must be positive");
+  }
+  // The baseline ratio is calibrated at reference pressure. At altitude,
+  // lower compressor inlet pressure requires a higher ratio to preserve
+  // the same absolute delivery-pressure target.
+  const ratio = basePressureRatio *
+    (0.75 + 0.25 * referencePressureMPa / ambientPressureMPa);
+  return finiteResult(ratio, "altitude-adjusted compressor pressure ratio");
+}
 export function calculatePolarizationPoint({ reversibleVoltage, activationLoss, currentDensity, areaSpecificResistance, limitingCurrentDensity, concentrationCoefficient }) {
   for (const [name, value] of Object.entries({ reversibleVoltage, activationLoss, currentDensity, areaSpecificResistance, limitingCurrentDensity, concentrationCoefficient })) finite(value, name);
   if (reversibleVoltage <= 0 || activationLoss < 0 || currentDensity < 0 || areaSpecificResistance < 0 || limitingCurrentDensity <= 0 || concentrationCoefficient < 0) throw new RangeError("Polarization inputs are outside their physical domain");
