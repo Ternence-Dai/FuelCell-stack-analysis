@@ -3089,7 +3089,7 @@ window.addEventListener('resize', () => {
 
 (async function bootWithDomainCore(){
   try{
-    window.FuelCellDomain = await import('../../src/domain/index.js');
+    window.FuelCellDomain = await import('../../src/domain/index.js?v=20261019-fuelcell-core-v2');
   }catch(error){
     console.error('FuelCell domain core failed to load',error);
     toast('科学计算核心加载失败，请刷新页面或检查网络');
