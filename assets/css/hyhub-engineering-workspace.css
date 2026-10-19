@@ -1,0 +1,22 @@
+/* HyHub engineering workspace — domain-specific visual hierarchy */
+body[data-workspace="fuelcell"]{background:radial-gradient(ellipse at 80% 0%,rgba(5,151,169,.12),transparent 36rem),#f1f5fa;color:#14283d}
+body[data-workspace="fuelcell"] .app{min-height:100vh}
+body[data-workspace="fuelcell"] .sidebar{width:252px;background:linear-gradient(180deg,#10283e,#0b1b2b 80%);padding:26px 18px}
+body[data-workspace="fuelcell"] .brand{padding:8px 8px 28px;border-bottom:1px solid rgba(210,232,245,.12)}
+body[data-workspace="fuelcell"] .brand-logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(140deg,#18b6c0,#08758d);box-shadow:0 8px 24px rgba(4,165,177,.25)}
+body[data-workspace="fuelcell"] .main{min-width:0;background:transparent}
+body[data-workspace="fuelcell"] .topbar{padding:14px clamp(18px,3vw,42px);min-height:70px}
+body[data-workspace="fuelcell"] .hyhub-intro{padding:clamp(26px,4vw,48px);min-height:238px;border-radius:24px;background:linear-gradient(118deg,#102a43,#16465b 62%,#087c8c);color:#f5fbff;box-shadow:0 22px 54px rgba(12,52,77,.18)}
+body[data-workspace="fuelcell"] .hyhub-intro h2{color:white;font-size:clamp(27px,3.4vw,42px);letter-spacing:-.04em}
+body[data-workspace="fuelcell"] .hyhub-intro p{color:#c4dce6;max-width:760px;line-height:1.8}
+body[data-workspace="fuelcell"] .hyhub-intro .eyebrow{color:#69d8dc;letter-spacing:.18em;font-weight:800}
+body[data-workspace="fuelcell"] .hyhub-intro .chips span{border:1px solid rgba(194,241,244,.2);background:rgba(255,255,255,.08);color:#e3f8fa;border-radius:99px;padding:7px 11px}
+body[data-workspace="fuelcell"] .mark{border-radius:26px;background:radial-gradient(circle at 35% 30%,#a1f1ed,#0d91a1 52%,#0e344e);box-shadow:0 0 0 12px rgba(255,255,255,.05),0 0 50px rgba(40,199,200,.24)}
+body[data-workspace="fuelcell"] .product-workflow{margin-top:20px;padding:22px;border:1px solid #dfe8ef;border-radius:20px;background:#fff;box-shadow:0 12px 32px rgba(24,55,78,.06)}
+body[data-workspace="fuelcell"] .product-workflow__grid{gap:12px}
+body[data-workspace="fuelcell"] .product-workflow__item{border:1px solid #e1eaf0;border-radius:15px;background:linear-gradient(145deg,#fff,#f5fafb);padding:18px;min-height:136px;text-align:left}
+body[data-workspace="fuelcell"] .product-workflow__item i{color:#078c9a;font-style:normal;font-weight:900}
+body[data-workspace="fuelcell"] .product-workflow__item b{color:#18364b}
+body[data-workspace="fuelcell"] .product-workflow__item span{color:#087f8d;font-weight:800}
+@media(max-width:900px){body[data-workspace="fuelcell"] .sidebar{width:220px}}
+@media(max-width:680px){body[data-workspace="fuelcell"] .hyhub-intro{padding:22px}.mark{display:none!important}}
