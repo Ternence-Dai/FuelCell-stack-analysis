@@ -475,3 +475,7 @@ body,.app,.main,.content{background:#f2f7fb!important;color:#172f45}
   :where(.lib-stats,.metrics-grid){grid-template-columns:minmax(0,1fr)}
 }
 @media(prefers-reduced-motion:reduce){:where(button,a,[role="button"],.card,.kpi,.gcard,.experiment-card,.metric-card,.module-card,.quick,.mode){transition:none!important;transform:none!important}}
+
+
+/* V5 · Core workspace actions */
+.dashboard-command{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:15px 0 21px;padding:18px 21px;border:1px solid #cfe2ea;border-radius:15px;background:linear-gradient(110deg,#fff 0%,#f1f8fb 58%,#eaf6f5 100%);box-shadow:0 6px 20px rgba(26,73,96,.045)}.dashboard-command-copy{min-width:0}.dashboard-command-copy .eyebrow{font-size:9px;letter-spacing:1.6px;color:#16859b;font-weight:850}.dashboard-command-copy h3{margin:4px 0;color:#1c4057;font-size:15px;font-weight:800}.dashboard-command-copy p{margin:0;color:#678091;font-size:11px;line-height:1.65;max-width:620px}.dashboard-command-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}.dashboard-command-actions .btn{min-height:37px;padding:8px 12px;font-size:10.5px;white-space:nowrap}@media(max-width:760px){.dashboard-command{align-items:flex-start;flex-direction:column;padding:16px}.dashboard-command-actions{width:100%;justify-content:flex-start}.dashboard-command-actions .btn{flex:1 1 135px}}
