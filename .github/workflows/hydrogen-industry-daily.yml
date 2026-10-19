@@ -1,6 +1,12 @@
 name: Daily hydrogen fuel-cell industry intelligence
 
 on:
+  push:
+    paths:
+      - ".github/workflows/hydrogen-industry-daily.yml"
+      - "automation/hydrogen-daily/**"
+  schedule:
+    - cron: "15 1 * * *"
   workflow_dispatch:
     inputs:
       mode:
@@ -24,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
-      REPORT_MODE: ${{ inputs.mode || 'preview' }}
+      REPORT_MODE: ${{ github.event.inputs.mode || 'preview' }}
       SMTP_HOST: smtp.163.com
       SMTP_PORT: "465"
       SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
