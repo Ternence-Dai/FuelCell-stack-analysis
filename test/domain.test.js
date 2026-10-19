@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow, calculateReactantMassFlows, calculateAltitudeAdjustedPressureRatio, calculateFuelToElectricEfficiency, calculateCoolantPumpPower, calculateNetElectricalPower } from "../src/domain/index.js";
+import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow, calculateReactantMassFlows, calculateAltitudeAdjustedPressureRatio, calculateFuelToElectricEfficiency, calculateCoolantPumpPower, calculateNetElectricalPower, solveFirstPowerCrossing } from "../src/domain/index.js";
 const base = { reversibleVoltage:1.18, activationLoss:0.04, currentDensity:0.5, areaSpecificResistance:0.12, limitingCurrentDensity:2, concentrationCoefficient:0.03 };
 test("altitude compensation raises compressor pressure ratio as inlet pressure falls",()=>{
  const seaLevel=calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0.1013});
@@ -217,4 +217,34 @@ test("net electrical output never invents positive power when BOP exceeds stack 
  assert.equal(calculateNetElectricalPower({stackPowerKw:10,balanceOfPlantPowerKw:12}),0);
  assert.throws(()=>calculateNetElectricalPower({stackPowerKw:-1,balanceOfPlantPowerKw:0}),RangeError);
  assert.throws(()=>calculateNetElectricalPower({stackPowerKw:10,balanceOfPlantPowerKw:NaN}),TypeError);
+});
+
+
+test("power solver chooses the first upward crossing on a non-monotonic polarization power curve",()=>{
+ const current=solveFirstPowerCrossing({
+  targetPower:3,minCurrentDensity:0.1,maxCurrentDensity:3.9,steps:100,
+  powerAt:i=>i*(4-i)
+ });
+ assert.ok(Math.abs(current-1)<1e-10);
+ assert.ok(current<2,"solver must not select the descending high-current branch");
+});
+test("power solver returns the sampled maximum when target power is unattainable",()=>{
+ const current=solveFirstPowerCrossing({
+  targetPower:5,minCurrentDensity:0,maxCurrentDensity:4,steps:100,
+  powerAt:i=>i*(4-i)
+ });
+ assert.equal(current,2);
+});
+test("power solver returns the minimum-current point when target is already met",()=>{
+ assert.equal(solveFirstPowerCrossing({
+  targetPower:0.5,minCurrentDensity:0.1,maxCurrentDensity:3,steps:100,
+  powerAt:i=>i
+ }),0.1);
+});
+test("power solver rejects malformed intervals, steps and non-finite model output",()=>{
+ const base={targetPower:1,minCurrentDensity:0.1,maxCurrentDensity:2,powerAt:i=>i};
+ assert.throws(()=>solveFirstPowerCrossing({...base,maxCurrentDensity:0.1}),RangeError);
+ assert.throws(()=>solveFirstPowerCrossing({...base,steps:0}),RangeError);
+ assert.throws(()=>solveFirstPowerCrossing({...base,powerAt:null}),TypeError);
+ assert.throws(()=>solveFirstPowerCrossing({...base,powerAt:()=>NaN}),RangeError);
 });
