@@ -5,8 +5,9 @@ const base = { reversibleVoltage:1.18, activationLoss:0.04, currentDensity:0.5, 
 test("altitude compensation raises compressor pressure ratio as inlet pressure falls",()=>{
  const seaLevel=calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0.1013});
  const altitude=calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0.054});
- assert.equal(seaLevel,2.5);
+ assert.ok(Math.abs(seaLevel-2.5)<1e-12);
  assert.ok(altitude>seaLevel);
+ assert.ok(Math.abs(altitude-(2.5*0.1013/0.054))<1e-12);
  assert.throws(()=>calculateAltitudeAdjustedPressureRatio({basePressureRatio:1,ambientPressureMPa:0.1}),RangeError);
  assert.throws(()=>calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0}),RangeError);
 });
