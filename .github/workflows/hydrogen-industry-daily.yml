@@ -24,13 +24,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
-      REPORT_MODE: ${ inputs.mode || 'preview' }}
+      REPORT_MODE: ${{ inputs.mode || 'preview' }}
       SMTP_HOST: smtp.163.com
       SMTP_PORT: "465"
-      SMTP_USERNAME: ${ secrets.SMTP_USERNAME }}
-      SMTP_PASSWORD: ${ secrets.SMTP_PASSWORD }}
-      REPORT_RECIPIENT: ${ secrets.REPORT_RECIPIENT }}
-      GEMINI_API_KEY: ${ secrets.GEMINI_API_KEY }}
+      SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      REPORT_RECIPIENT: ${{ secrets.REPORT_RECIPIENT }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GEMINI_MODEL: gemini-3.6-flash
       PYTHONUTF8: "1"
     steps:
