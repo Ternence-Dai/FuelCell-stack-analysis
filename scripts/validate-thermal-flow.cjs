@@ -79,4 +79,12 @@ assert.ok(app.includes('冷却液比热 cp kJ/(kg·K)') &&
           app.includes('冷却液密度 ρ kg/L'),
   'thermal calculator UI must label specific heat and density with their units');
 
+
+assert.ok(domain.includes('export function solveFirstPowerCrossing('),
+  'the non-monotonic stack operating-point solver must live in the tested domain core');
+assert.ok(app.includes('window.FuelCellDomain.solveFirstPowerCrossing('),
+  'the main stack solver must call the shared first-crossing solver');
+assert.ok(!app.includes('function solveCurrentDensity(targetP_kW, p){\\n  const target = Number(targetP_kW) * 1000;\\n  const minI = 0.01'),
+  'the application must not retain a duplicate untested current-density scan implementation');
+
 console.log('Fuel-cell coolant thermal-flow integration checks passed.');
