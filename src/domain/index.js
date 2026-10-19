@@ -40,6 +40,17 @@ export function calculateCoolantPumpPower({
     "coolant pump electrical power");
 }
 
+export function calculateNetElectricalPower({ stackPowerKw, balanceOfPlantPowerKw }) {
+  finite(stackPowerKw, "stackPowerKw");
+  finite(balanceOfPlantPowerKw, "balanceOfPlantPowerKw");
+  if (stackPowerKw < 0 || balanceOfPlantPowerKw < 0) {
+    throw new RangeError("stack and balance-of-plant power must be non-negative");
+  }
+  // A system consuming more than the stack produces has no positive net export.
+  // Do not add an artificial minimum output to an infeasible operating point.
+  return Math.max(0, stackPowerKw - balanceOfPlantPowerKw);
+}
+
 export function calculateFuelToElectricEfficiency({
   netPowerKw,
   hydrogenFeedKgPerHour,
