@@ -12,8 +12,8 @@ export function solveFirstPowerCrossing({ targetPower, minCurrentDensity, maxCur
 
   const evaluate = current => {
     const power = powerAt(current);
-    if (!Number.isFinite(power) || power < 0) {
-      throw new RangeError("powerAt must return a finite non-negative power");
+    if (!Number.isFinite(power)) {
+      throw new RangeError("powerAt must return a finite power");
     }
     return power;
   };
