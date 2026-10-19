@@ -714,6 +714,18 @@ function viewDashboard(){
         </div>`).join('')}
     </div>
   </div>
+  <section class="dashboard-command" aria-label="工程工作流快捷入口">
+    <div class="dashboard-command-copy">
+      <div class="eyebrow">ENGINEERING WORKFLOW</div>
+      <h3>从工况设定到工程判断</h3>
+      <p>先调整电堆工况与参数，再进入仿真、计算或监控页面核对结果。模型输出不等于台架实测数据。</p>
+    </div>
+    <div class="dashboard-command-actions">
+      <button class="btn primary" data-action="nav" data-id="sim">进入动态仿真</button>
+      <button class="btn ghost" data-action="nav" data-id="calc">打开工程计算</button>
+      <button class="btn ghost" data-action="nav" data-id="monitor">查看运行监控</button>
+    </div>
+  </section>
   ${r.powerLimited ? '<div class="hint" role="alert" style="border-color:rgba(255,159,10,.45);color:#ffcc80">当前目标功率超过此参数组合下的模型峰值；页面显示的是模型峰值工况，不代表达到额定目标。</div>' :
     r.powerFloorLimited ? '<div class="hint" role="alert" style="border-color:rgba(255,159,10,.45);color:#ffcc80">当前目标低于求解器最低扫描电流密度下的最小可行功率；为避免使用 Tafel 模型无效区间，页面采用最低扫描电流工况，因此实际计算功率会高于目标。</div>' :
     r.netPowerDeficit ? '<div class="hint" role="alert" style="border-color:rgba(255,159,10,.45);color:#ffcc80">辅机总功耗不低于电堆输出功率，系统当前没有正净输出；净功率和系统效率按 0 计，不代表可向外供电。</div>' : ''}
