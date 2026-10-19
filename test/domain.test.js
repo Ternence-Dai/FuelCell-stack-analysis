@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow, calculateReactantMassFlows, calculateAltitudeAdjustedPressureRatio } from "../src/domain/index.js";
+import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow, calculateReactantMassFlows, calculateAltitudeAdjustedPressureRatio, calculateFuelToElectricEfficiency } from "../src/domain/index.js";
 const base = { reversibleVoltage:1.18, activationLoss:0.04, currentDensity:0.5, areaSpecificResistance:0.12, limitingCurrentDensity:2, concentrationCoefficient:0.03 };
 test("altitude compensation raises compressor pressure ratio as inlet pressure falls",()=>{
  const seaLevel=calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0.1013});
@@ -10,6 +10,21 @@ test("altitude compensation raises compressor pressure ratio as inlet pressure f
  assert.ok(Math.abs(altitude-(2.5*0.1013/0.054))<1e-12);
  assert.throws(()=>calculateAltitudeAdjustedPressureRatio({basePressureRatio:1,ambientPressureMPa:0.1}),RangeError);
  assert.throws(()=>calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0}),RangeError);
+});
+test("net system efficiency uses actual hydrogen feed chemical energy",()=>{
+ const efficiency=calculateFuelToElectricEfficiency({
+  netPowerKw:50,hydrogenFeedKgPerHour:3,hydrogenLhvKwhPerKg:33.33
+ });
+ assert.ok(Math.abs(efficiency-(50/(3*33.33)))<1e-12);
+ assert.equal(calculateFuelToElectricEfficiency({
+  netPowerKw:0,hydrogenFeedKgPerHour:3
+ }),0);
+ assert.throws(()=>calculateFuelToElectricEfficiency({
+  netPowerKw:100,hydrogenFeedKgPerHour:1
+ }),RangeError);
+ assert.throws(()=>calculateFuelToElectricEfficiency({
+  netPowerKw:50,hydrogenFeedKgPerHour:0
+ }),RangeError);
 });
 test("polarization losses sum to reversible voltage minus cell voltage", () => {
  const p = calculatePolarizationPoint(base);
