@@ -17,11 +17,9 @@ export function calculateAltitudeAdjustedPressureRatio({
   if (basePressureRatio <= 1 || ambientPressureMPa <= 0 || referencePressureMPa <= 0) {
     throw new RangeError("compressor pressure ratio must exceed 1 and absolute pressures must be positive");
   }
-  // The baseline ratio is calibrated at reference pressure. At altitude,
-  // lower compressor inlet pressure requires a higher ratio to preserve
-  // the same absolute delivery-pressure target.
-  const ratio = basePressureRatio *
-    (0.75 + 0.25 * referencePressureMPa / ambientPressureMPa);
+  // Treat the configured ratio as the sea-level design point. Holding
+  // absolute discharge pressure constant requires Pout/Pambient at altitude.
+  const ratio = basePressureRatio * referencePressureMPa / ambientPressureMPa;
   return finiteResult(ratio, "altitude-adjusted compressor pressure ratio");
 }
 export function calculatePolarizationPoint({ reversibleVoltage, activationLoss, currentDensity, areaSpecificResistance, limitingCurrentDensity, concentrationCoefficient }) {
