@@ -578,9 +578,10 @@ const LIB = [
     { id:'test.cycle', k:'耐久循环', v:'5000 – 15000 h', u:'—', range:'—', note:'启停循环 / 变载循环 / 怠速循环 三类' },
     { id:'test.cold', k:'冷启动测试', v:'-30 / -35 / -40', u:'℃', range:'-40 – 0', note:'环境仓浸泡 ≥ 8h 至热平衡' },
   ]},
-  { id:'global', t:'全球电堆数据库', ico:'', desc:'国际主流电堆实测参数对标', items: GLOBAL_DB.map((g,i) => ({
+  { id:'global', t:'全球电堆数据库', ico:'', desc:'机型参数整理稿 · 来源未逐条核验，当前仅供研究线索参考，不可作为实测对标或设计输入', items: GLOBAL_DB.map((g,i) => ({
     id:'g.'+i, k:g.n, v:`${g.p} kW / ${g.vpd} kW/L / ${g.sp} kW/kg`, u:'—', range:'—',
-    note:`${g.N} 片 · ${g.area} cm² · ${g.i} A/cm² · 效率 ${g.eta}% · 寿命 ${g.life}h · ${g.r}`
+    evidenceStatus:'source-pending', evidenceLabel:'来源待核验',
+    note:`${g.N} 片 · ${g.area} cm² · ${g.i} A/cm² · 效率 ${g.eta}% · 寿命 ${g.life}h · ${g.r} · 当前无逐项来源登记，数值不得视为厂家实测数据`
   }))},
 ];
 
@@ -2088,6 +2089,7 @@ function viewLib(){
             </div>
             ${it.range && it.range !== '—' ? `<div class="lib-item-range">极限范围：${it.range}${it.u && it.u !== '—' ? ' ' + it.u : ''}</div>` : ''}
             <div class="lib-item-note">${it.note || ''}</div>
+            ${it.evidenceStatus === 'source-pending' ? '<div class="source-provenance-warning"><span>⚠</span> ' + (it.evidenceLabel || '来源待核验') + ' · 请勿作为工程设计依据</div>' : ''}
             <div class="lib-item-foot">
               <div class="tier-tags">${tierTags || '<span class="tier-tag">通用</span>'}</div>
               ${canApply
