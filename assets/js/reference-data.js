@@ -1,5 +1,6 @@
 /* Reference datasets: validate source provenance before changing technical values. */
 /* ================= 全球电堆数据库 ================= */
+/* The following comparison figures currently lack per-field public source records and are labeled source-pending in the UI. Do not use as verified manufacturer measurements or design inputs. */
 const GLOBAL_DB = [
   { n:'Toyota Mirai 2', r:'日本·丰田', p:128, N:330, area:400, vpd:5.4, sp:4.0, i:1.30, eta:60.0, life:15000, cold:-30, mem:10, pt:0.20, bpp:'钛合金', note:'3D 细密流场 + 增强复合膜' },
   { n:'Hyundai NEXO', r:'韩国·现代', p:95, N:440, area:250, vpd:3.1, sp:2.3, i:1.20, eta:60.0, life:5000, cold:-30, mem:15, pt:0.30, bpp:'不锈钢', note:'金属板 + 石墨复合' },
