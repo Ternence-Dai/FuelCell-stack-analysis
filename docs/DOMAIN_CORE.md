@@ -13,7 +13,7 @@ The two polarization helpers use different concentration-loss parameterisations.
 
 ## Power-target feasibility and solver boundary
 
-The current-density solver searches the upward branch over the documented scan interval of 0.01–3.0 A/cm². It intentionally does not extrapolate below the Tafel model's minimum current density or above the modeled peak-power point.
+The current-density solver is implemented in the shared domain core as `solveFirstPowerCrossing`. It scans the documented interval of 0.01–3.0 A/cm², brackets the first upward crossing, and refines that crossing with 60 bisection iterations. It intentionally does not extrapolate below the Tafel model's minimum current density or above the modeled peak-power point. Finite negative power values on the high-current descending branch are permitted during the scan but cannot become a positive target crossing; non-finite model output is rejected.
 
 - If the target lies below the minimum scan point's power, the solver uses the 0.01 A/cm² floor and labels the result `below-minimum`; calculated output is higher than the requested target.
 - If the target exceeds the modeled peak, it uses the peak-power point and labels the result `above-maximum`; calculated output is lower than the request.
