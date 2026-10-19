@@ -41,7 +41,8 @@ export function solveFirstPowerCrossing({ targetPower, minCurrentDensity, maxCur
         if (evaluate(middle) >= targetPower) high = middle;
         else low = middle;
       }
-      return (low + high) / 2;
+      // Return the feasible side of the bracket so the requested power is not under-shot.
+      return high;
     }
     previousCurrent = current;
   }
