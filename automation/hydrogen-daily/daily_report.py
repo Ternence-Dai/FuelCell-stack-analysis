@@ -319,7 +319,7 @@ def _extract_response_text(data: dict) -> str:
     return text.strip()
 
 
-def enrich_with_gemini(items: list[NewsItem], api_key: str, model: str = "gemini-3.6-flash") -> bool:
+def enrich_with_gemini(items: list[NewsItem], api_key: str, model: str = "gemini-3.8-flash") -> bool:
     if not api_key or not items:
         return False
     payload_items = [{
@@ -338,12 +338,12 @@ def enrich_with_gemini(items: list[NewsItem], api_key: str, model: str = "gemini
         "stack_relevance 写对 PEM 燃料电池电堆研发的参考；uncertainty 写资料局限。\n\n"
         + json.dumps(payload_items, ensure_ascii=False)
     )
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{urllib.parse.quote(model, safe='')}:generateContent?key={urllib.parse.quote(api_key, safe='')}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{urllib.parse.quote(model, safe='')}:generateContent"
     body = json.dumps({
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"temperature": 0.2, "responseMimeType": "application/json"},
     }).encode("utf-8")
-    request = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", "User-Agent": USER_AGENT}, method="POST")
+    request = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", "x-goog-api-key": api_key, "User-Agent": USER_AGENT}, method="POST")
     try:
         with urllib.request.urlopen(request, timeout=90) as response:
             response_data = json.loads(response.read().decode("utf-8"))
@@ -457,7 +457,7 @@ def main() -> int:
         raise RuntimeError("No usable news items were found in the last 7 days; email was not sent.")
 
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    model = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash").strip()
+    model = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash").strip()
     enriched = enrich_with_gemini(selected, api_key, model) if api_key else False
     for item in selected:
         if not item.editorial:
