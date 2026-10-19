@@ -8,8 +8,9 @@
 <meta name="contact" content="18662613315@163.com">
 <title>氢枢 HyHub · 燃料电池电堆全能平台 | 戴煜</title>
 <link rel="stylesheet" href="./assets/css/legacy-app.css">
-  <link rel="stylesheet" href="./assets/css/product-system.css?v=20261018-v3.2">
-  <link rel="stylesheet" href="./assets/css/product-system.css?v=20261019-v5">
+
+
+  <link rel="stylesheet" href="./assets/css/product-system.css?v=20261019-v6">
 </head>
 <body>
 
@@ -38,6 +39,15 @@
       <div class="top-chip" id="chipStatus">● 在线</div>
     </header>
     <div class="hyhub-intro"><div><div class="eyebrow">HYHUB · ENGINEERING WORKSPACE</div><h2>燃料电池电堆工程工作台</h2><p>从工况设定、模型计算到性能监控与数据导出，集中管理电堆研发过程。请区分模型计算结果与真实台架测试数据。</p><div class="chips"><span>参数驱动计算</span><span>性能指标分析</span><span>工况数据导出</span><span>模型结果需验证</span></div></div><div class="mark">H₂</div></div>
+    <section class="product-workflow" aria-label="工程工作流快捷入口">
+      <div class="product-workflow__head"><div><span class="eyebrow">ENGINEERING CONTROL CENTER</span><h3>工程任务流</h3><p>从模型训练、工况仿真到工程计算与运行监控，按研发路径进入对应工作区。</p></div><span class="product-workflow__mode">MODEL · SIMULATE · VALIDATE</span></div>
+      <div class="product-workflow__grid">
+        <button class="product-workflow__item" type="button" onclick="navigate('model')"><i>01</i><b>模型分析</b><small>参数辨识 · 模型训练</small><span>进入工作区 ↗</span></button>
+        <button class="product-workflow__item" type="button" onclick="navigate('sim')"><i>02</i><b>工况仿真</b><small>稳态 · 动态 · 边界工况</small><span>进入工作区 ↗</span></button>
+        <button class="product-workflow__item" type="button" onclick="navigate('calc')"><i>03</i><b>工程计算</b><small>电化学 · 热管理 · 辅机</small><span>进入工作区 ↗</span></button>
+        <button class="product-workflow__item" type="button" onclick="navigate('monitor')"><i>04</i><b>运行监控</b><small>模型输出与实测状态分层</small><span>进入工作区 ↗</span></button>
+      </div><div class="product-workflow__foot">对标参照：ECSIM/OPEM · 工况、模型输出与验证状态分层；此处监控数据仍须以实际设备接入状态为准。</div>
+    </section>
     <div class="content" id="content"></div>
   </div>
 </div>
