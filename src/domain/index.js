@@ -22,6 +22,23 @@ export function calculateAltitudeAdjustedPressureRatio({
   const ratio = basePressureRatio * referencePressureMPa / ambientPressureMPa;
   return finiteResult(ratio, "altitude-adjusted compressor pressure ratio");
 }
+export function calculateFuelToElectricEfficiency({
+  netPowerKw,
+  hydrogenFeedKgPerHour,
+  hydrogenLhvKwhPerKg = 33.33
+}) {
+  for (const [name, value] of Object.entries({
+    netPowerKw, hydrogenFeedKgPerHour, hydrogenLhvKwhPerKg
+  })) finite(value, name);
+  if (netPowerKw < 0 || hydrogenFeedKgPerHour <= 0 || hydrogenLhvKwhPerKg <= 0) {
+    throw new RangeError("net power must be non-negative and hydrogen feed and LHV must be positive");
+  }
+  const fuelInputKw = hydrogenFeedKgPerHour * hydrogenLhvKwhPerKg;
+  const efficiency = finiteResult(netPowerKw / fuelInputKw, "fuel-to-electric efficiency");
+  if (efficiency > 1) throw new RangeError("net electrical output cannot exceed hydrogen chemical energy input");
+  return efficiency;
+}
+
 export function calculatePolarizationPoint({ reversibleVoltage, activationLoss, currentDensity, areaSpecificResistance, limitingCurrentDensity, concentrationCoefficient }) {
   for (const [name, value] of Object.entries({ reversibleVoltage, activationLoss, currentDensity, areaSpecificResistance, limitingCurrentDensity, concentrationCoefficient })) finite(value, name);
   if (reversibleVoltage <= 0 || activationLoss < 0 || currentDensity < 0 || areaSpecificResistance < 0 || limitingCurrentDensity <= 0 || concentrationCoefficient < 0) throw new RangeError("Polarization inputs are outside their physical domain");
