@@ -5,7 +5,7 @@ const app = fs.readFileSync('assets/js/legacy-app.js', 'utf8');
 const domain = fs.readFileSync('src/domain/index.js', 'utf8');
 const html = fs.readFileSync('index.html', 'utf8');
 const productCss = fs.readFileSync('assets/css/product-system.css', 'utf8');
-assert.ok(html.includes('product-system.css?v=20261019-v6'),
+assert.ok(html.includes('product-system.css?v=20261019-v7'),
   'HyHub must load the current V6 engineering workspace stylesheet');
 assert.ok(html.includes('viewport-fit=cover') && !html.includes('user-scalable=no'),
   'HyHub must retain mobile safe-area support and browser zoom accessibility');
@@ -20,7 +20,7 @@ assert.ok(productCss.includes('@media(max-width:760px)') &&
           productCss.includes('@media(max-width:420px)'),
   'HyHub V3 must include tablet/mobile responsive layouts');
 
-assert.ok(html.includes('product-system.css?v=20261019-v6'),
+assert.ok(html.includes('product-system.css?v=20261019-v7'),
   'HyHub must load the cache-busted V3.2 parameter library theme');
 for (const selector of [
   '.lib-categories-grid{', '.lib-cat{', '.lib-cat-head{', '.lib-cat-body{',
