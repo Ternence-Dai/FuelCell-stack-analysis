@@ -40,3 +40,11 @@
 - [OPEM README 与模型说明](https://github.com/ECSIM/opem)
 - [Amphlett 模型源文件](https://github.com/ECSIM/opem/blob/master/opem/Static/Amphlett.py)
 - [Amphlett 回归测试](https://github.com/ECSIM/opem/blob/master/test/test_Amphlett.py)
+
+
+## 6. 2026-10-19 实施补充：全球机型数据来源状态
+
+- 复核发现 12 条全球电堆机型对比记录没有逐字段登记公开规格书/测试报告 URL、版本和核验日期，原分类标题“实测参数对标”会造成来源已核验的误解。
+- 已将分类描述改为“机型参数整理稿 · 来源未逐条核验”，并给每张卡片增加“来源待核验”警示；`assets/js/reference-data.js` 也明确记录这组数据当前不应视为厂家实测数据或工程设计输入。
+- 未凭猜测改写任何厂家数字。下一步逐字段补齐厂商规格书、公开测试报告和适用工况，再将有证据的字段逐个转为已核验状态。
+- 新增 `scripts/validate-global-database.cjs` 并加入 standalone CI，检查 12 条记录都保持未核验提示，不允许界面重新使用“实测参数对标”的误导性描述。
