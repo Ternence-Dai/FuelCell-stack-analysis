@@ -41,7 +41,7 @@ const state = {
     bppMat:'ti', flowField:'3d', coating:'tin', coatThk:120, contactR:5,
     bppBrand:'ti-g1', bppCoatingBrand:'tin-1', sealType:'fkm', gasketType:'ptfe', endPlate:'cf',
     R:0.095, Aact:0.0085, i0:0.0018, m:2.2e-5, n:4,
-    coolFlow:120, coolType:'eg50', dpCool:250, dpH2:15, dpAir:22, radMargin:20, pumpEff:0.65,
+    coolFlowMode:'manual', coolFlow:120, coolType:'eg50', dpCool:250, dpH2:15, dpAir:22, radMargin:20, pumpEff:0.65,
     cmpType:'centri', cmpEff:0.72, cmpRatio:2.5, dcdcEff:0.98, recirc:'ejector',
     purgePeriod:15, purgeDur:0.9,
     optMode:'balanced', adaptive:'on', sohWeight:50,
@@ -199,8 +199,9 @@ function solveSystem(){
     specificHeatKJPerKgK:3.55,
     densityKgPerL:1.05
   }).volumeFlowLPerMinute;
-  const flow = Number.isFinite(P.coolFlow) && P.coolFlow > 0
-    ? P.coolFlow : Math.max(autoCoolantFlow, 10);
+  const flow = P.coolFlowMode === 'auto'
+    ? Math.max(autoCoolantFlow, 10)
+    : (Number.isFinite(P.coolFlow) && P.coolFlow > 0 ? P.coolFlow : 10);
   const pPump = window.FuelCellDomain.calculateCoolantPumpPower({
     volumeFlowLPerMinute:flow,
     pressureDropKPa:P.dpCool ?? 250,
@@ -209,6 +210,8 @@ function solveSystem(){
 
   const pRecirc = P.recirc === 'ejector' ? P.stackPower * 0.004
                  : P.recirc === 'roots' ? P.stackPower * 0.020 : P.stackPower * 0.012;
+  // Recirculation parasitics are first-order technology heuristics, not a
+  // compressor/ejector map or a validated operating-point calculation.
 
   const pDcdc = Pstack * (1 - (P.dcdcEff || 0.98));
 
@@ -377,6 +380,9 @@ const PARAM_GROUPS = [
     { key:'n', k:'浓差指数', unit:'—', min:2, max:6, step:0.5, dec:1, note:'控制浓差损耗上升陡峭度；典型 4' },
   ]},
   { id:'thermal', ico:'❄', name:'水热管理参数', desc:'冷却液、流量、压降、散热裕度', items:[
+    { key:'coolFlowMode', k:'冷却流量模式', unit:'—', type:'select', options:[
+      {v:'manual',t:'手动设定流量'},{v:'auto',t:'按热负荷估算流量'}],
+      note:'自动模式按热负荷、温差、比热 3.55 kJ/(kg·K) 和密度 1.05 kg/L 估算；这些物性是固定近似值，需按实际冷却液温度与浓度校准' },
     { key:'coolType', k:'冷却液类型', unit:'—', type:'select', options:[
       {v:'eg50',t:'50% 乙二醇水溶液（-37℃）'},{v:'eg60',t:'60% 乙二醇水溶液（-48℃）'},
       {v:'di',t:'去离子水（18.2 MΩ·cm）'}],
