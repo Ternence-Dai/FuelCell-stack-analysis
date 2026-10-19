@@ -213,7 +213,11 @@ function solveSystem(){
   const pDcdc = Pstack * (1 - (P.dcdcEff || 0.98));
 
   const pBop = pCmp + pPump + pRecirc + pDcdc;
-  const Pnet = Math.max(Pstack - pBop, 0.1);
+  const Pnet = window.FuelCellDomain.calculateNetElectricalPower({
+    stackPowerKw:Pstack,
+    balanceOfPlantPowerKw:pBop
+  });
+  const netPowerDeficit = Pnet === 0 && pBop >= Pstack;
   const etaSys = window.FuelCellDomain.calculateFuelToElectricEfficiency({
     netPowerKw:Pnet,
     hydrogenFeedKgPerHour:mH2,
@@ -234,7 +238,7 @@ function solveSystem(){
   const lossCon = P.N * I * cell.concentrationLoss / 1000;
 
   return {
-    tier:t, i, Vc, Vstack, I, Pstack, powerLimited, powerFloorLimited,
+    tier:t, i, Vc, Vstack, I, Pstack, powerLimited, powerFloorLimited, netPowerDeficit,
     powerTargetStatus, minimumFeasiblePowerKw, etaStack, etaSys, lamH2, lamAir, mH2, mAir,
     pCmp, pPump, pRecirc, pDcdc, pBop, Pnet, Q, flow,
     gkwh: mH2*1000/Math.max(Pnet,1e-6),
@@ -731,7 +735,8 @@ function viewDashboard(){
     </div>
   </div>
   ${r.powerLimited ? '<div class="hint" role="alert" style="border-color:rgba(255,159,10,.45);color:#ffcc80">当前目标功率超过此参数组合下的模型峰值；页面显示的是模型峰值工况，不代表达到额定目标。</div>' :
-    r.powerFloorLimited ? '<div class="hint" role="alert" style="border-color:rgba(255,159,10,.45);color:#ffcc80">当前目标低于求解器最低扫描电流密度下的最小可行功率；为避免使用 Tafel 模型无效区间，页面采用最低扫描电流工况，因此实际计算功率会高于目标。</div>' : ''}
+    r.powerFloorLimited ? '<div class="hint" role="alert" style="border-color:rgba(255,159,10,.45);color:#ffcc80">当前目标低于求解器最低扫描电流密度下的最小可行功率；为避免使用 Tafel 模型无效区间，页面采用最低扫描电流工况，因此实际计算功率会高于目标。</div>' :
+    r.netPowerDeficit ? '<div class="hint" role="alert" style="border-color:rgba(255,159,10,.45);color:#ffcc80">辅机总功耗不低于电堆输出功率，系统当前没有正净输出；净功率和系统效率按 0 计，不代表可向外供电。</div>' : ''}
 
   <div class="sec-title">电堆功率分段</div>
   <div class="card">
