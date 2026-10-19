@@ -210,7 +210,11 @@ function solveSystem(){
 
   const pBop = pCmp + pPump + pRecirc + pDcdc;
   const Pnet = Math.max(Pstack - pBop, 0.1);
-  const etaSys = Pnet / Math.max(Pstack, 1e-6) * etaStack;
+  const etaSys = window.FuelCellDomain.calculateFuelToElectricEfficiency({
+    netPowerKw:Pnet,
+    hydrogenFeedKgPerHour:mH2,
+    hydrogenLhvKwhPerKg:33.33
+  });
 
   const coreVolL = P.N * (P.cellThk||1.5) * P.area / 1000;
   const volL = coreVolL * 1.5;
