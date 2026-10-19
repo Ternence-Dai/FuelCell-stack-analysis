@@ -44,3 +44,5 @@ jobs:
         run: node scripts/validate-nernst.cjs
       - name: Validate coolant thermal-flow units
         run: node scripts/validate-thermal-flow.cjs
+      - name: Validate global stack database provenance labels
+        run: node scripts/validate-global-database.cjs
