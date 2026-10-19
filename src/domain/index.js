@@ -22,6 +22,24 @@ export function calculateAltitudeAdjustedPressureRatio({
   const ratio = basePressureRatio * referencePressureMPa / ambientPressureMPa;
   return finiteResult(ratio, "altitude-adjusted compressor pressure ratio");
 }
+export function calculateCoolantPumpPower({
+  volumeFlowLPerMinute,
+  pressureDropKPa,
+  pumpEfficiency
+}) {
+  for (const [name, value] of Object.entries({
+    volumeFlowLPerMinute, pressureDropKPa, pumpEfficiency
+  })) finite(value, name);
+  if (volumeFlowLPerMinute < 0 || pressureDropKPa < 0 ||
+      pumpEfficiency <= 0 || pumpEfficiency > 1) {
+    throw new RangeError("coolant flow and pressure drop must be non-negative and pump efficiency must be in (0, 1]");
+  }
+  // kW = kPa × m³/s; convert L/min to m³/s before applying efficiency.
+  const flowM3PerSecond = volumeFlowLPerMinute / 60000;
+  return finiteResult(pressureDropKPa * flowM3PerSecond / pumpEfficiency,
+    "coolant pump electrical power");
+}
+
 export function calculateFuelToElectricEfficiency({
   netPowerKw,
   hydrogenFeedKgPerHour,
