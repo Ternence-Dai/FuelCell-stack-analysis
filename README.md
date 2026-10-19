@@ -30,3 +30,8 @@ The modernization work is being applied directly to `main`. The verified slice n
 Remaining delivery work includes calibration against traceable stack datasets, source references and uncertainty for the fitted electrochemical parameters, deeper water/thermal and transient models, data provenance/import-export, and browser-level tests for critical workflows. Built-in project examples remain demonstrations, not measured customer or laboratory results.
 
 See [the rebuild plan](docs/REBUILD_PLAN.md) and [domain rules, units and validation boundaries](docs/DOMAIN_CORE.md).
+
+
+## 开源项目深度对标
+
+本项目采用的上游参考、架构借鉴、实现边界与后续验收要求见 [docs/OPEN_SOURCE_BENCHMARKS.md](docs/OPEN_SOURCE_BENCHMARKS.md)。
