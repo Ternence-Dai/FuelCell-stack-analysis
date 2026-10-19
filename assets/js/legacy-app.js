@@ -115,39 +115,13 @@ function classifyPowerTarget(targetKw, actualKw, minimumFeasibleKw){
 }
 function solveCurrentDensity(targetP_kW, p){
   const target = Number(targetP_kW) * 1000;
-  const minI = 0.01, maxI = 3.0, steps = 600;
-  const powerAt = current => p.N * vcell(current, p.T_K, p) * current * p.area;
-  let previousI = minI;
-  let previousPower = powerAt(previousI);
-  let peakI = previousI;
-  let peakPower = previousPower;
-  if(!Number.isFinite(target) || target <= previousPower) return minI;
-
-  // Find the first upward crossing. Stack power is not monotonic over the
-  // entire current-density range; a single wide bisection can converge to
-  // the high-current descending branch and report an unstable operating point.
-  for(let step=1; step<=steps; step++){
-    const current = minI + (maxI-minI)*step/steps;
-    const power = powerAt(current);
-    if(Number.isFinite(power) && power > peakPower){
-      peakPower = power;
-      peakI = current;
-    }
-    if(Number.isFinite(power) && power >= target){
-      let lo = previousI, hi = current;
-      for(let k=0;k<60;k++){
-        const mid = (lo+hi)/2;
-        if(powerAt(mid) >= target) hi = mid;
-        else lo = mid;
-      }
-      return (lo+hi)/2;
-    }
-    previousI = current;
-    previousPower = power;
-  }
-  // Requested power exceeds the modelled maximum: return the peak-power
-  // operating point. solveSystem exposes a powerLimited flag to the UI.
-  return peakI;
+  return window.FuelCellDomain.solveFirstPowerCrossing({
+    targetPower:target,
+    minCurrentDensity:0.01,
+    maxCurrentDensity:3.0,
+    steps:600,
+    powerAt:current => p.N * vcell(current, p.T_K, p) * current * p.area
+  });
 }
 function solveSystem(){
   const P = state.params;
