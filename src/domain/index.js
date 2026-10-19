@@ -71,8 +71,14 @@ export function calculateAltitudeAdjustedPressureRatio({
   }
   // Treat the configured ratio as the sea-level design point. Holding
   // absolute discharge pressure constant requires Pout/Pambient at altitude.
-  const ratio = basePressureRatio * referencePressureMPa / ambientPressureMPa;
-  return finiteResult(ratio, "altitude-adjusted compressor pressure ratio");
+  const ratio = finiteResult(
+    basePressureRatio * referencePressureMPa / ambientPressureMPa,
+    "altitude-adjusted compressor pressure ratio"
+  );
+  if (ratio <= 1) {
+    throw new RangeError("ambient pressure leaves no feasible compressor pressure rise at the configured absolute discharge pressure");
+  }
+  return ratio;
 }
 export function calculateCoolantPumpPower({
   volumeFlowLPerMinute,
