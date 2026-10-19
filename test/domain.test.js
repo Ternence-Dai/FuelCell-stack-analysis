@@ -228,6 +228,13 @@ test("power solver chooses the first upward crossing on a non-monotonic polariza
  assert.ok(Math.abs(current-1)<1e-10);
  assert.ok(current<2,"solver must not select the descending high-current branch");
 });
+test("power solver returns a feasible point that does not under-shoot a target",()=>{
+ const current=solveFirstPowerCrossing({
+  targetPower:2,minCurrentDensity:0,maxCurrentDensity:2,steps:1,
+  powerAt:i=>i*i
+ });
+ assert.ok(current*current>=2,"returned operating point must meet or exceed requested power");
+});
 test("power solver returns the sampled maximum when target power is unattainable",()=>{
  const current=solveFirstPowerCrossing({
   targetPower:5,minCurrentDensity:0,maxCurrentDensity:4,steps:100,
