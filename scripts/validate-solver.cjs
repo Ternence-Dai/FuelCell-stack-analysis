@@ -44,6 +44,9 @@ async function main() {
     'the air pressure control must disclose the oxygen-fraction assumption');
   const system = extract('solveSystem');
   assert.ok(system.includes('calculateCoolantPumpPower') && system.includes('pressureDropKPa:P.dpCool ?? 250'), 'coolant pump power must use the configured coolant-loop pressure drop and shared hydraulic-power calculation');
+  assert.ok(system.includes('calculateNetElectricalPower') && system.includes('netPowerDeficit') &&
+    !system.includes('Math.max(Pstack - pBop, 0.1)'),
+    'net output must clamp at zero and expose an explicit BOP power deficit instead of inventing a positive floor');
   assert.ok(system.includes('calculateFuelToElectricEfficiency') && system.includes('calculateAltitudeAdjustedPressureRatio') && system.includes('compressorInletTemperatureK = P.Tamb + 273.15'), 'system solver must use hydrogen-feed efficiency and altitude/ambient-aware compressor inputs');
   assert.ok(system.includes('window.FuelCellDomain.calculateReactantMassFlows'),
     'main stack solver must use the shared Faraday/stoichiometric reactant-flow model');
