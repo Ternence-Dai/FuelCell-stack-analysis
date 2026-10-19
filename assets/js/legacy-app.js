@@ -184,7 +184,11 @@ function solveSystem(){
 
   const gamma = 0.2857;
   const cmpEff = P.cmpEff || 0.72;
-  const ratio = Math.max(P.cmpRatio || 2.5, 1.01) * (0.75 + 0.25 * pAtm / 0.1013);
+  const ratio = window.FuelCellDomain.calculateAltitudeAdjustedPressureRatio({
+    basePressureRatio:Math.max(P.cmpRatio || 2.5, 1.01),
+    ambientPressureMPa:pAtm,
+    referencePressureMPa:0.1013
+  });
   const pCmp = (mAir/3600) * 1.005 * 293 * (Math.pow(ratio, gamma) - 1) / cmpEff;
 
   const Q = Pstack * (1/etaStack - 1);
