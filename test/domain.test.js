@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow, calculateReactantMassFlows, calculateAltitudeAdjustedPressureRatio, calculateFuelToElectricEfficiency, calculateCoolantPumpPower } from "../src/domain/index.js";
+import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow, calculateReactantMassFlows, calculateAltitudeAdjustedPressureRatio, calculateFuelToElectricEfficiency, calculateCoolantPumpPower, calculateNetElectricalPower } from "../src/domain/index.js";
 const base = { reversibleVoltage:1.18, activationLoss:0.04, currentDensity:0.5, areaSpecificResistance:0.12, limitingCurrentDensity:2, concentrationCoefficient:0.03 };
 test("altitude compensation raises compressor pressure ratio as inlet pressure falls",()=>{
  const seaLevel=calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0.1013});
@@ -209,4 +209,12 @@ test("tiny concentration coefficient offsets raw exponential overflow",()=>{
  assert.ok(p.concentrationLoss>0);
  assert.ok(Math.abs(p.concentrationLoss-Math.exp(Math.log(Number.MIN_VALUE)+720))<1e-25);
  assert.ok(Number.isFinite(p.cellVoltage));
+});
+
+test("net electrical output never invents positive power when BOP exceeds stack output",()=>{
+ assert.equal(calculateNetElectricalPower({stackPowerKw:100,balanceOfPlantPowerKw:20}),80);
+ assert.equal(calculateNetElectricalPower({stackPowerKw:20,balanceOfPlantPowerKw:20}),0);
+ assert.equal(calculateNetElectricalPower({stackPowerKw:10,balanceOfPlantPowerKw:12}),0);
+ assert.throws(()=>calculateNetElectricalPower({stackPowerKw:-1,balanceOfPlantPowerKw:0}),RangeError);
+ assert.throws(()=>calculateNetElectricalPower({stackPowerKw:10,balanceOfPlantPowerKw:NaN}),TypeError);
 });
