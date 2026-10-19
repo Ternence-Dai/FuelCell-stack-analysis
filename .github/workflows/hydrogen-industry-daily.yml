@@ -31,7 +31,7 @@ jobs:
       SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
       REPORT_RECIPIENT: ${{ secrets.REPORT_RECIPIENT }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      GEMINI_MODEL: gemini-3.6-flash
+      GEMINI_MODEL: gemini-3.8-flash
       PYTHONUTF8: "1"
     steps:
       - name: Check out repository
