@@ -41,7 +41,7 @@ const state = {
     bppMat:'ti', flowField:'3d', coating:'tin', coatThk:120, contactR:5,
     bppBrand:'ti-g1', bppCoatingBrand:'tin-1', sealType:'fkm', gasketType:'ptfe', endPlate:'cf',
     R:0.095, Aact:0.0085, i0:0.0018, m:2.2e-5, n:4,
-    coolFlow:120, coolType:'eg50', dpH2:15, dpAir:22, radMargin:20, pumpEff:0.65,
+    coolFlow:120, coolType:'eg50', dpCool:250, dpH2:15, dpAir:22, radMargin:20, pumpEff:0.65,
     cmpType:'centri', cmpEff:0.72, cmpRatio:2.5, dcdcEff:0.98, recirc:'ejector',
     purgePeriod:15, purgeDur:0.9,
     optMode:'balanced', adaptive:'on', sohWeight:50,
@@ -201,7 +201,11 @@ function solveSystem(){
   }).volumeFlowLPerMinute;
   const flow = Number.isFinite(P.coolFlow) && P.coolFlow > 0
     ? P.coolFlow : Math.max(autoCoolantFlow, 10);
-  const pPump = flow * 0.25 / 60 / (P.pumpEff || 0.65);
+  const pPump = window.FuelCellDomain.calculateCoolantPumpPower({
+    volumeFlowLPerMinute:flow,
+    pressureDropKPa:P.dpCool ?? 250,
+    pumpEfficiency:P.pumpEff || 0.65
+  });
 
   const pRecirc = P.recirc === 'ejector' ? P.stackPower * 0.004
                  : P.recirc === 'roots' ? P.stackPower * 0.020 : P.stackPower * 0.012;
@@ -374,6 +378,7 @@ const PARAM_GROUPS = [
       {v:'di',t:'去离子水（18.2 MΩ·cm）'}],
       note:'高寒地区可提高乙二醇比例；去离子水需在线电导率监控' },
     { key:'coolFlow', k:'冷却液流量', unit:'L/min', min:10, max:400, step:5, dec:0, note:'流量随功率近似线性增长；120kW 级典型 100–160 L/min' },
+    { key:'dpCool', k:'冷却回路压降', unit:'kPa', min:50, max:300, step:5, dec:0, note:'默认 250 kPa 为模型设计假设；应按实际冷却回路阻力与泵曲线标定' },
     { key:'pumpEff', k:'冷却水泵效率', unit:'—', min:0.40, max:0.85, step:0.01, dec:2, note:'高效永磁同步水泵可达 0.75–0.85' },
     { key:'dpH2', k:'氢侧压降', unit:'kPa', min:5, max:50, step:1, dec:0, note:'压降升高预示流场堵塞或水淹；典型 10–25 kPa' },
     { key:'dpAir', k:'空气侧压降', unit:'kPa', min:8, max:60, step:1, dec:0, note:'压降过高增加空压机功耗；典型 15–30 kPa' },
