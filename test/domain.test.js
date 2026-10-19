@@ -237,7 +237,7 @@ test("power solver returns the sampled maximum when target power is unattainable
 });
 test("power solver returns the minimum-current point when target is already met",()=>{
  assert.equal(solveFirstPowerCrossing({
-  targetPower:0.5,minCurrentDensity:0.1,maxCurrentDensity:3,steps:100,
+  targetPower:0.05,minCurrentDensity:0.1,maxCurrentDensity:3,steps:100,
   powerAt:i=>i
  }),0.1);
 });
