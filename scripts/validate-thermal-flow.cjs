@@ -5,8 +5,8 @@ const app = fs.readFileSync('assets/js/legacy-app.js', 'utf8');
 const domain = fs.readFileSync('src/domain/index.js', 'utf8');
 const html = fs.readFileSync('index.html', 'utf8');
 const productCss = fs.readFileSync('assets/css/product-system.css', 'utf8');
-assert.ok(html.includes('product-system.css?v=20261019-v7'),
-  'HyHub must load the current V6 engineering workspace stylesheet');
+assert.ok(html.includes('product-system.css?v=20261019-v8'),
+  'HyHub must load the current V8 engineering workspace stylesheet');
 assert.ok(html.includes('viewport-fit=cover') && !html.includes('user-scalable=no'),
   'HyHub must retain mobile safe-area support and browser zoom accessibility');
 assert.ok(productCss.includes('HyHub V3') || productCss.includes('visible product interface refresh'),
@@ -20,8 +20,8 @@ assert.ok(productCss.includes('@media(max-width:760px)') &&
           productCss.includes('@media(max-width:420px)'),
   'HyHub V3 must include tablet/mobile responsive layouts');
 
-assert.ok(html.includes('product-system.css?v=20261019-v7'),
-  'HyHub must load the cache-busted V3.2 parameter library theme');
+assert.ok(html.includes('product-system.css?v=20261019-v8'),
+  'HyHub must load the cache-busted V4 dashboard and parameter-library theme');
 for (const selector of [
   '.lib-categories-grid{', '.lib-cat{', '.lib-cat-head{', '.lib-cat-body{',
   '.lib-cat.open .lib-cat-body{', '.lib-item{', '.hyhub-intro{'
@@ -33,6 +33,16 @@ assert.ok(productCss.includes('grid-template-columns:repeat(2,minmax(0,1fr))!imp
 assert.ok(productCss.includes('background:#fff!important') &&
           productCss.includes('background:#f7fafc'),
   'the library cards and expansion surface must use the new light engineering palette');
+
+
+assert.ok(productCss.includes('HyHub V4') &&
+          productCss.includes('.dashboard-command{') &&
+          productCss.includes('.content:has(.hero)>.hero{') &&
+          productCss.includes('.content:has(.hero) .gcard-grid{'),
+  'HyHub V4 must provide the new dashboard command surface, hero layout, and benchmark card system');
+assert.ok(productCss.includes('grid-template-areas:"top top" "power metrics" "slider metrics" "scale metrics"') &&
+          productCss.includes('@media(max-width:980px)'),
+  'HyHub V4 dashboard must reflow its engineering KPIs responsively');
 
 assert.ok(productCss.includes('prefers-reduced-motion:reduce'),
   'HyHub V3 must respect reduced-motion preferences');
