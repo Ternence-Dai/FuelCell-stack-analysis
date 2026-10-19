@@ -10,6 +10,8 @@ test("altitude compensation raises compressor pressure ratio as inlet pressure f
  assert.ok(Math.abs(altitude-(2.5*0.1013/0.054))<1e-12);
  assert.throws(()=>calculateAltitudeAdjustedPressureRatio({basePressureRatio:1,ambientPressureMPa:0.1}),RangeError);
  assert.throws(()=>calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0}),RangeError);
+ assert.throws(()=>calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0.3}),RangeError,
+  "reject an ambient pressure above the configured absolute discharge pressure");
 });
 test("coolant pump power uses flow pressure drop and efficiency with SI conversion",()=>{
  const power=calculateCoolantPumpPower({
