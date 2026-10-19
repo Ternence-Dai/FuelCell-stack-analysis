@@ -189,7 +189,8 @@ function solveSystem(){
     ambientPressureMPa:pAtm,
     referencePressureMPa:0.1013
   });
-  const pCmp = (mAir/3600) * 1.005 * 293 * (Math.pow(ratio, gamma) - 1) / cmpEff;
+  const compressorInletTemperatureK = P.Tamb + 273.15;
+  const pCmp = (mAir/3600) * 1.005 * compressorInletTemperatureK * (Math.pow(ratio, gamma) - 1) / cmpEff;
 
   const Q = Pstack * (1/etaStack - 1);
   const autoCoolantFlow = window.FuelCellDomain.calculateCoolantFlow({
