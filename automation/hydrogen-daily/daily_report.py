@@ -8,6 +8,7 @@ content; without an API key, a transparent rule-based editorial fallback is used
 from __future__ import annotations
 
 import difflib
+import global_breakthrough
 import email.utils
 import html
 import json
@@ -525,7 +526,7 @@ def _date_label(value: datetime | None) -> str:
     return value.astimezone(TZ).strftime("%Y-%m-%d %H:%M SGT") if value else "来源未提供发布时间"
 
 
-def build_html(items: list[NewsItem], warnings: list[str], enriched: bool, now: datetime | None = None) -> str:
+def build_html(items: list[NewsItem], warnings: list[str], enriched: bool, now: datetime | None = None, breakthroughs: list[NewsItem] | None = None) -> str:
     now_local = (now or datetime.now(timezone.utc)).astimezone(TZ)
     cards: list[str] = []
     for index, item in enumerate(items, 1):
@@ -559,17 +560,20 @@ def build_html(items: list[NewsItem], warnings: list[str], enriched: bool, now: 
         warning_html = "<p style='color:#8a5200;background:#fff7e6;padding:10px;border-radius:8px;'><strong>采集提醒：</strong>部分 RSS 来源本次不可用，已跳过，未编造补齐。</p>"
     mode_note = "已使用 Gemini 对 RSS 材料进行中文编辑；分析严格受所提供来源内容约束。" if enriched else "未配置或暂不可用的 AI API：事实区保留 RSS 原始摘要，分析区使用透明的规则化技术提示；没有补造事实。"
     empty = "<p>最近 24 小时内没有采集到可用新闻。系统未编造新闻，也不会发送空白日报。</p>" if not cards else "".join(cards)
+    global_section = global_breakthrough.build_section(breakthroughs or [])
     return f"""<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"></head>
     <body style="margin:0;padding:20px;background:#f3f6f9;font-family:Arial,'Microsoft YaHei',sans-serif;color:#243b53;">
       <main style="max-width:820px;margin:0 auto;background:#ffffff;border-radius:16px;padding:24px;">
         <header style="padding:8px 0 18px;border-bottom:2px solid #d8e2ec;">
-          <p style="margin:0 0 8px;color:#627d98;font-size:12px;letter-spacing:1px;">GLOBAL HYDROGEN FUEL CELL INDUSTRY INTELLIGENCE</p>
-          <h1 style="font-size:25px;margin:0 0 8px;color:#102a43;">全球氢燃料电池产业每日情报</h1>
+          <p style="margin:0 0 8px;color:#627d98;font-size:12px;letter-spacing:1px;">GLOBAL SCIENCE & ENGINEERING + HYDROGEN INTELLIGENCE</p>
+          <h1 style="font-size:25px;margin:0 0 8px;color:#102a43;">全球科技突破与氢燃料电池产业每日情报</h1>
           <p style="margin:0;color:#627d98;">{now_local.strftime('%Y年%m月%d日')} · 新加坡时间 {now_local.strftime('%H:%M')} · 精选 {len(items)} 条</p>
         </header>
         <p style="line-height:1.7;">覆盖基础材料、催化剂、质子交换膜、MEA、双极板、电堆、系统集成、氢气制储运及商业化。优先采用近期消息，并保留原始报道链接。</p>
         {warning_html}
         <p style="font-size:12px;color:#627d98;">编辑方式：{html.escape(mode_note)}</p>
+        {global_section}
+        <h2>全球氢燃料电池产业情报</h2>
         {empty}
         <footer style="border-top:1px solid #d8e2ec;margin-top:24px;padding-top:14px;color:#627d98;font-size:12px;line-height:1.7;">
           本日报由自动化程序采集公开 RSS 信息。新闻事实以原文为准；技术分析属于研究参考，不替代原始测试数据或正式技术验证。<br>
@@ -627,6 +631,10 @@ def main() -> int:
     print(f"Configured report recipient: {mask_email(os.environ.get('REPORT_RECIPIENT', ''))}")
     now = datetime.now(timezone.utc)
     items, warnings = collect_news(now)
+    breakthroughs, breakthrough_warnings = global_breakthrough.collect_breakthroughs(now)
+    warnings.extend(breakthrough_warnings)
+    for breakthrough in breakthroughs:
+        global_breakthrough.base.hydrate_article(breakthrough)
     # Enrich a wider shortlist so weak or stock-only stories can be replaced by substantive reporting.
     selected = select_top_news(items, limit=8, minimum=5)
     for item in selected:
@@ -651,8 +659,8 @@ def main() -> int:
 
     local_now = now.astimezone(TZ)
     date_tag = local_now.strftime("%Y-%m-%d")
-    subject = f"全球氢燃料电池产业每日情报 {date_tag}"
-    html_body = build_html(selected, warnings, enriched, now)
+    subject = f"全球科技突破与氢燃料电池产业每日情报 {date_tag}"
+    html_body = build_html(selected, warnings, enriched, now, breakthroughs)
     output = Path("dist/hydrogen-industry-daily-report.html")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(html_body, encoding="utf-8")
