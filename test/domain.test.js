@@ -43,6 +43,14 @@ test("net system efficiency uses actual hydrogen feed chemical energy",()=>{
   netPowerKw:50,hydrogenFeedKgPerHour:0
  }),RangeError);
 });
+test("fuel efficiency remains representable when the intermediate fuel-energy product overflows",()=>{
+ const efficiency=calculateFuelToElectricEfficiency({
+  netPowerKw:Number.MAX_VALUE,
+  hydrogenFeedKgPerHour:1e200,
+  hydrogenLhvKwhPerKg:1e200
+ });
+ assert.ok(Number.isFinite(efficiency) && efficiency > 0 && efficiency < 1e-90);
+});
 // Independent cross-check against ECSIM/OPEM test/test_Amphlett.py:
 // Enernst_Calc(T=343.15 K, PH2=1 atm, PO2=1 atm) = 1.19075 V.
 // This app accepts dry-air total pressure, so PO2=1 atm maps to
