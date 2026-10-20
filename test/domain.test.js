@@ -349,3 +349,8 @@ test("coolant pump rejects unrepresentable positive power without rejecting scal
  });
  assert.ok(Number.isFinite(scaled) && scaled>0);
 });
+
+
+test("rejects finite-positive pump inputs when their representable result underflows",()=>{
+ assert.throws(()=>calculateCoolantPumpPower({volumeFlowLPerMinute:Number.MIN_VALUE,pressureDropKPa:Number.MIN_VALUE,pumpEfficiency:1}),RangeError);
+});
