@@ -291,3 +291,13 @@ test("power solver scales grid fractions before multiplying extreme finite inter
  assert.ok(current/Number.MAX_VALUE>=0.75);
  assert.ok(Math.abs(current/Number.MAX_VALUE-0.75)<1e-12);
 });
+
+
+test("power solver enforces its documented sampling-step ceiling",()=>{
+ const base={targetPower:1,minCurrentDensity:0,maxCurrentDensity:2,powerAt:i=>i};
+ assert.throws(()=>solveFirstPowerCrossing({...base,steps:100001}),RangeError);
+ assert.throws(()=>solveFirstPowerCrossing({...base,steps:1.5}),RangeError);
+ assert.throws(()=>solveFirstPowerCrossing({...base,steps:Number.MAX_SAFE_INTEGER+1}),RangeError);
+ assert.equal(solveFirstPowerCrossing({...base,steps:1}),1,
+  "the minimum valid one-interval grid must still locate a feasible crossing");
+});
