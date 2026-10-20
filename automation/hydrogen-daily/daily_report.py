@@ -250,14 +250,14 @@ def hydrate_article(item: NewsItem) -> None:
             candidate_image = meta.get("og:image") or meta.get("twitter:image") or ""
             if candidate_image.startswith("https://"):
                 item.image = candidate_image
-        if item.published is None:
-            date_value = (
-                meta.get("article:published_time") or meta.get("datepublished")
-                or meta.get("pubdate") or meta.get("publishdate") or ""
-            )
-            parsed_date = _parse_date(date_value)
-            if parsed_date:
-                item.published = parsed_date
+        date_value = (
+            meta.get("article:published_time") or meta.get("datepublished")
+            or meta.get("pubdate") or meta.get("publishdate") or ""
+        )
+        parsed_date = _parse_date(date_value)
+        if parsed_date:
+            # Prefer the publisher's explicit original publication timestamp over an RSS refresh date.
+            item.published = parsed_date
     except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
         print(f"Article page enrichment unavailable: {urlparse(item.link).netloc} ({type(exc).__name__}).")
 
@@ -604,7 +604,8 @@ def main() -> int:
     print(f"Configured report recipient: {mask_email(os.environ.get('REPORT_RECIPIENT', ''))}")
     now = datetime.now(timezone.utc)
     items, warnings = collect_news(now)
-    selected = select_top_news(items, limit=5, minimum=3)
+    # Enrich a wider shortlist so weak or stock-only stories can be replaced by substantive reporting.
+    selected = select_top_news(items, limit=12, minimum=6)
     for item in selected:
         hydrate_article(item)
     # Re-apply the 24-hour gate after publisher metadata has had a chance to correct RSS dates.
