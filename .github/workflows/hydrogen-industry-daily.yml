@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
-      REPORT_MODE: ${{ github.event.inputs.mode || 'preview' }}
+      REPORT_MODE: ${{ github.event_name == 'schedule' && 'send' || github.event.inputs.mode || 'preview' }}
       SMTP_HOST: smtp.163.com
       SMTP_PORT: "465"
       SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
