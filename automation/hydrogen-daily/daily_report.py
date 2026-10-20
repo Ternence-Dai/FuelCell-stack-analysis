@@ -647,8 +647,8 @@ def main() -> int:
         classify_and_score(item, now)
         item.editorial = {}
     selected = select_top_news(selected, limit=5, minimum=3)
-    if not selected:
-        raise RuntimeError("No usable news items were found in the last 24 hours; email was not sent.")
+    if not selected and not breakthroughs:
+        raise RuntimeError("No usable hydrogen news or global science breakthrough was found in the last 24 hours; email was not sent.")
 
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     model = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash").strip()
