@@ -85,9 +85,11 @@ class GlobalBreakthroughTests(unittest.TestCase):
         ]
         for index, item in enumerate(rows):
             item.score = 20 - index
-        with mock.patch.object(global_report, "GLOBAL_SOURCES", ()), \\
-             mock.patch.object(global_report.base, "filter_recent", return_value=rows), \\
-             mock.patch.object(global_report.base, "deduplicate", side_effect=lambda items: sorted(items, key=lambda x: x.score, reverse=True)):
+        with (
+            mock.patch.object(global_report, "GLOBAL_SOURCES", ()),
+            mock.patch.object(global_report.base, "filter_recent", return_value=rows),
+            mock.patch.object(global_report.base, "deduplicate", side_effect=lambda items: sorted(items, key=lambda x: x.score, reverse=True)),
+        ):
             selected, warnings = global_report.collect_breakthroughs(self.now)
         self.assertEqual([global_report._topic_label(item) for item in selected], ["量子科技", "机器人", "储能与电池"])
         self.assertEqual(warnings, [])
