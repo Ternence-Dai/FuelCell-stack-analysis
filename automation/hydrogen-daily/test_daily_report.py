@@ -37,6 +37,52 @@ class DailyReportTests(unittest.TestCase):
         self.assertEqual(items[0].link, "https://example.com/atom")
         self.assertIsNotNone(items[0].published)
 
+    def test_url_date_rejects_old_article_republished_in_rss(self):
+        now = datetime(2026, 10, 20, 1, 0, tzinfo=timezone.utc)
+        reposted = report.NewsItem(
+            "Old catalyst story refreshed in feed",
+            "https://fuelcellsworks.com/2026/10/13/h2/old-catalyst-story",
+            "FuelCellsWorks",
+            now - timedelta(hours=2),
+        )
+        genuinely_recent = report.NewsItem(
+            "Recent hydrogen infrastructure story",
+            "https://fuelcellsworks.com/2026/10/19/h2/recent-story",
+            "FuelCellsWorks",
+            now - timedelta(hours=2),
+        )
+        self.assertEqual(report.filter_recent([reposted, genuinely_recent], now), [genuinely_recent])
+
+    def test_classifies_hydrogen_derived_aviation_fuel_separately(self):
+        item = report.NewsItem(
+            "Emerging buyers of green hydrogen-based aviation fuel",
+            "https://example.com/aviation",
+            "Test",
+            datetime.now(timezone.utc),
+        )
+        report.classify_and_score(item, datetime.now(timezone.utc))
+        self.assertEqual(item.category, "氢基燃料及交通航空应用")
+
+    def test_stock_sentiment_commentary_is_downranked(self):
+        now = datetime.now(timezone.utc)
+        substantive = report.NewsItem(
+            "New fuel cell durability test results",
+            "https://example.com/technical",
+            "Technical News",
+            now,
+            "The test reports stack durability results and operating conditions.",
+        )
+        stock = report.NewsItem(
+            "Ballard faces market weakness and negative sentiment",
+            "https://example.com/stock",
+            "Market News",
+            now,
+            "Analyst views and share price pressure.",
+        )
+        report.classify_and_score(substantive, now)
+        report.classify_and_score(stock, now)
+        self.assertGreater(substantive.score, stock.score)
+
     def test_classifies_membrane_news(self):
         item = report.NewsItem("New proton exchange membrane MEA", "https://x.test/a", "Test", datetime.now(timezone.utc), "PFSA membrane research")
         report.classify_and_score(item, datetime.now(timezone.utc))
