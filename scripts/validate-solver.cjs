@@ -125,6 +125,30 @@ async function main() {
   assert.match(html, /规划模块（尚未实现）/, 'unimplemented neural-network architecture must be labeled as a plan');
   assert.doesNotMatch(html, /贡献度 85%|贡献度 92%|贡献度 68%|贡献度 76%/, 'fabricated model contribution percentages must not be displayed');
   assert.match(html, /启动演示/, 'synthetic model activity must be presented as a demo, not real training');
+  const runSimStart = html.indexOf('function runSim()');
+  const runSimEnd = html.indexOf('/* ================= 计算器', runSimStart);
+  assert.ok(runSimStart >= 0 && runSimEnd > runSimStart,
+    'simulation modes must remain bounded for disclosure and provenance checks');
+  const simulationSource = html.slice(runSimStart, runSimEnd);
+  assert.ok(simulationSource.includes('role="note"') &&
+            simulationSource.includes('不代表台架实测、产品认证或国家标准符合性结论') &&
+            simulationSource.includes('res.insertAdjacentHTML(\'afterbegin\''),
+    'every simulation mode must disclose that model outputs are not measured or certification results');
+  assert.ok(simulationSource.includes('标准符合性判定</div><div class="kpi-v" style="font-size:15px;color:var(--muted)">未执行') &&
+            !simulationSource.includes('国标判定</div><div class="kpi-v" style="font-size:15px;color:var(--green)">优秀'),
+    'cold-start mode must not claim standards compliance without a test');
+  assert.ok(simulationSource.includes('剩余寿命结论</div><div class="kpi-v" style="font-size:15px;color:var(--muted)">未标定') &&
+            !simulationSource.includes('12000<small>h</small>'),
+    'durability mode must not present a fabricated remaining-life estimate');
+  assert.ok(simulationSource.includes('合成扰动样本（非实测）') &&
+            simulationSource.includes('const syntheticRmse =') &&
+            simulationSource.includes('const syntheticMaxError =') &&
+            simulationSource.includes('const syntheticR2 ='),
+    'bench metrics must be computed from and labeled as synthetic demonstration samples');
+  assert.ok(simulationSource.includes('80℃模型边界电流密度') &&
+            simulationSource.includes('膜水合状态') &&
+            simulationSource.includes('未建模'),
+    'transport-boundary mode must distinguish calculated curve limits from unmodeled membrane hydration');
   console.log('Fuel-cell solver branch and power-limit regression checks passed against domain core');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

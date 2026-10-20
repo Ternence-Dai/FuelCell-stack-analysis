@@ -1376,10 +1376,10 @@ function runSim(){
     }
     html = `
       <div class="grid g2" style="margin-bottom:12px">
-        <div class="kpi b"><div class="kpi-k">响应时间</div><div class="kpi-v">2.0<small>s</small></div></div>
-        <div class="kpi g"><div class="kpi-k">动态效率</div><div class="kpi-v">${fmt(r.etaStack*100-1.8,1)}<small>%</small></div></div>
-        <div class="kpi o"><div class="kpi-k">峰值功率</div><div class="kpi-v">${fmt(Pmax*1.05,0)}<small>kW</small></div></div>
-        <div class="kpi c"><div class="kpi-k">氢耗波动</div><div class="kpi-v">±3.5<small>%</small></div></div>
+        <div class="kpi b"><div class="kpi-k">响应模型时间常数</div><div class="kpi-v">2.0<small>s（设定）</small></div></div>
+        <div class="kpi g"><div class="kpi-k">简化模型效率估算</div><div class="kpi-v">${fmt(r.etaStack*100-1.8,1)}<small>%（示意）</small></div></div>
+        <div class="kpi o"><div class="kpi-k">假设瞬态峰值</div><div class="kpi-v">${fmt(Pmax*1.05,0)}<small>kW（设定）</small></div></div>
+        <div class="kpi c"><div class="kpi-k">氢耗波动假设</div><div class="kpi-v">±3.5<small>%（未标定）</small></div></div>
       </div>
       <div class="chart-wrap"><canvas id="cv1" class="tall"></canvas>${legend([{c:'#0a84ff',n:'电堆功率响应 (kW)'},{c:'#ff9f0a',n:'电堆电流 (A/10)'}])}</div>
       <div class="chart-wrap"><canvas id="cv2"></canvas>${legend([{c:'#00d48a',n:'电堆电压 (V)'}])}</div>`;
@@ -1402,10 +1402,10 @@ function runSim(){
     }
     html = `
       <div class="grid g2" style="margin-bottom:12px">
-        <div class="kpi c"><div class="kpi-k">启动时间</div><div class="kpi-v">30<small>s</small></div></div>
-        <div class="kpi g"><div class="kpi-k">最低启动温度</div><div class="kpi-v">-35<small>℃</small></div></div>
-        <div class="kpi o"><div class="kpi-k">启动能耗</div><div class="kpi-v">1.5<small>kWh</small></div></div>
-        <div class="kpi b"><div class="kpi-k">国标判定</div><div class="kpi-v" style="font-size:15px;color:var(--green)">优秀 ✓</div></div>
+        <div class="kpi c"><div class="kpi-k">启动响应时间假设</div><div class="kpi-v">30<small>s（示意）</small></div></div>
+        <div class="kpi g"><div class="kpi-k">模型设定温度下限</div><div class="kpi-v">-35<small>℃（未验证）</small></div></div>
+        <div class="kpi o"><div class="kpi-k">示意启动能耗</div><div class="kpi-v">1.5<small>kWh（假设）</small></div></div>
+        <div class="kpi b"><div class="kpi-k">标准符合性判定</div><div class="kpi-v" style="font-size:15px;color:var(--muted)">未执行</div></div>
       </div>
       <div class="chart-wrap"><canvas id="cv1" class="tall"></canvas>${legend([{c:'#22d3ee',n:'堆温 (℃)'},{c:'#00d48a',n:'单片电压 (V ×120)'}])}</div>
       <div class="chart-wrap"><canvas id="cv2"></canvas>${legend([{c:'#ff9f0a',n:'输出功率 (kW)'}])}</div>`;
@@ -1427,10 +1427,10 @@ function runSim(){
     }
     html = `
       <div class="grid g2" style="margin-bottom:12px">
-        <div class="kpi g"><div class="kpi-k">电堆 SOH (15000h)</div><div class="kpi-v">${fmt(pts[pts.length-1][1],1)}<small>%</small></div></div>
-        <div class="kpi o"><div class="kpi-k">衰减速率</div><div class="kpi-v">1.5<small>μV/h·cell</small></div></div>
-        <div class="kpi b"><div class="kpi-k">电堆剩余寿命</div><div class="kpi-v">12000<small>h</small></div></div>
-        <div class="kpi p"><div class="kpi-k">启停衰减</div><div class="kpi-v">10<small>μV/次</small></div></div>
+        <div class="kpi g"><div class="kpi-k">假设老化模型 SOH（15000 h）</div><div class="kpi-v">${fmt(pts[pts.length-1][1],1)}<small>%（示意）</small></div></div>
+        <div class="kpi o"><div class="kpi-k">模型假设衰减速率</div><div class="kpi-v">1.5<small>μV/h·cell（未标定）</small></div></div>
+        <div class="kpi b"><div class="kpi-k">剩余寿命结论</div><div class="kpi-v" style="font-size:15px;color:var(--muted)">未标定</div></div>
+        <div class="kpi p"><div class="kpi-k">启停衰减参数</div><div class="kpi-v" style="font-size:15px;color:var(--muted)">未接入实测</div></div>
       </div>
       <div class="chart-wrap"><canvas id="cv1" class="tall"></canvas>${legend([{c:'#00d48a',n:'电堆 SOH (%)'}])}</div>
       <div class="chart-wrap"><canvas id="cv2"></canvas>${legend([{c:'#ff9f0a',n:'衰减速率 (μV/h·cell)'},{c:'#22d3ee',n:'单片电压 (mV)'}])}</div>`;
@@ -1446,17 +1446,29 @@ function runSim(){
     const sim = [], mea = [], resid = [];
     for(let i = 0.1; i <= 2.5; i += 0.1){
       const v = vcell(i, T_K, { N:P.N, area:P.area, pH2:P.pH2, pAir:P.pAir, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
-      const m = v * (0.99 + (Math.sin(i*7) * 0.006));
-      sim.push([i, v]); mea.push([i, m]); resid.push([i, (m - v) * 1000]);
+      const syntheticSample = v * (0.99 + (Math.sin(i*7) * 0.006));
+      sim.push([i, v]); mea.push([i, syntheticSample]); resid.push([i, (syntheticSample - v) * 1000]);
     }
+    // Calculate fit metrics from the generated synthetic sample set. These
+    // values describe this demonstration only; they are not bench results.
+    const meanSim = sim.reduce((sum,row)=>sum+row[1],0)/sim.length;
+    const meanSynthetic = mea.reduce((sum,row)=>sum+row[1],0)/mea.length;
+    const scaleNumerator = sim.reduce((sum,row,index)=>sum+row[1]*mea[index][1],0);
+    const scaleDenominator = sim.reduce((sum,row)=>sum+row[1]*row[1],0);
+    const syntheticScale = scaleDenominator ? scaleNumerator/scaleDenominator : 0;
+    const syntheticRmse = Math.sqrt(resid.reduce((sum,row)=>sum+Math.pow(row[1]/1000,2),0)/resid.length)*1000;
+    const syntheticMaxError = Math.max(...resid.map(row=>Math.abs(row[1])));
+    const syntheticSse = mea.reduce((sum,row,index)=>sum+Math.pow(row[1]-syntheticScale*sim[index][1],2),0);
+    const syntheticSst = mea.reduce((sum,row)=>sum+Math.pow(row[1]-meanSynthetic,2),0);
+    const syntheticR2 = syntheticSst ? 1-syntheticSse/syntheticSst : 1;
     html = `
       <div class="grid g2" style="margin-bottom:12px">
-        <div class="kpi b"><div class="kpi-k">RMSE</div><div class="kpi-v">5.2<small>mV</small></div></div>
-        <div class="kpi g"><div class="kpi-k">最大偏差</div><div class="kpi-v">10.5<small>mV</small></div></div>
-        <div class="kpi o"><div class="kpi-k">修正系数 k</div><div class="kpi-v">0.993</div></div>
-        <div class="kpi c"><div class="kpi-k">拟合优度 R²</div><div class="kpi-v">0.9985</div></div>
+        <div class="kpi b"><div class="kpi-k">合成样本 RMSE</div><div class="kpi-v">${fmt(syntheticRmse,2)}<small>mV</small></div></div>
+        <div class="kpi g"><div class="kpi-k">最大合成偏差</div><div class="kpi-v">${fmt(syntheticMaxError,2)}<small>mV</small></div></div>
+        <div class="kpi o"><div class="kpi-k">合成比例拟合系数 k</div><div class="kpi-v">${fmt(syntheticScale,4)}</div></div>
+        <div class="kpi c"><div class="kpi-k">合成样本 R²</div><div class="kpi-v">${fmt(syntheticR2,4)}</div></div>
       </div>
-      <div class="chart-wrap"><canvas id="cv1" class="tall"></canvas>${legend([{c:'#0a84ff',n:'仿真值'},{c:'#ff9f0a',n:'实测值'}])}</div>
+      <div class="chart-wrap"><canvas id="cv1" class="tall"></canvas>${legend([{c:'#0a84ff',n:'模型曲线'},{c:'#ff9f0a',n:'合成扰动样本（非实测）'}])}</div>
       <div class="chart-wrap"><canvas id="cv2"></canvas>${legend([{c:'#ff453a',n:'残差 (mV)'}])}</div>`;
     res.innerHTML = html;
     requestAnimationFrame(() => {
@@ -1554,18 +1566,27 @@ function runSim(){
       }
       return { data:d, color:['#22d3ee','#00d48a','#0a84ff','#ff9f0a'][idx] };
     });
+    const referenceCurve = series[2].data;
+    const boundaryPoint = referenceCurve.length ? referenceCurve[referenceCurve.length-1] : null;
+    const boundaryCurrent = boundaryPoint ? boundaryPoint[0] : NaN;
+    const boundaryMargin = Number.isFinite(boundaryCurrent) && boundaryCurrent > 0
+      ? Math.max(0,(boundaryCurrent-r.i)/boundaryCurrent*100) : NaN;
     html = `
       <div class="grid g2" style="margin-bottom:12px">
-        <div class="kpi o"><div class="kpi-k">极限电流密度</div><div class="kpi-v">2.85<small>A/cm²</small></div></div>
-        <div class="kpi g"><div class="kpi-k">安全边界裕度</div><div class="kpi-v">22.5<small>%</small></div></div>
-        <div class="kpi c"><div class="kpi-k">最低单片电压</div><div class="kpi-v">0.58<small>V</small></div></div>
-        <div class="kpi p"><div class="kpi-k">干湿膜判定</div><div class="kpi-v" style="font-size:15px;color:var(--green)">正常 ✓</div></div>
+        <div class="kpi o"><div class="kpi-k">80℃模型边界电流密度</div><div class="kpi-v">${fmt(boundaryCurrent,2)}<small>A/cm²（示意）</small></div></div>
+        <div class="kpi g"><div class="kpi-k">当前电流边界裕度</div><div class="kpi-v">${fmt(boundaryMargin,1)}<small>%（模型估算）</small></div></div>
+        <div class="kpi c"><div class="kpi-k">当前工况单片电压</div><div class="kpi-v">${fmt(r.Vc,3)}<small>V</small></div></div>
+        <div class="kpi p"><div class="kpi-k">膜水合状态</div><div class="kpi-v" style="font-size:15px;color:var(--muted)">未建模</div></div>
       </div>
       <div class="chart-wrap"><canvas id="cv1" class="tall"></canvas>${legend([{c:'#22d3ee',n:'40℃'},{c:'#00d48a',n:'60℃'},{c:'#0a84ff',n:'80℃'},{c:'#ff9f0a',n:'95℃'}])}</div>`;
     res.innerHTML = html;
     requestAnimationFrame(() => plot($('#cv1'), {
       xMin:0, xMax:3.0, yMin:0, yMax:1.1, xLabel:'电流密度 (A/cm²)', yLabel:'单片电压 (V)', series }));
   }
+  res.insertAdjacentHTML('afterbegin',
+    '<div class="card" role="note" style="margin-bottom:12px;border-left:3px solid var(--orange)">' +
+    '<strong>模型边界说明</strong><div class="li-s">本视图包含简化模型和合成示例曲线，不代表台架实测、产品认证或国家标准符合性结论。冷启动与寿命结果为假设情景；台架页指标只描述合成扰动样本。使用工程结论前必须导入真实测试数据并完成模型/传感器标定。</div></div>'
+  );
   toast('电堆仿真完成 · ' + SIM_MODES.find(m => m.id === state.simMode).t);
 }
 
