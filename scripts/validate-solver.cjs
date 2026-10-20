@@ -149,7 +149,7 @@ async function main() {
             simulationSource.includes('导出本次合成演示样本 JSON') &&
             simulationSource.includes('state.lastSyntheticBenchDataset = dataset'),
     'synthetic bench results must expose an export action for the exact displayed run');
-  assert.ok(html.includes('datasetKind: \'synthetic-demonstration\'') &&
+  assert.ok(html.includes('datasetKind:\'synthetic-demonstration\'') &&
             html.includes('measured:false') &&
             html.includes('hardwareConnected:false') &&
             html.includes('Not a physical bench measurement'),
