@@ -5,9 +5,10 @@
 ## 工作方式
 
 - 读取公开 RSS 新闻源（FuelCellsWorks、Google News 多个产业链检索主题）。
-- 解析 RSS/Atom，按最近 24 小时筛选（没有可核验发布时间的条目不纳入日报），按产业链分类、相关性评分和标题相似度去重。
-- 选择最多 5 条不同方向的新闻；不足时如实少报，不编造补齐。
-- 保留原文链接、来源、发布时间和可识别的 RSS 图片链接。
+- 解析 RSS/Atom，按最近 24 小时筛选；同时交叉检查文章 URL 中的明确日期，排除 RSS 重新推送的旧文章。
+- 按产业链分类、相关性评分和标题相似度去重；降低股价评论类新闻优先级。
+- 只保留具有实质来源摘要的新闻，丢弃 Google News 聚合模板文本；最多 5 条，不足时少报、不凑数。
+- 对入选文章尝试读取发布页的摘要、发布时间和图片元数据；保留原文链接与来源。
 - 可选调用 Gemini API 进行中文专业编辑；提示词强制区分新闻事实与编辑分析。
 - 未配置 AI API 时使用透明的规则化技术提示，并在日报中明确标示限制。
 - 使用网易 163 SMTP over TLS（smtp.163.com:465）发送 HTML 邮件。
@@ -28,7 +29,12 @@
 
 ## 可选 AI 专业编辑
 
-可选新增 `GEMINI_API_KEY` 仓库机密。默认模型为 `gemini-3.8-flash`，每天最多发起一次编辑请求。使用前请自行查看 Google 当前免费额度、速率限制、隐私及数据使用条款。该功能不使用 Google Search grounding。没有 API Key 时仍能运行，但不会声称完成了 AI 中文翻译或专业编辑。
+在 **Settings → Secrets and variables → Actions → New repository secret** 中新增：
+
+- Name：`GEMINI_API_KEY`
+- Secret：从 Google AI Studio 创建并复制的 Gemini API Key（不要提交到仓库或粘贴到聊天中）。
+
+工作流默认使用 `gemini-3.8-flash`，每天最多发起一次编辑请求。使用前请查看 Google 当前免费额度、速率限制、隐私及数据使用条款。该功能不使用 Google Search grounding。没有 API Key 时日报仍可运行，但不会声称完成 AI 中文翻译或专业编辑。模型名称以 Google Gemini API 官方模型目录为准：https://ai.google.dev/gemini-api/docs/models
 
 ## 正式定时发送
 
