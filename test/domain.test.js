@@ -369,3 +369,8 @@ test("reactant mass flows avoid intermediate overflow before Faraday scaling",()
 test("fuel efficiency rejects positive inputs whose efficiency underflows to zero",()=>{
  assert.throws(()=>calculateFuelToElectricEfficiency({netPowerKw:Number.MIN_VALUE,hydrogenFeedKgPerHour:1e308,hydrogenLhvKwhPerKg:1e308}),RangeError);
 });
+
+
+test("polarization rejects operating points where losses exceed reversible voltage",()=>{
+ assert.throws(()=>calculatePolarizationPoint({reversibleVoltage:0.5,activationLoss:0.2,currentDensity:2,areaSpecificResistance:0.2,limitingCurrentDensity:3,concentrationCoefficient:0.1}),RangeError);
+});
