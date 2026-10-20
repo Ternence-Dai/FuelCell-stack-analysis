@@ -239,15 +239,14 @@ def hydrate_article(item: NewsItem) -> None:
         parser = _ArticleHTMLParser()
         parser.feed(body.decode("utf-8", errors="replace"))
         meta = parser.meta
-        if not item.summary:
+        if not item.summary or "comprehensive up-to-date news coverage" in item.summary.lower():
             description = (
                 meta.get("og:description") or meta.get("description")
                 or meta.get("twitter:description") or ""
             )
-            if description:
-                item.summary = clean_text(description)[:1800]
-            elif parser.paragraphs:
-                item.summary = " ".join(parser.paragraphs[:5])[:1800]
+            candidate_summary = clean_text(description) if description else " ".join(parser.paragraphs[:5])
+            if candidate_summary and "comprehensive up-to-date news coverage" not in candidate_summary.lower():
+                item.summary = candidate_summary[:1800]
         if not item.image:
             candidate_image = meta.get("og:image") or meta.get("twitter:image") or ""
             if candidate_image.startswith("https://"):
@@ -284,7 +283,12 @@ def parse_feed(xml_bytes: bytes, feed_name: str) -> list[NewsItem]:
             continue
         summary_raw = _child_text(entry, {"description", "summary", "encoded", "content"})
         summary = clean_text(summary_raw)[:3500]
-        if _norm_title(summary) == _norm_title(title):
+        summary_lower = summary.lower()
+        if (
+            _norm_title(summary) == _norm_title(title)
+            or "comprehensive up-to-date news coverage" in summary_lower
+            or "aggregated from sources all over the world by google news" in summary_lower
+        ):
             summary = ""
         published_text = _child_text(entry, {"pubdate", "published", "updated", "date", "issued"})
         source = _child_text(entry, {"source", "creator", "author"}) or feed_name
