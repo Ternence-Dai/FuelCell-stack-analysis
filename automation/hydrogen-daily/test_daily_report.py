@@ -1,5 +1,8 @@
 import sys
 import unittest
+from unittest import mock
+import json
+import urllib.error
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -8,6 +11,43 @@ import daily_report as report
 
 
 class DailyReportTests(unittest.TestCase):
+    def test_gemini_retries_transient_503_then_enriches(self):
+        item = report.NewsItem(
+            "Fuel cell stack research", "https://example.org/stack", "Test",
+            datetime.now(timezone.utc), "A detailed source summary describing a measured stack result."
+        )
+        success = mock.MagicMock()
+        success.__enter__.return_value.read.return_value = json.dumps({
+            "candidates": [{"content": {"parts": [{"text": json.dumps({"items": [{
+                "id": "0", "zh_title": "电堆研究", "facts": "来源事实", "tech": "技术解读",
+                "impact": "产业影响", "stack_relevance": "研发参考", "uncertainty": "需核验"
+            }]})}]}}]
+        }).encode()
+        temporary = urllib.error.HTTPError(
+            "https://generativelanguage.googleapis.com/test", 503, "Unavailable",
+            {"Retry-After": "0"}, None
+        )
+        with mock.patch.object(report.urllib.request, "urlopen", side_effect=[temporary, success]) as urlopen, \
+             mock.patch.object(report.time, "sleep") as sleep:
+            self.assertTrue(report.enrich_with_gemini([item], "test-key"))
+        self.assertEqual(urlopen.call_count, 2)
+        sleep.assert_called_once_with(0.0)
+        self.assertEqual(item.editorial["zh_title"], "电堆研究")
+
+    def test_gemini_503_exhaustion_falls_back_without_crashing(self):
+        item = report.NewsItem(
+            "Fuel cell stack research", "https://example.org/stack", "Test",
+            datetime.now(timezone.utc), "A detailed source summary describing a measured stack result."
+        )
+        errors = [
+            urllib.error.HTTPError("https://example.org", 503, "Unavailable", {}, None)
+            for _ in range(3)
+        ]
+        with mock.patch.object(report.urllib.request, "urlopen", side_effect=errors), \
+             mock.patch.object(report.time, "sleep"):
+            self.assertFalse(report.enrich_with_gemini([item], "test-key"))
+        self.assertEqual(item.editorial, {})
+
     def test_email_address_is_masked_for_public_logs(self):
         self.assertEqual(report.mask_email("18662613315@163.com"), "******13315@163.com")
         self.assertEqual(report.mask_email("bad-value"), "<invalid-or-non-email-address>")
