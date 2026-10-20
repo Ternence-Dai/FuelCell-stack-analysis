@@ -298,7 +298,7 @@ def parse_feed(xml_bytes: bytes, feed_name: str) -> list[NewsItem]:
 def _url_publication_day(link: str):
     """Read an explicit YYYY/MM/DD date embedded in an article URL, when present."""
     path = urlparse(link).path
-    match = re.search(r"/(20\\d{2})/(\\d{1,2})/(\\d{1,2})(?:/|$)", path)
+    match = re.search(r"/(20\d{2})/(\d{1,2})/(\d{1,2})(?:/|$)", path)
     if not match:
         return None
     try:
