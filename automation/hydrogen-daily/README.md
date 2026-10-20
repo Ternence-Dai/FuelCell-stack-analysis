@@ -36,6 +36,8 @@
 
 工作流默认使用 `gemini-3.8-flash`，每天最多发起一次编辑请求。使用前请查看 Google 当前免费额度、速率限制、隐私及数据使用条款。该功能不使用 Google Search grounding。没有 API Key 时日报仍可运行，但不会声称完成 AI 中文翻译或专业编辑。模型名称以 Google Gemini API 官方模型目录为准：https://ai.google.dev/gemini-api/docs/models
 
+添加或更新 `GEMINI_API_KEY` 后，请在 Actions 中手动运行一次并选择 `preview` 验证日志中的 `Gemini enrichment: yes`。仓库文件推送触发的运行也默认为 preview，不会发送邮件；只有每日 schedule 或明确选择 `send` 才会发送。
+
 ## 正式定时发送
 
 每日 08:07（新加坡时间）定时事件会自动生成并发送 HTML 日报。已通过手动 `send` 验收，SMTP 返回发送成功。任何代码变更触发的工作流仍保持 `preview`，不会因普通提交自动发邮件；手动运行可自行选择模式。GitHub 定时任务可能因平台负载延迟，不能保证精确到秒。
