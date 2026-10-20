@@ -512,6 +512,10 @@ def enrich_with_gemini(items: list[NewsItem], api_key: str, model: str = "gemini
                 for key in ("zh_title", "facts", "tech", "impact", "stack_relevance", "uncertainty")
             }
         return True
+    except urllib.error.HTTPError as exc:
+        # Log only the HTTP status; never print request headers, API keys, or response bodies.
+        print(f"Gemini API rejected the request (HTTP {exc.code}); using transparent RSS fallback.", file=sys.stderr)
+        return False
     except (urllib.error.URLError, TimeoutError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         print(f"Gemini enrichment unavailable; using transparent RSS fallback ({type(exc).__name__}).", file=sys.stderr)
         return False
