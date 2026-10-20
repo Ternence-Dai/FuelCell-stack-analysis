@@ -301,3 +301,14 @@ test("power solver enforces its documented sampling-step ceiling",()=>{
  assert.equal(solveFirstPowerCrossing({...base,steps:1}),1,
   "the minimum valid one-interval grid must still locate a feasible crossing");
 });
+
+
+test("power solver includes the maximum-current endpoint in its sampled grid",()=>{
+ const samples=[];
+ const current=solveFirstPowerCrossing({
+  targetPower:4,minCurrentDensity:0,maxCurrentDensity:4,steps:4,
+  powerAt:i=>{samples.push(i);return i;}
+ });
+ assert.equal(current,4);
+ assert.equal(samples.at(-1),4);
+});
