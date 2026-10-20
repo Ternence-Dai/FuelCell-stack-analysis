@@ -478,6 +478,8 @@ def main() -> int:
     mode = os.environ.get("REPORT_MODE", "preview").strip().lower()
     if mode not in {"preview", "send"}:
         raise ValueError("REPORT_MODE must be preview or send")
+    print(f"Configured SMTP sender: {mask_email(os.environ.get('SMTP_USERNAME', ''))}")
+    print(f"Configured report recipient: {mask_email(os.environ.get('REPORT_RECIPIENT', ''))}")
     now = datetime.now(timezone.utc)
     items, warnings = collect_news(now)
     selected = select_top_news(items, limit=5, minimum=3)
