@@ -155,6 +155,7 @@ export function calculatePolarizationPoint({ reversibleVoltage, activationLoss, 
   }
   const ohmicLoss = currentDensity * areaSpecificResistance;
   const cellVoltage = reversibleVoltage - activationLoss - ohmicLoss - concentrationLoss;
+  if (cellVoltage < 0) throw new RangeError("polarization losses exceed the reversible cell voltage");
   const powerDensity = cellVoltage * currentDensity;
   for (const [name, value] of Object.entries({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss, powerDensity })) finiteResult(value, name);
   return Object.freeze({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss, currentDensity, powerDensity });
