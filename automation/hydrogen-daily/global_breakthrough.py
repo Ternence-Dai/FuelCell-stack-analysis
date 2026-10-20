@@ -28,6 +28,8 @@ TECH_TERMS = (
     "robotics", "catalyst", "energy", "device", "实验", "突破", "研究", "首次",
     "新型", "效率", "芯片", "机器人", "量子", "电池", "材料", "航天", "基因",
 )
+GLOBAL_BREAKTHROUGH_LIMIT = 3
+
 NOISE_TERMS = ("stock price", "shares", "market outlook", "analyst rating", "funding round", "earnings")
 
 
@@ -69,7 +71,7 @@ def collect_breakthroughs(now: datetime | None = None) -> tuple[list[base.NewsIt
             item.score += 0.5
         ranked.append(item)
     unique = base.deduplicate(ranked)
-    return unique[:1], warnings
+    return unique[:GLOBAL_BREAKTHROUGH_LIMIT], warnings
 
 
 def _topic_label(item: base.NewsItem) -> str:
@@ -145,4 +147,4 @@ def build_section(items: list[base.NewsItem]) -> str:
             "<p>最近 24 小时未筛选到满足时间与摘要质量要求的全球科技突破。本期不编造内容；"
             "可查看下方来源采集提醒，下一次定时任务会继续检索。</p></section>"
         )
-    return "<section><h2>全球科技每日突破</h2>" + render_breakthrough(items[0]) + "</section>"
+    return "<section><h2>全球科技每日突破</h2>" + "".join(render_breakthrough(item) for item in items) + "</section>"
