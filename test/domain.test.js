@@ -43,6 +43,14 @@ test("net system efficiency uses actual hydrogen feed chemical energy",()=>{
   netPowerKw:50,hydrogenFeedKgPerHour:0
  }),RangeError);
 });
+test("fuel efficiency remains representable when the intermediate fuel-energy product overflows",()=>{
+ const efficiency=calculateFuelToElectricEfficiency({
+  netPowerKw:Number.MAX_VALUE,
+  hydrogenFeedKgPerHour:1e200,
+  hydrogenLhvKwhPerKg:1e200
+ });
+ assert.ok(Number.isFinite(efficiency) && efficiency > 0 && efficiency < 1e-90);
+});
 // Independent cross-check against ECSIM/OPEM test/test_Amphlett.py:
 // Enernst_Calc(T=343.15 K, PH2=1 atm, PO2=1 atm) = 1.19075 V.
 // This app accepts dry-air total pressure, so PO2=1 atm maps to
@@ -290,4 +298,88 @@ test("power solver scales grid fractions before multiplying extreme finite inter
  assert.ok(Number.isFinite(current));
  assert.ok(current/Number.MAX_VALUE>=0.75);
  assert.ok(Math.abs(current/Number.MAX_VALUE-0.75)<1e-12);
+});
+
+
+test("power solver enforces its documented sampling-step ceiling",()=>{
+ const base={targetPower:1,minCurrentDensity:0,maxCurrentDensity:2,powerAt:i=>i};
+ assert.throws(()=>solveFirstPowerCrossing({...base,steps:100001}),RangeError);
+ assert.throws(()=>solveFirstPowerCrossing({...base,steps:1.5}),RangeError);
+ assert.throws(()=>solveFirstPowerCrossing({...base,steps:Number.MAX_SAFE_INTEGER+1}),RangeError);
+ assert.equal(solveFirstPowerCrossing({...base,steps:1}),1,
+  "the minimum valid one-interval grid must still locate a feasible crossing");
+});
+
+
+test("power solver includes the maximum-current endpoint in its sampled grid",()=>{
+ const samples=[];
+ const current=solveFirstPowerCrossing({
+  targetPower:4,minCurrentDensity:0,maxCurrentDensity:4,steps:4,
+  powerAt:i=>{samples.push(i);return i;}
+ });
+ assert.equal(current,4);
+ assert.equal(samples.at(-1),4);
+});
+
+
+test("altitude pressure ratio remains finite when its numerator product would overflow",()=>{
+ const ratio=calculateAltitudeAdjustedPressureRatio({
+  basePressureRatio:1e200,referencePressureMPa:1e100,ambientPressureMPa:1e200
+ });
+ assert.ok(Number.isFinite(ratio));
+ assert.ok(Math.abs(ratio/1e100-1)<1e-12);
+});
+
+
+test("coolant pump power preserves representable results when SI flow conversion would underflow",()=>{
+ const power=calculateCoolantPumpPower({
+  volumeFlowLPerMinute:1e-320,pressureDropKPa:1e308,pumpEfficiency:0.5
+ });
+ const expected=(1e-320*1e308)/60000/0.5;
+ assert.ok(power>0 && Number.isFinite(power));
+ assert.ok(Math.abs(power/expected-1)<1e-12);
+});
+
+test("coolant pump rejects unrepresentable positive power without rejecting scaled representable power",()=>{
+ assert.throws(()=>calculateCoolantPumpPower({
+  volumeFlowLPerMinute:Number.MIN_VALUE,pressureDropKPa:1,pumpEfficiency:1
+ }),RangeError);
+ const scaled=calculateCoolantPumpPower({
+  volumeFlowLPerMinute:Number.MIN_VALUE,pressureDropKPa:1e300,pumpEfficiency:1
+ });
+ assert.ok(Number.isFinite(scaled) && scaled>0);
+});
+
+
+test("rejects finite-positive pump inputs when their representable result underflows",()=>{
+ assert.throws(()=>calculateCoolantPumpPower({volumeFlowLPerMinute:Number.MIN_VALUE,pressureDropKPa:Number.MIN_VALUE,pumpEfficiency:1}),RangeError);
+});
+
+test("reactant mass flows avoid intermediate overflow before Faraday scaling",()=>{
+ const result=calculateReactantMassFlows({
+  cellCount:1,stackCurrentA:1e308,hydrogenStoichRatio:1,airStoichRatio:1
+ });
+ assert.ok(Number.isFinite(result.hydrogenConsumedKgPerHour));
+ assert.ok(Number.isFinite(result.hydrogenFeedKgPerHour));
+ assert.ok(Number.isFinite(result.airFeedKgPerHour));
+ assert.ok(result.hydrogenConsumedKgPerHour>1e303);
+});
+
+
+test("fuel efficiency rejects positive inputs whose efficiency underflows to zero",()=>{
+ assert.throws(()=>calculateFuelToElectricEfficiency({netPowerKw:Number.MIN_VALUE,hydrogenFeedKgPerHour:1e308,hydrogenLhvKwhPerKg:1e308}),RangeError);
+});
+
+
+test("polarization rejects operating points where losses exceed reversible voltage",()=>{
+ assert.throws(()=>calculatePolarizationPoint({reversibleVoltage:0.5,activationLoss:0.2,currentDensity:2,areaSpecificResistance:0.2,limitingCurrentDensity:3,concentrationCoefficient:0.1}),RangeError);
+});
+
+
+test("cell-voltage model rejects physically impossible negative terminal voltage",()=>{
+ assert.throws(()=>calculateCellVoltage({
+  reversibleVoltage:0.5,activationCoefficient:1,currentDensity:100,
+  exchangeCurrentDensity:1,areaSpecificResistance:1,
+  concentrationCoefficient:0,concentrationExponent:0
+ }),/polarization losses exceed the reversible cell voltage/);
 });

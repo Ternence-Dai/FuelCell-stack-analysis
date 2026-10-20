@@ -71,10 +71,11 @@ export function calculateAltitudeAdjustedPressureRatio({
   }
   // Treat the configured ratio as the sea-level design point. Holding
   // absolute discharge pressure constant requires Pout/Pambient at altitude.
-  const ratio = finiteResult(
-    basePressureRatio * referencePressureMPa / ambientPressureMPa,
-    "altitude-adjusted compressor pressure ratio"
-  );
+  // Evaluate the positive ratio in log space so a large numerator does
+  // not overflow before division by a similarly large ambient pressure.
+  const ratio = finiteResult(Math.exp(
+    Math.log(basePressureRatio) + Math.log(referencePressureMPa) - Math.log(ambientPressureMPa)
+  ), "altitude-adjusted compressor pressure ratio");
   if (ratio <= 1) {
     throw new RangeError("ambient pressure leaves no feasible compressor pressure rise at the configured absolute discharge pressure");
   }
@@ -92,10 +93,18 @@ export function calculateCoolantPumpPower({
       pumpEfficiency <= 0 || pumpEfficiency > 1) {
     throw new RangeError("coolant flow and pressure drop must be non-negative and pump efficiency must be in (0, 1]");
   }
-  // kW = kPa × m³/s; convert L/min to m³/s before applying efficiency.
-  const flowM3PerSecond = volumeFlowLPerMinute / 60000;
-  return finiteResult(pressureDropKPa * flowM3PerSecond / pumpEfficiency,
-    "coolant pump electrical power");
+  if (volumeFlowLPerMinute === 0 || pressureDropKPa === 0) return 0;
+  // Combine scale factors before exponentiation. Converting an extremely small
+  // L/min value to m³/s first can underflow to zero even when the final kW is
+  // representable after multiplication by a large pressure drop.
+  const powerKw = Math.exp(
+    Math.log(volumeFlowLPerMinute) + Math.log(pressureDropKPa) -
+    Math.log(60000) - Math.log(pumpEfficiency)
+  );
+  if (powerKw === 0) {
+    throw new RangeError("positive coolant pump inputs produce power below the representable numeric range");
+  }
+  return finiteResult(powerKw, "coolant pump electrical power");
 }
 
 export function calculateNetElectricalPower({ stackPowerKw, balanceOfPlantPowerKw }) {
@@ -120,8 +129,13 @@ export function calculateFuelToElectricEfficiency({
   if (netPowerKw < 0 || hydrogenFeedKgPerHour <= 0 || hydrogenLhvKwhPerKg <= 0) {
     throw new RangeError("net power must be non-negative and hydrogen feed and LHV must be positive");
   }
-  const fuelInputKw = hydrogenFeedKgPerHour * hydrogenLhvKwhPerKg;
-  const efficiency = finiteResult(netPowerKw / fuelInputKw, "fuel-to-electric efficiency");
+  if (netPowerKw === 0) return 0;
+  // Divide in log space: the fuel-energy product may overflow even when the
+  // final efficiency ratio is a perfectly representable finite number.
+  const efficiency = finiteResult(Math.exp(
+    Math.log(netPowerKw) - Math.log(hydrogenFeedKgPerHour) - Math.log(hydrogenLhvKwhPerKg)
+  ), "fuel-to-electric efficiency");
+  if (efficiency === 0) throw new RangeError("positive net power produces efficiency below the representable numeric range");
   if (efficiency > 1) throw new RangeError("net electrical output cannot exceed hydrogen chemical energy input");
   return efficiency;
 }
@@ -141,6 +155,7 @@ export function calculatePolarizationPoint({ reversibleVoltage, activationLoss, 
   }
   const ohmicLoss = currentDensity * areaSpecificResistance;
   const cellVoltage = reversibleVoltage - activationLoss - ohmicLoss - concentrationLoss;
+  if (cellVoltage < 0) throw new RangeError("polarization losses exceed the reversible cell voltage");
   const powerDensity = cellVoltage * currentDensity;
   for (const [name, value] of Object.entries({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss, powerDensity })) finiteResult(value, name);
   return Object.freeze({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss, currentDensity, powerDensity });
@@ -175,14 +190,29 @@ export function calculateReactantMassFlows({
   // Faraday's law gives the electrochemically consumed H2 independently of
   // the anode excess-feed ratio. λH2 affects fresh H2 feed only; λair is
   // applied separately to the theoretical cathode air requirement.
-  const hydrogenConsumedKgPerHour =
-    cellCount * stackCurrentA * 2.016 * 3.6 / (2 * 96485);
-  const hydrogenFeedKgPerHour = hydrogenConsumedKgPerHour * hydrogenStoichRatio;
+  if (stackCurrentA === 0) {
+    return Object.freeze({
+      hydrogenConsumedKgPerHour: 0,
+      hydrogenFeedKgPerHour: 0,
+      airFeedKgPerHour: 0
+    });
+  }
+  // Combine Faraday and stoichiometric factors in log space. The direct
+  // product can overflow at cellCount*current before the final divisor brings
+  // a mathematically representable mass flow back into range.
+  const logHydrogenConsumed = Math.log(cellCount) + Math.log(stackCurrentA) +
+    Math.log(2.016) + Math.log(3.6) - Math.log(2) - Math.log(96485);
+  const hydrogenConsumedKgPerHour = Math.exp(logHydrogenConsumed);
+  const hydrogenFeedKgPerHour = Math.exp(logHydrogenConsumed + Math.log(hydrogenStoichRatio));
   // Dry-air/H2 stoichiometric mass ratio: 8 kg O2 per kg H2,
   // divided by the declared 0.232 dry-air oxygen mass fraction.
-  const dryAirOxygenMassFraction = 0.232;
-  const stoichiometricAirPerHydrogen = 8 / dryAirOxygenMassFraction;
-  const airFeedKgPerHour = hydrogenConsumedKgPerHour * stoichiometricAirPerHydrogen * airStoichRatio;
+  const stoichiometricAirPerHydrogen = 8 / 0.232;
+  const airFeedKgPerHour = Math.exp(
+    logHydrogenConsumed + Math.log(stoichiometricAirPerHydrogen) + Math.log(airStoichRatio)
+  );
+  if (hydrogenConsumedKgPerHour === 0 || hydrogenFeedKgPerHour === 0 || airFeedKgPerHour === 0) {
+    throw new RangeError("positive stack current produces reactant flow below the representable numeric range");
+  }
   const result = {
     hydrogenConsumedKgPerHour,
     hydrogenFeedKgPerHour,
@@ -210,6 +240,11 @@ export function calculateCoolantFlow({ heatPowerKw, deltaTemperatureK, specificH
   const massFlowKgPerSecond = Math.exp(logMassFlowPerSecond);
   const massFlowKgPerMinute = Math.exp(logMassFlowPerSecond + Math.log(60));
   const volumeFlowLPerMinute = Math.exp(logMassFlowPerSecond + Math.log(60) - Math.log(densityKgPerL));
+  // A positive heat load cannot physically produce an exact zero flow. If any
+  // required output underflows, reject it instead of silently reporting zero.
+  if (massFlowKgPerSecond === 0 || massFlowKgPerMinute === 0 || volumeFlowLPerMinute === 0) {
+    throw new RangeError("positive coolant heat load produces a flow below the representable numeric range");
+  }
   for (const [name, value] of Object.entries({ massFlowKgPerSecond, massFlowKgPerMinute, volumeFlowLPerMinute })) {
     finiteResult(value, name);
   }
@@ -231,6 +266,7 @@ export function calculateCellVoltage({ reversibleVoltage, activationCoefficient,
   const concentrationLoss = concentrationCoefficient === 0 ? 0
     : Math.exp(Math.log(concentrationCoefficient) + concentrationExponent * currentDensity);
   const cellVoltage = reversibleVoltage - activationLoss - ohmicLoss - concentrationLoss;
+  if (cellVoltage < 0) throw new RangeError("polarization losses exceed the reversible cell voltage");
   for (const [name, value] of Object.entries({ activationLoss, ohmicLoss, concentrationLoss, cellVoltage })) finiteResult(value, name);
   return Object.freeze({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss });
 }

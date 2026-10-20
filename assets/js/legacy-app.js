@@ -115,10 +115,36 @@ function classifyPowerTarget(targetKw, actualKw, minimumFeasibleKw){
 }
 function solveCurrentDensity(targetP_kW, p){
   const target = Number(targetP_kW) * 1000;
+  const minCurrentDensity = 0.01;
+  let maxCurrentDensity = 3.0;
+  // Bound the solver grid to the physically feasible positive-voltage region.
+  // The shared domain rejects negative cell voltage; do not let an exploratory
+  // high-current sample abort an otherwise valid lower-current solution.
+  try {
+    vcell(maxCurrentDensity, p.T_K, p);
+  } catch (error) {
+    if (!error || error.name !== 'RangeError') throw error;
+    let feasible = minCurrentDensity;
+    let infeasible = maxCurrentDensity;
+    for (let iteration = 0; iteration < 64; iteration++) {
+      const midpoint = feasible + (infeasible - feasible) / 2;
+      try {
+        vcell(midpoint, p.T_K, p);
+        feasible = midpoint;
+      } catch (probeError) {
+        if (!probeError || probeError.name !== 'RangeError') throw probeError;
+        infeasible = midpoint;
+      }
+    }
+    maxCurrentDensity = feasible;
+  }
+  if (maxCurrentDensity <= minCurrentDensity) {
+    throw new RangeError('no feasible positive-voltage current-density interval is available');
+  }
   return window.FuelCellDomain.solveFirstPowerCrossing({
     targetPower:target,
-    minCurrentDensity:0.01,
-    maxCurrentDensity:3.0,
+    minCurrentDensity,
+    maxCurrentDensity,
     steps:600,
     powerAt:current => p.N * vcell(current, p.T_K, p) * current * p.area
   });
