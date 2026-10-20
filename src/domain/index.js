@@ -266,6 +266,7 @@ export function calculateCellVoltage({ reversibleVoltage, activationCoefficient,
   const concentrationLoss = concentrationCoefficient === 0 ? 0
     : Math.exp(Math.log(concentrationCoefficient) + concentrationExponent * currentDensity);
   const cellVoltage = reversibleVoltage - activationLoss - ohmicLoss - concentrationLoss;
+  if (cellVoltage < 0) throw new RangeError("polarization losses exceed the reversible cell voltage");
   for (const [name, value] of Object.entries({ activationLoss, ohmicLoss, concentrationLoss, cellVoltage })) finiteResult(value, name);
   return Object.freeze({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss });
 }
