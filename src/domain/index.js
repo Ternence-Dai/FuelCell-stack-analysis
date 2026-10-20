@@ -120,8 +120,12 @@ export function calculateFuelToElectricEfficiency({
   if (netPowerKw < 0 || hydrogenFeedKgPerHour <= 0 || hydrogenLhvKwhPerKg <= 0) {
     throw new RangeError("net power must be non-negative and hydrogen feed and LHV must be positive");
   }
-  const fuelInputKw = hydrogenFeedKgPerHour * hydrogenLhvKwhPerKg;
-  const efficiency = finiteResult(netPowerKw / fuelInputKw, "fuel-to-electric efficiency");
+  if (netPowerKw === 0) return 0;
+  // Divide in log space: the fuel-energy product may overflow even when the
+  // final efficiency ratio is a perfectly representable finite number.
+  const efficiency = finiteResult(Math.exp(
+    Math.log(netPowerKw) - Math.log(hydrogenFeedKgPerHour) - Math.log(hydrogenLhvKwhPerKg)
+  ), "fuel-to-electric efficiency");
   if (efficiency > 1) throw new RangeError("net electrical output cannot exceed hydrogen chemical energy input");
   return efficiency;
 }
