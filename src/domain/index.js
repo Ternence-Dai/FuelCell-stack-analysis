@@ -135,6 +135,7 @@ export function calculateFuelToElectricEfficiency({
   const efficiency = finiteResult(Math.exp(
     Math.log(netPowerKw) - Math.log(hydrogenFeedKgPerHour) - Math.log(hydrogenLhvKwhPerKg)
   ), "fuel-to-electric efficiency");
+  if (efficiency === 0) throw new RangeError("positive net power produces efficiency below the representable numeric range");
   if (efficiency > 1) throw new RangeError("net electrical output cannot exceed hydrogen chemical energy input");
   return efficiency;
 }
