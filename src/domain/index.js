@@ -220,6 +220,11 @@ export function calculateCoolantFlow({ heatPowerKw, deltaTemperatureK, specificH
   const massFlowKgPerSecond = Math.exp(logMassFlowPerSecond);
   const massFlowKgPerMinute = Math.exp(logMassFlowPerSecond + Math.log(60));
   const volumeFlowLPerMinute = Math.exp(logMassFlowPerSecond + Math.log(60) - Math.log(densityKgPerL));
+  // A positive heat load cannot physically produce an exact zero flow. If any
+  // required output underflows, reject it instead of silently reporting zero.
+  if (massFlowKgPerSecond === 0 || massFlowKgPerMinute === 0 || volumeFlowLPerMinute === 0) {
+    throw new RangeError("positive coolant heat load produces a flow below the representable numeric range");
+  }
   for (const [name, value] of Object.entries({ massFlowKgPerSecond, massFlowKgPerMinute, volumeFlowLPerMinute })) {
     finiteResult(value, name);
   }
