@@ -8,6 +8,10 @@ import daily_report as report
 
 
 class DailyReportTests(unittest.TestCase):
+    def test_email_address_is_masked_for_public_logs(self):
+        self.assertEqual(report.mask_email("18662613315@163.com"), "******13315@163.com")
+        self.assertEqual(report.mask_email("bad-value"), "<invalid-or-non-email-address>")
+
     def test_parse_rss_item(self):
         xml = b'''<?xml version="1.0"?><rss><channel><item>
         <title>New PEM fuel cell stack announced</title>
