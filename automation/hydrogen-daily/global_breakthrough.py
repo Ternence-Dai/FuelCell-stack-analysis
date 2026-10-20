@@ -71,7 +71,24 @@ def collect_breakthroughs(now: datetime | None = None) -> tuple[list[base.NewsIt
             item.score += 0.5
         ranked.append(item)
     unique = base.deduplicate(ranked)
-    return unique[:GLOBAL_BREAKTHROUGH_LIMIT], warnings
+    # A small daily shortlist should not be monopolized by one research area.
+    # Preserve relevance order, prefer one item per topic, then backfill from
+    # the remaining ranked candidates when distinct topics are unavailable.
+    selected: list[base.NewsItem] = []
+    deferred: list[base.NewsItem] = []
+    seen_topics: set[str] = set()
+    for item in unique:
+        topic = _topic_label(item)
+        if topic in seen_topics:
+            deferred.append(item)
+            continue
+        selected.append(item)
+        seen_topics.add(topic)
+        if len(selected) == GLOBAL_BREAKTHROUGH_LIMIT:
+            break
+    if len(selected) < GLOBAL_BREAKTHROUGH_LIMIT:
+        selected.extend(deferred[:GLOBAL_BREAKTHROUGH_LIMIT - len(selected)])
+    return selected, warnings
 
 
 def _topic_label(item: base.NewsItem) -> str:
