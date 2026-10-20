@@ -354,3 +354,13 @@ test("coolant pump rejects unrepresentable positive power without rejecting scal
 test("rejects finite-positive pump inputs when their representable result underflows",()=>{
  assert.throws(()=>calculateCoolantPumpPower({volumeFlowLPerMinute:Number.MIN_VALUE,pressureDropKPa:Number.MIN_VALUE,pumpEfficiency:1}),RangeError);
 });
+
+test("reactant mass flows avoid intermediate overflow before Faraday scaling",()=>{
+ const result=calculateReactantMassFlows({
+  cellCount:1,stackCurrentA:1e308,hydrogenStoichRatio:1,airStoichRatio:1
+ });
+ assert.ok(Number.isFinite(result.hydrogenConsumedKgPerHour));
+ assert.ok(Number.isFinite(result.hydrogenFeedKgPerHour));
+ assert.ok(Number.isFinite(result.airFeedKgPerHour));
+ assert.ok(result.hydrogenConsumedKgPerHour>1e303);
+});
