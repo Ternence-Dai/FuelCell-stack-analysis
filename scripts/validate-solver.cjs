@@ -145,6 +145,36 @@ async function main() {
             simulationSource.includes('const syntheticMaxError =') &&
             simulationSource.includes('const syntheticR2 ='),
     'bench metrics must be computed from and labeled as synthetic demonstration samples');
+  assert.ok(simulationSource.includes('downloadSyntheticBenchDataset()') &&
+            simulationSource.includes('导出本次合成演示样本 JSON') &&
+            simulationSource.includes('state.lastSyntheticBenchDataset = dataset'),
+    'synthetic bench results must expose an export action for the exact displayed run');
+  assert.ok(html.includes('datasetKind: \'synthetic-demonstration\'') &&
+            html.includes('measured:false') &&
+            html.includes('hardwareConnected:false') &&
+            html.includes('Not a physical bench measurement'),
+    'exported demo data must carry machine-readable non-measurement provenance');
+
+  const syntheticContext = {
+    Math, Date, Number, Array, Object,
+    vcell:sandbox.vcell
+  };
+  const buildSyntheticDataset = vm.runInNewContext('(' + extract('buildSyntheticBenchDataset') + ')', syntheticContext);
+  const demo = buildSyntheticDataset({T:82,N:370,area:420,pH2:0.19,pAir:0.20,R:0.095,Aact:0.0085,i0:0.0018,m:2.2e-5,n:4});
+  assert.equal(demo.schema,'hyhub.synthetic-bench-demo.v1');
+  assert.equal(demo.datasetKind,'synthetic-demonstration');
+  assert.equal(demo.provenance.measured,false);
+  assert.equal(demo.provenance.hardwareConnected,false);
+  assert.equal(demo.samples.length,25);
+  assert.ok(demo.samples.every(row=>Number.isFinite(row.modelCellVoltageV)&&
+    Number.isFinite(row.syntheticSampleCellVoltageV)&&Number.isFinite(row.residualMv)));
+  const independentlyCalculatedRmse = Math.sqrt(demo.samples.reduce((sum,row)=>sum+row.residualMv**2,0)/demo.samples.length);
+  assert.ok(Math.abs(demo.metrics.rmseMv-independentlyCalculatedRmse)<1e-10,
+    'exported RMSE must be reproducible from the exported residual samples');
+  const repeated = buildSyntheticDataset({T:82,N:370,area:420,pH2:0.19,pAir:0.20,R:0.095,Aact:0.0085,i0:0.0018,m:2.2e-5,n:4});
+  assert.deepEqual(repeated.samples,demo.samples,
+    'identical model inputs must reproduce the same synthetic sample set');
+
   assert.ok(simulationSource.includes('80℃模型边界电流密度') &&
             simulationSource.includes('膜水合状态') &&
             simulationSource.includes('未建模'),

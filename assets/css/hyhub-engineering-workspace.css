@@ -20,3 +20,9 @@ body[data-workspace="fuelcell"] .product-workflow__item b{color:#18364b}
 body[data-workspace="fuelcell"] .product-workflow__item span{color:#087f8d;font-weight:800}
 @media(max-width:900px){body[data-workspace="fuelcell"] .sidebar{width:220px}}
 @media(max-width:680px){body[data-workspace="fuelcell"] .hyhub-intro{padding:22px}.mark{display:none!important}}
+
+/* Explicit export boundary for synthetic bench-fit demonstrations. */
+body[data-workspace="fuelcell"] .simulation-export{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0;padding:13px 15px;border:1px solid rgba(245,158,11,.32);border-left:4px solid #d97706;border-radius:13px;background:rgba(120,75,10,.08)}
+body[data-workspace="fuelcell"] .simulation-export span{flex:1;min-width:220px;color:var(--muted);font-size:12px;line-height:1.65}
+body[data-workspace="fuelcell"] .simulation-export button{flex-shrink:0}
+@media(max-width:520px){body[data-workspace="fuelcell"] .simulation-export{align-items:stretch}body[data-workspace="fuelcell"] .simulation-export button{width:100%}}

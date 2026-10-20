@@ -1309,11 +1309,82 @@ function afterSim(){
   });
 }
 
+function buildSyntheticBenchDataset(P){
+  const temperatureK = P.T + 273.15;
+  const modelParameters = {
+    N:P.N,area:P.area,pH2:P.pH2,pAir:P.pAir,
+    R:P.R,Aact:P.Aact,i0:P.i0,m:P.m,n:P.n
+  };
+  const samples = [];
+  for(let step=1;step<=25;step++){
+    const currentDensityAcm2 = step / 10;
+    const modelCellVoltageV = vcell(currentDensityAcm2,temperatureK,modelParameters);
+    const syntheticSampleCellVoltageV =
+      modelCellVoltageV * (0.99 + Math.sin(currentDensityAcm2*7) * 0.006);
+    samples.push({
+      currentDensityAcm2,
+      modelCellVoltageV,
+      syntheticSampleCellVoltageV,
+      residualMv:(syntheticSampleCellVoltageV-modelCellVoltageV)*1000
+    });
+  }
+  const meanSynthetic = samples.reduce((sum,row)=>sum+row.syntheticSampleCellVoltageV,0)/samples.length;
+  const scaleNumerator = samples.reduce((sum,row)=>sum+row.modelCellVoltageV*row.syntheticSampleCellVoltageV,0);
+  const scaleDenominator = samples.reduce((sum,row)=>sum+row.modelCellVoltageV*row.modelCellVoltageV,0);
+  const scaleFactor = scaleDenominator ? scaleNumerator/scaleDenominator : 0;
+  const rmseMv = Math.sqrt(samples.reduce((sum,row)=>sum+Math.pow(row.residualMv,2),0)/samples.length);
+  const maxAbsResidualMv = Math.max(...samples.map(row=>Math.abs(row.residualMv)));
+  const sse = samples.reduce((sum,row)=>sum+Math.pow(row.syntheticSampleCellVoltageV-scaleFactor*row.modelCellVoltageV,2),0);
+  const sst = samples.reduce((sum,row)=>sum+Math.pow(row.syntheticSampleCellVoltageV-meanSynthetic,2),0);
+  const rSquared = sst ? 1-sse/sst : 1;
+  return {
+    schema:'hyhub.synthetic-bench-demo.v1',
+    datasetKind:'synthetic-demonstration',
+    generatedAt:new Date().toISOString(),
+    provenance:{
+      measured:false,
+      hardwareConnected:false,
+      source:'model-derived synthetic generator',
+      method:'synthetic sample = model cell voltage × (0.99 + 0.006 × sin(7 × current density))',
+      warning:'Not a physical bench measurement, not calibration evidence, and not suitable for product validation or certification.'
+    },
+    parameters:{
+      temperatureC:P.T,cellCount:P.N,activeAreaCm2:P.area,
+      hydrogenPressureMPa:P.pH2,airPressureMPa:P.pAir,
+      areaSpecificResistance:P.R,activationCoefficient:P.Aact,
+      exchangeCurrentDensity:P.i0,concentrationCoefficient:P.m,
+      concentrationExponent:P.n
+    },
+    metrics:{rmseMv,maxAbsResidualMv,scaleFactor,rSquared},
+    samples
+  };
+}
+function downloadSyntheticBenchDataset(){
+  const dataset = state.lastSyntheticBenchDataset;
+  if(!dataset || dataset.datasetKind !== 'synthetic-demonstration'){
+    toast('请先运行一次台架拟合演示，再导出合成样本。');
+    return false;
+  }
+  const blob = new Blob([JSON.stringify(dataset,null,2)],{type:'application/json;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'HyHub_synthetic_bench_demo_'+new Date().toISOString().slice(0,10)+'.json';
+  link.hidden = true;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast('合成演示样本 JSON 已触发下载；文件内已标记非实测来源。');
+  return true;
+}
+
 function runSim(){
   const r = solveSystem();
   const P = state.params;
   const T_K = P.T + 273.15;
   const res = $('#simResult');
+  state.lastSyntheticBenchDataset = null;
   let html = '';
 
   if(state.simMode === 'steady'){
@@ -1443,30 +1514,25 @@ function runSim(){
     });
   }
   else if(state.simMode === 'bench'){
-    const sim = [], mea = [], resid = [];
-    for(let i = 0.1; i <= 2.5; i += 0.1){
-      const v = vcell(i, T_K, { N:P.N, area:P.area, pH2:P.pH2, pAir:P.pAir, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
-      const syntheticSample = v * (0.99 + (Math.sin(i*7) * 0.006));
-      sim.push([i, v]); mea.push([i, syntheticSample]); resid.push([i, (syntheticSample - v) * 1000]);
-    }
-    // Calculate fit metrics from the generated synthetic sample set. These
-    // values describe this demonstration only; they are not bench results.
-    const meanSim = sim.reduce((sum,row)=>sum+row[1],0)/sim.length;
-    const meanSynthetic = mea.reduce((sum,row)=>sum+row[1],0)/mea.length;
-    const scaleNumerator = sim.reduce((sum,row,index)=>sum+row[1]*mea[index][1],0);
-    const scaleDenominator = sim.reduce((sum,row)=>sum+row[1]*row[1],0);
-    const syntheticScale = scaleDenominator ? scaleNumerator/scaleDenominator : 0;
-    const syntheticRmse = Math.sqrt(resid.reduce((sum,row)=>sum+Math.pow(row[1]/1000,2),0)/resid.length)*1000;
-    const syntheticMaxError = Math.max(...resid.map(row=>Math.abs(row[1])));
-    const syntheticSse = mea.reduce((sum,row,index)=>sum+Math.pow(row[1]-syntheticScale*sim[index][1],2),0);
-    const syntheticSst = mea.reduce((sum,row)=>sum+Math.pow(row[1]-meanSynthetic,2),0);
-    const syntheticR2 = syntheticSst ? 1-syntheticSse/syntheticSst : 1;
+    const dataset = buildSyntheticBenchDataset(P);
+    state.lastSyntheticBenchDataset = dataset;
+    const sim = dataset.samples.map(row=>[row.currentDensityAcm2,row.modelCellVoltageV]);
+    const mea = dataset.samples.map(row=>[row.currentDensityAcm2,row.syntheticSampleCellVoltageV]);
+    const resid = dataset.samples.map(row=>[row.currentDensityAcm2,row.residualMv]);
+    const syntheticRmse = dataset.metrics.rmseMv;
+    const syntheticMaxError = dataset.metrics.maxAbsResidualMv;
+    const syntheticScale = dataset.metrics.scaleFactor;
+    const syntheticR2 = dataset.metrics.rSquared;
     html = `
       <div class="grid g2" style="margin-bottom:12px">
         <div class="kpi b"><div class="kpi-k">合成样本 RMSE</div><div class="kpi-v">${fmt(syntheticRmse,2)}<small>mV</small></div></div>
         <div class="kpi g"><div class="kpi-k">最大合成偏差</div><div class="kpi-v">${fmt(syntheticMaxError,2)}<small>mV</small></div></div>
         <div class="kpi o"><div class="kpi-k">合成比例拟合系数 k</div><div class="kpi-v">${fmt(syntheticScale,4)}</div></div>
         <div class="kpi c"><div class="kpi-k">合成样本 R²</div><div class="kpi-v">${fmt(syntheticR2,4)}</div></div>
+      </div>
+      <div class="simulation-export" role="note">
+        <button class="btn primary" type="button" onclick="downloadSyntheticBenchDataset()">导出本次合成演示样本 JSON</button>
+        <span>包含 25 个模型扰动样本、当前参数快照和残差指标；数据不是台架实测，也不是标定结果。</span>
       </div>
       <div class="chart-wrap"><canvas id="cv1" class="tall"></canvas>${legend([{c:'#0a84ff',n:'模型曲线'},{c:'#ff9f0a',n:'合成扰动样本（非实测）'}])}</div>
       <div class="chart-wrap"><canvas id="cv2"></canvas>${legend([{c:'#ff453a',n:'残差 (mV)'}])}</div>`;
