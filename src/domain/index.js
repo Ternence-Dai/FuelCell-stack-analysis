@@ -37,7 +37,7 @@ export function solveFirstPowerCrossing({ targetPower, minCurrentDensity, maxCur
       let low = previousCurrent;
       let high = current;
       for (let iteration = 0; iteration < 60; iteration++) {
-        const middle = (low + high) / 2;
+        const middle = low + (high - low) / 2;
         if (evaluate(middle) >= targetPower) high = middle;
         else low = middle;
       }
