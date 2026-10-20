@@ -27,6 +27,17 @@ class DailyReportTests(unittest.TestCase):
         self.assertEqual(items[0].image, "https://example.com/image.jpg")
         self.assertEqual(items[0].source, "Example Industry News")
 
+    def test_discards_google_news_boilerplate_summary(self):
+        xml = b"""<rss><channel><item>
+        <title>Hyster Delivers Hydrogen-Powered ReachStacker</title>
+        <link>https://news.google.com/rss/articles/example</link>
+        <description>Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News.</description>
+        <pubDate>Mon, 19 Oct 2026 12:00:00 GMT</pubDate>
+        </item></channel></rss>"""
+        items = report.parse_feed(xml, "Google News")
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].summary, "")
+
     def test_parse_atom_item(self):
         xml = b'''<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><entry>
         <title>Proton exchange membrane update</title><link href="https://example.com/atom" />
