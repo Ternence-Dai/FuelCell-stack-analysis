@@ -500,8 +500,28 @@ def enrich_with_gemini(items: list[NewsItem], api_key: str, model: str = "gemini
     }).encode("utf-8")
     request = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", "x-goog-api-key": api_key, "User-Agent": USER_AGENT}, method="POST")
     try:
-        with urllib.request.urlopen(request, timeout=90) as response:
-            response_data = json.loads(response.read().decode("utf-8"))
+        response_data = None
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(request, timeout=90) as response:
+                    response_data = json.loads(response.read().decode("utf-8"))
+                break
+            except urllib.error.HTTPError as exc:
+                if exc.code not in {429, 500, 502, 503, 504} or attempt == 2:
+                    raise
+                retry_after = exc.headers.get("Retry-After", "") if exc.headers else ""
+                try:
+                    delay = min(8.0, max(0.0, float(retry_after)))
+                except (TypeError, ValueError):
+                    delay = float(2 ** attempt)
+                print(
+                    f"Gemini temporary HTTP {exc.code}; retrying attempt {attempt + 2}/3 after {delay:g}s.",
+                    file=sys.stderr,
+                )
+                exc.close()
+                time.sleep(delay)
+        if response_data is None:
+            raise ValueError("Gemini returned no response after retries")
         generated = _extract_response_text(response_data)
         parsed = json.loads(generated)
         by_id = {str(row.get("id")): row for row in parsed.get("items", []) if isinstance(row, dict)}

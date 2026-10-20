@@ -57,6 +57,30 @@ class GlobalBreakthroughTests(unittest.TestCase):
         self.assertEqual(selected[0].link, "https://example.org/quantum-paper")
         self.assertEqual(warnings, [])
 
+    def test_collector_returns_multiple_ranked_breakthroughs(self):
+        rows = [
+            base.NewsItem(f"New {topic} breakthrough demonstration", f"https://example.org/{topic}", "Research",
+                          self.now, f"Researchers demonstrate a new {topic} technology with experimental measurements "
+                          "and report a new method under controlled laboratory conditions.")
+            for topic in ("quantum", "robotics", "battery", "semiconductor")
+        ]
+        with mock.patch.object(global_report, "GLOBAL_SOURCES", ()), \
+             mock.patch.object(global_report.base, "filter_recent", return_value=rows), \
+             mock.patch.object(global_report.base, "deduplicate", side_effect=lambda items: sorted(items, key=lambda x: x.score, reverse=True)):
+            selected, warnings = global_report.collect_breakthroughs(self.now)
+        self.assertEqual(len(selected), global_report.GLOBAL_BREAKTHROUGH_LIMIT)
+        self.assertEqual(len({item.link for item in selected}), 3)
+        self.assertEqual(warnings, [])
+
+    def test_build_section_renders_each_selected_breakthrough(self):
+        rows = [
+            base.NewsItem(f"Breakthrough {index}", f"https://example.org/{index}", "Research",
+                          self.now, "A sufficiently substantive summary describing experimental results.")
+            for index in range(3)
+        ]
+        section = global_report.build_section(rows)
+        self.assertEqual(section.count("<article"), 3)
+
     def test_malformed_feed_is_reported_and_skipped(self):
         response = mock.MagicMock()
         response.__enter__.return_value.read.return_value = b"<rss><broken>"
