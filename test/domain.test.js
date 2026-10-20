@@ -364,3 +364,8 @@ test("reactant mass flows avoid intermediate overflow before Faraday scaling",()
  assert.ok(Number.isFinite(result.airFeedKgPerHour));
  assert.ok(result.hydrogenConsumedKgPerHour>1e303);
 });
+
+
+test("fuel efficiency rejects positive inputs whose efficiency underflows to zero",()=>{
+ assert.throws(()=>calculateFuelToElectricEfficiency({netPowerKw:Number.MIN_VALUE,hydrogenFeedKgPerHour:1e308,hydrogenLhvKwhPerKg:1e308}),RangeError);
+});
