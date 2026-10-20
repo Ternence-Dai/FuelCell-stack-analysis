@@ -433,6 +433,19 @@ def select_top_news(items: list[NewsItem], limit: int = 5, minimum: int = 3) -> 
     return selected
 
 
+def is_substantive_summary(summary: str) -> bool:
+    """Require a factual summary; reject empty text and generic aggregator boilerplate."""
+    value = clean_text(summary)
+    lower = value.lower()
+    if len(value) < 45:
+        return False
+    if "comprehensive up-to-date news coverage" in lower:
+        return False
+    if "aggregated from sources all over the world by google news" in lower:
+        return False
+    return True
+
+
 def deterministic_editorial(item: NewsItem) -> dict[str, str]:
     tech, impact, relevance = CATEGORY_INSIGHTS[item.category]
     fact = item.summary or "RSS 来源未提供可用摘要；本条仅保留原始标题、来源和链接，需打开原文核验。"
@@ -616,6 +629,8 @@ def main() -> int:
         hydrate_article(item)
     # Re-apply the 24-hour gate after publisher metadata has had a chance to correct RSS dates.
     selected = filter_recent(selected, now, window_hours=24)
+    # Do not pad the digest with title-only stories or aggregator boilerplate.
+    selected = [item for item in selected if is_substantive_summary(item.summary)]
     for item in selected:
         classify_and_score(item, now)
         item.editorial = {}
