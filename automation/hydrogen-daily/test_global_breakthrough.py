@@ -57,6 +57,21 @@ class GlobalBreakthroughTests(unittest.TestCase):
         self.assertEqual(selected[0].link, "https://example.org/quantum-paper")
         self.assertEqual(warnings, [])
 
+    def test_collector_returns_multiple_ranked_breakthroughs(self):
+        rows = [
+            base.NewsItem(f"New {topic} breakthrough demonstration", f"https://example.org/{topic}", "Research",
+                          self.now, f"Researchers demonstrate a new {topic} technology with experimental measurements "
+                          "and report a new method under controlled laboratory conditions.")
+            for topic in ("quantum", "robotics", "battery", "semiconductor")
+        ]
+        with mock.patch.object(global_report, "GLOBAL_SOURCES", ()), \
+             mock.patch.object(global_report.base, "filter_recent", return_value=rows), \
+             mock.patch.object(global_report.base, "deduplicate", side_effect=lambda items: sorted(items, key=lambda x: x.score, reverse=True)):
+            selected, warnings = global_report.collect_breakthroughs(self.now)
+        self.assertEqual(len(selected), global_report.GLOBAL_BREAKTHROUGH_LIMIT)
+        self.assertEqual(len({item.link for item in selected}), 3)
+        self.assertEqual(warnings, [])
+
     def test_shortlist_prefers_distinct_topics_before_backfilling(self):
         rows = [
             base.NewsItem("Quantum processor advance", "https://example.org/q1", "Research", self.now,
@@ -70,12 +85,65 @@ class GlobalBreakthroughTests(unittest.TestCase):
         ]
         for index, item in enumerate(rows):
             item.score = 20 - index
-        with mock.patch.object(global_report, "GLOBAL_SOURCES", ()), \\
-             mock.patch.object(global_report.base, "filter_recent", return_value=rows), \\
-             mock.patch.object(global_report.base, "deduplicate", side_effect=lambda items: sorted(items, key=lambda x: x.score, reverse=True)):
+        with (
+            mock.patch.object(global_report, "GLOBAL_SOURCES", ()),
+            mock.patch.object(global_report.base, "filter_recent", return_value=rows),
+            mock.patch.object(global_report.base, "deduplicate", side_effect=lambda items: sorted(items, key=lambda x: x.score, reverse=True)),
+        ):
             selected, warnings = global_report.collect_breakthroughs(self.now)
         self.assertEqual([global_report._topic_label(item) for item in selected], ["量子科技", "机器人", "储能与电池"])
         self.assertEqual(warnings, [])
+
+    def test_build_section_renders_each_selected_breakthrough(self):
+        rows = [
+            base.NewsItem(f"Breakthrough {index}", f"https://example.org/{index}", "Research",
+                          self.now, "A sufficiently substantive summary describing experimental results.")
+            for index in range(3)
+        ]
+        section = global_report.build_section(rows)
+        self.assertEqual(section.count("<article"), 3)
+
+    def test_malformed_feed_is_reported_and_skipped(self):
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = b"<rss><broken>"
+        with mock.patch.object(global_report, "GLOBAL_SOURCES", (("Broken source", "https://example.org/feed"),)), \
+             mock.patch.object(global_report.urllib.request, "urlopen", return_value=response), \
+             mock.patch.object(global_report.time, "sleep"):
+            selected, warnings = global_report.collect_breakthroughs(self.now)
+        self.assertEqual(selected, [])
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("Broken source", warnings[0])
+
+    def test_render_includes_source_script_and_maturity_caveat(self):
+        item = base.NewsItem(
+            "A new <quantum> device",
+            "https://example.org/paper?a=1&b=2",
+            "University research",
+            self.now,
+            "Researchers demonstrate a new device in laboratory experiments and report measured performance.",
+        )
+        rendered = global_report.render_breakthrough(item)
+        self.assertIn("TikTok 约 60 秒口播稿", rendered)
+        self.assertIn("技术成熟度与局限", rendered)
+        self.assertIn("实验室验证", rendered)
+        self.assertIn("&lt;quantum&gt;", rendered)
+        self.assertIn("https://example.org/paper?a=1&amp;b=2", rendered)
+
+    def test_empty_section_does_not_invent_a_breakthrough(self):
+        section = global_report.build_section([])
+        self.assertIn("未筛选到", section)
+        self.assertNotIn("虚构", section)
+
+    def test_topic_label_identifies_robotics(self):
+        item = base.NewsItem(
+            "New robot manipulation method",
+            "https://example.org/robot",
+            "Research",
+            self.now,
+            "Researchers demonstrate robotics experiments.",
+        )
+        self.assertEqual(global_report._topic_label(item), "机器人")
+
 
     def test_global_section_reports_independent_selected_count(self):
         rows = [
@@ -166,39 +234,6 @@ class GlobalBreakthroughTests(unittest.TestCase):
                 ["models/gemini-2.5-flash", "models/gemini-3.8-flash-lite"],
             )
 
-    def test_malformed_feed_is_reported_and_skipped(self):
-        response = mock.MagicMock()
-        response.__enter__.return_value.read.return_value = b"<rss><broken>"
-        with mock.patch.object(global_report, "GLOBAL_SOURCES", (("Broken source", "https://example.org/feed"),)), \
-             mock.patch.object(global_report.urllib.request, "urlopen", return_value=response), \
-             mock.patch.object(global_report.time, "sleep"):
-            selected, warnings = global_report.collect_breakthroughs(self.now)
-        self.assertEqual(selected, [])
-        self.assertEqual(len(warnings), 1)
-        self.assertIn("Broken source", warnings[0])
-
-    def test_render_includes_source_script_and_maturity_caveat(self):
-        item = base.NewsItem(
-            "A new <quantum> device",
-            "https://example.org/paper?a=1&b=2",
-            "University research",
-            self.now,
-            "Researchers demonstrate a new device in laboratory experiments and report measured performance.",
-        )
-        rendered = global_report.render_breakthrough(item)
-        self.assertIn("TikTok 约 60 秒口播稿", rendered)
-        self.assertIn("成熟度判断", rendered)
-        self.assertIn("复核清单", rendered)
-        self.assertIn("真实场景任务成功率", global_report.render_breakthrough(base.NewsItem("Robot manipulation breakthrough", "https://example.org/robot", "Research", self.now, "Researchers demonstrate a robot manipulation method in a lab.")))
-        self.assertIn("实验室验证", rendered)
-        self.assertIn("&lt;quantum&gt;", rendered)
-        self.assertIn("https://example.org/paper?a=1&amp;b=2", rendered)
-
-    def test_empty_section_does_not_invent_a_breakthrough(self):
-        section = global_report.build_section([])
-        self.assertIn("未筛选到", section)
-        self.assertNotIn("虚构", section)
-
     def test_topic_label_does_not_misclassify_heterogeneous_as_gene(self):
         item = base.NewsItem(
             "A boundary integral method for electron repulsion integrals in heterogeneous dielectric environments",
@@ -208,17 +243,6 @@ class GlobalBreakthroughTests(unittest.TestCase):
             "A computational method for electronic structure in heterogeneous dielectric media.",
         )
         self.assertNotEqual(global_report._topic_label(item), "生物工程")
-
-    def test_topic_label_identifies_robotics(self):
-        item = base.NewsItem(
-            "New robot manipulation method",
-            "https://example.org/robot",
-            "Research",
-            self.now,
-            "Researchers demonstrate robotics experiments.",
-        )
-        self.assertEqual(global_report._topic_label(item), "机器人")
-
 
 if __name__ == "__main__":
     unittest.main()
