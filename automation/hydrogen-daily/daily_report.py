@@ -8,7 +8,6 @@ content; without an API key, a transparent rule-based editorial fallback is used
 from __future__ import annotations
 
 import difflib
-import global_breakthrough
 import email.utils
 import html
 import json
@@ -134,6 +133,10 @@ class NewsItem:
     category: str = "产业化、政策与投资"
     score: float = 0.0
     editorial: dict[str, str] = field(default_factory=dict)
+
+
+# Imported after NewsItem is defined to avoid the two modules' shared model import cycle.
+import global_breakthrough
 
 
 def clean_text(raw: str) -> str:
