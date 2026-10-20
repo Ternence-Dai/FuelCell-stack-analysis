@@ -638,6 +638,11 @@ def main() -> int:
     warnings.extend(breakthrough_warnings)
     for breakthrough in breakthroughs:
         global_breakthrough.base.hydrate_article(breakthrough)
+    # Publisher metadata may reveal an older original publication date than the feed timestamp.
+    breakthroughs = [
+        item for item in global_breakthrough.base.filter_recent(breakthroughs, now, window_hours=24)
+        if global_breakthrough.base.is_substantive_summary(item.summary)
+    ]
     # Enrich a wider shortlist so weak or stock-only stories can be replaced by substantive reporting.
     selected = select_top_news(items, limit=8, minimum=5)
     for item in selected:
