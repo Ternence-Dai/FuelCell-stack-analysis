@@ -124,7 +124,7 @@ class GlobalBreakthroughTests(unittest.TestCase):
         )
         rendered = global_report.render_breakthrough(item)
         self.assertIn("TikTok 约 60 秒口播稿", rendered)
-        self.assertIn("技术成熟度与局限", rendered)
+        self.assertIn("成熟度判断", rendered)
         self.assertIn("实验室验证", rendered)
         self.assertIn("&lt;quantum&gt;", rendered)
         self.assertIn("https://example.org/paper?a=1&amp;b=2", rendered)
