@@ -94,6 +94,15 @@ class DailyReportTests(unittest.TestCase):
         report.classify_and_score(stock, now)
         self.assertGreater(substantive.score, stock.score)
 
+    def test_summary_quality_gate_rejects_empty_and_boilerplate(self):
+        self.assertFalse(report.is_substantive_summary(""))
+        self.assertFalse(report.is_substantive_summary(
+            "Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News."
+        ))
+        self.assertTrue(report.is_substantive_summary(
+            "The company reported a new electrolyzer test campaign and published the remediation plan."
+        ))
+
     def test_classifies_membrane_news(self):
         item = report.NewsItem("New proton exchange membrane MEA", "https://x.test/a", "Test", datetime.now(timezone.utc), "PFSA membrane research")
         report.classify_and_score(item, datetime.now(timezone.utc))
