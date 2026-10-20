@@ -188,14 +188,29 @@ export function calculateReactantMassFlows({
   // Faraday's law gives the electrochemically consumed H2 independently of
   // the anode excess-feed ratio. λH2 affects fresh H2 feed only; λair is
   // applied separately to the theoretical cathode air requirement.
-  const hydrogenConsumedKgPerHour =
-    cellCount * stackCurrentA * 2.016 * 3.6 / (2 * 96485);
-  const hydrogenFeedKgPerHour = hydrogenConsumedKgPerHour * hydrogenStoichRatio;
+  if (stackCurrentA === 0) {
+    return Object.freeze({
+      hydrogenConsumedKgPerHour: 0,
+      hydrogenFeedKgPerHour: 0,
+      airFeedKgPerHour: 0
+    });
+  }
+  // Combine Faraday and stoichiometric factors in log space. The direct
+  // product can overflow at cellCount*current before the final divisor brings
+  // a mathematically representable mass flow back into range.
+  const logHydrogenConsumed = Math.log(cellCount) + Math.log(stackCurrentA) +
+    Math.log(2.016) + Math.log(3.6) - Math.log(2) - Math.log(96485);
+  const hydrogenConsumedKgPerHour = Math.exp(logHydrogenConsumed);
+  const hydrogenFeedKgPerHour = Math.exp(logHydrogenConsumed + Math.log(hydrogenStoichRatio));
   // Dry-air/H2 stoichiometric mass ratio: 8 kg O2 per kg H2,
   // divided by the declared 0.232 dry-air oxygen mass fraction.
-  const dryAirOxygenMassFraction = 0.232;
-  const stoichiometricAirPerHydrogen = 8 / dryAirOxygenMassFraction;
-  const airFeedKgPerHour = hydrogenConsumedKgPerHour * stoichiometricAirPerHydrogen * airStoichRatio;
+  const stoichiometricAirPerHydrogen = 8 / 0.232;
+  const airFeedKgPerHour = Math.exp(
+    logHydrogenConsumed + Math.log(stoichiometricAirPerHydrogen) + Math.log(airStoichRatio)
+  );
+  if (hydrogenConsumedKgPerHour === 0 || hydrogenFeedKgPerHour === 0 || airFeedKgPerHour === 0) {
+    throw new RangeError("positive stack current produces reactant flow below the representable numeric range");
+  }
   const result = {
     hydrogenConsumedKgPerHour,
     hydrogenFeedKgPerHour,
