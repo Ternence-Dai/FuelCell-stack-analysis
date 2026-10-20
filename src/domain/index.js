@@ -25,7 +25,7 @@ export function solveFirstPowerCrossing({ targetPower, minCurrentDensity, maxCur
 
   for (let step = 1; step <= steps; step++) {
     const current = minCurrentDensity +
-      (maxCurrentDensity - minCurrentDensity) * step / steps;
+      (maxCurrentDensity - minCurrentDensity) * (step / steps);
     const power = evaluate(current);
     if (power > peakPower) {
       peakPower = power;
