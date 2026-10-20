@@ -28,6 +28,8 @@ TECH_TERMS = (
     "robotics", "catalyst", "energy", "device", "实验", "突破", "研究", "首次",
     "新型", "效率", "芯片", "机器人", "量子", "电池", "材料", "航天", "基因",
 )
+GLOBAL_BREAKTHROUGH_LIMIT = 3
+
 NOISE_TERMS = ("stock price", "shares", "market outlook", "analyst rating", "funding round", "earnings")
 
 
