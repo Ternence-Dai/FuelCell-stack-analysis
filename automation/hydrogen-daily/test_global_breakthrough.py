@@ -72,6 +72,26 @@ class GlobalBreakthroughTests(unittest.TestCase):
         self.assertEqual(len({item.link for item in selected}), 3)
         self.assertEqual(warnings, [])
 
+    def test_shortlist_prefers_distinct_topics_before_backfilling(self):
+        rows = [
+            base.NewsItem("Quantum processor advance", "https://example.org/q1", "Research", self.now,
+                          "A substantive quantum processor experiment reports measured performance."),
+            base.NewsItem("Quantum material advance", "https://example.org/q2", "Research", self.now,
+                          "A substantive quantum materials experiment reports measured performance."),
+            base.NewsItem("Robotics advance", "https://example.org/r", "Research", self.now,
+                          "A substantive robot experiment reports measured performance."),
+            base.NewsItem("Battery advance", "https://example.org/b", "Research", self.now,
+                          "A substantive battery experiment reports measured performance."),
+        ]
+        for index, item in enumerate(rows):
+            item.score = 20 - index
+        with mock.patch.object(global_report, "GLOBAL_SOURCES", ()), \\
+             mock.patch.object(global_report.base, "filter_recent", return_value=rows), \\
+             mock.patch.object(global_report.base, "deduplicate", side_effect=lambda items: sorted(items, key=lambda x: x.score, reverse=True)):
+            selected, warnings = global_report.collect_breakthroughs(self.now)
+        self.assertEqual([global_report._topic_label(item) for item in selected], ["量子科技", "机器人", "储能与电池"])
+        self.assertEqual(warnings, [])
+
     def test_build_section_renders_each_selected_breakthrough(self):
         rows = [
             base.NewsItem(f"Breakthrough {index}", f"https://example.org/{index}", "Research",
