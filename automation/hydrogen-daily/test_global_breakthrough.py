@@ -145,5 +145,104 @@ class GlobalBreakthroughTests(unittest.TestCase):
         self.assertEqual(global_report._topic_label(item), "机器人")
 
 
+    def test_global_section_reports_independent_selected_count(self):
+        rows = [
+            base.NewsItem(f"New technology result {index}", f"https://example.org/{index}",
+                          "Research", self.now, "Researchers demonstrate a new method with measured experimental results.")
+            for index in range(2)
+        ]
+        section = global_report.build_section(rows)
+        self.assertIn('data-global-technology-selected="2"', section)
+        self.assertIn("独立入选 2 条", section)
+        self.assertEqual(section.count("<article"), 2)
+
+    def test_gemini_retries_transient_503_then_succeeds(self):
+        import json
+        import urllib.error
+        item = base.NewsItem(
+            "A fuel cell catalyst result", "https://example.org/catalyst", "Research", self.now,
+            "Researchers report catalyst measurements from controlled laboratory experiments.",
+            category="基础材料与催化剂",
+        )
+        error = urllib.error.HTTPError(
+            "https://example.org", 503, "Service Unavailable", {"Retry-After": "0"}, None
+        )
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps({
+            "candidates": [{"content": {"parts": [{"text": json.dumps({
+                "items": [{"id": "0", "zh_title": "title"}]
+            })}]}}]
+        }).encode("utf-8")
+        with (
+            mock.patch.object(base, "discover_gemini_models", return_value=["models/gemini-primary"]),
+            mock.patch.object(base.urllib.request, "urlopen", side_effect=[error, response]) as urlopen,
+            mock.patch.object(base.time, "sleep"),
+        ):
+            self.assertTrue(base.enrich_with_gemini([item], "test-key", max_attempts=2))
+        self.assertEqual(urlopen.call_count, 2)
+        self.assertEqual(item.editorial["zh_title"], "title")
+
+    def test_gemini_fails_over_to_another_available_flash_model(self):
+        import json
+        import urllib.error
+        item = base.NewsItem(
+            "A fuel cell catalyst result", "https://example.org/catalyst", "Research", self.now,
+            "Researchers report catalyst measurements from controlled laboratory experiments.",
+            category="基础材料与催化剂",
+        )
+        unavailable = urllib.error.HTTPError(
+            "https://example.org", 503, "Service Unavailable", {"Retry-After": "0"}, None
+        )
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps({
+            "candidates": [{"content": {"parts": [{"text": json.dumps({
+                "items": [{"id": "0", "zh_title": "fallback-model-title"}]
+            })}]}}]
+        }).encode("utf-8")
+        with (
+            mock.patch.object(base, "discover_gemini_models", return_value=["models/gemini-primary", "models/gemini-fallback"]),
+            mock.patch.object(base.urllib.request, "urlopen", side_effect=[unavailable, unavailable, response]) as urlopen,
+            mock.patch.object(base.time, "sleep"),
+        ):
+            self.assertTrue(base.enrich_with_gemini([item], "test-key", max_attempts=2))
+        self.assertEqual(urlopen.call_count, 3)
+        self.assertEqual(item.editorial["zh_title"], "fallback-model-title")
+        self.assertIn("models/gemini-fallback:generateContent", urlopen.call_args.args[0].full_url)
+
+    def test_gemini_model_discovery_filters_unsupported_and_audio_models(self):
+        import json
+        first = mock.MagicMock()
+        first.__enter__.return_value.read.return_value = json.dumps({
+            "models": [
+                {"name": "models/gemini-2.5-flash", "supportedGenerationMethods": ["generateContent"]},
+                {"name": "models/gemini-2.5-flash-preview-tts", "supportedGenerationMethods": ["generateContent"]},
+                {"name": "models/text-embedding-004", "supportedGenerationMethods": ["embedContent"]},
+                {"name": "models/gemini-pro", "supportedGenerationMethods": ["generateContent"]},
+            ],
+            "nextPageToken": "next",
+        }).encode("utf-8")
+        second = mock.MagicMock()
+        second.__enter__.return_value.read.return_value = json.dumps({
+            "models": [
+                {"name": "models/gemini-3.8-flash-lite", "supportedGenerationMethods": ["generateContent"]},
+                {"name": "models/gemini-live-flash", "supportedGenerationMethods": ["generateContent"]},
+            ]
+        }).encode("utf-8")
+        with mock.patch.object(base.urllib.request, "urlopen", side_effect=[first, second]):
+            self.assertEqual(
+                base.discover_gemini_models("test-key", "gemini-configured"),
+                ["models/gemini-2.5-flash", "models/gemini-3.8-flash-lite"],
+            )
+
+    def test_topic_label_does_not_misclassify_heterogeneous_as_gene(self):
+        item = base.NewsItem(
+            "A boundary integral method for electron repulsion integrals in heterogeneous dielectric environments",
+            "https://example.org/physics",
+            "Research",
+            self.now,
+            "A computational method for electronic structure in heterogeneous dielectric media.",
+        )
+        self.assertNotEqual(global_report._topic_label(item), "生物工程")
+
 if __name__ == "__main__":
     unittest.main()

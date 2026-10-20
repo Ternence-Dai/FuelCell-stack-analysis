@@ -474,76 +474,134 @@ def _extract_response_text(data: dict) -> str:
     return text.strip()
 
 
-def enrich_with_gemini(items: list[NewsItem], api_key: str, model: str = "gemini-3.8-flash") -> bool:
+def _gemini_retry_delay(attempt: int, retry_after: str | None = None) -> float:
+    """Return a bounded delay, honoring Retry-After when it is a valid value."""
+    if retry_after:
+        try:
+            return min(15.0, max(0.0, float(retry_after)))
+        except ValueError:
+            try:
+                retry_at = email.utils.parsedate_to_datetime(retry_after)
+                return min(15.0, max(0.0, (retry_at - datetime.now(timezone.utc)).total_seconds()))
+            except (TypeError, ValueError, OverflowError):
+                pass
+    return min(4.0, 2.0 ** attempt)
+
+
+def discover_gemini_models(api_key: str, preferred: str) -> list[str]:
+    """Discover text-capable Flash models across API pages; omit audio/TTS variants."""
+    base_url = "https://generativelanguage.googleapis.com/v1beta/models"
+    page_token = ""
+    available: list[str] = []
+    request_count = 0
+    try:
+        while request_count < 3:
+            query = urllib.parse.urlencode({"pageSize": "100", **({"pageToken": page_token} if page_token else {})})
+            request = urllib.request.Request(
+                f"{base_url}?{query}", headers={"x-goog-api-key": api_key, "User-Agent": USER_AGENT}, method="GET"
+            )
+            with urllib.request.urlopen(request, timeout=8) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            for row in payload.get("models", []):
+                name = str(row.get("name", ""))
+                methods = row.get("supportedGenerationMethods", [])
+                short_name = name.removeprefix("models/")
+                lowered = short_name.lower()
+                if (
+                    name.startswith("models/")
+                    and "generateContent" in methods
+                    and "flash" in lowered
+                    and not any(term in lowered for term in ("tts", "audio", "live", "embedding"))
+                ):
+                    available.append(short_name)
+            page_token = str(payload.get("nextPageToken", ""))
+            request_count += 1
+            if not page_token:
+                break
+        preferred_name = preferred.removeprefix("models/")
+        ordered = ([preferred_name] if preferred_name in available else []) + [
+            name for name in available if name != preferred_name
+        ]
+        if ordered:
+            model_paths = ["models/" + name for name in ordered[:5]]
+            print("Gemini text model discovery: " + ", ".join(model_paths))
+            return model_paths
+        print("Gemini model discovery returned no text-capable Flash model; trying configured model only.", file=sys.stderr)
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError, TypeError, KeyError) as exc:
+        print(f"Gemini model discovery unavailable ({type(exc).__name__}); trying configured model only.", file=sys.stderr)
+    return ["models/" + preferred.removeprefix("models/")]
+
+
+def enrich_with_gemini(
+    items: list[NewsItem], api_key: str, model: str = "gemini-3.8-flash",
+    max_attempts: int = 2,
+) -> bool:
+    """Use discovered Flash models with bounded retries and deterministic RSS fallback."""
     if not api_key or not items:
         return False
+    max_attempts = max(1, min(3, int(max_attempts)))
     payload_items = [{
         "id": str(index), "source": item.source, "date": item.published.astimezone(TZ).isoformat() if item.published else "not supplied",
         "title": item.title, "category": item.category, "rss_summary": item.summary[:1800], "url": item.link,
     } for index, item in enumerate(items)]
     prompt = (
-        "你是氢燃料电池产业研究编辑。请仅根据下列 RSS 原始材料为每条新闻写中文专业简报。"
-        "不得联网补充，不得臆造数字、公司动作、技术参数、产品性能、因果关系或发布时间；"
-        "RSS 未披露的信息必须明确写‘来源未披露/需查原文’，不能推断成事实。"
-        "区分新闻事实与编辑分析。对电堆研发的建议须标注为研究参考，不可伪装成报道事实。"
-        "只返回合法 JSON，结构为 {\"items\":[{\"id\":\"0\",\"zh_title\":\"...\","
-        "\"facts\":\"...\",\"tech\":\"...\",\"impact\":\"...\","
-        "\"stack_relevance\":\"...\",\"uncertainty\":\"...\"}]}。"
-        "facts 写新闻事实/来源摘要；tech 写技术解读；impact 写产业链影响；"
-        "stack_relevance 写对 PEM 燃料电池电堆研发的参考；uncertainty 写资料局限。\n\n"
-        + json.dumps(payload_items, ensure_ascii=False)
+        "你是资深氢燃料电池产业与工程研究编辑。请仅依据每条 RSS 原始材料写可供工程师决策的中文深度简报。不得联网补充，不得臆造数字、公司动作、技术参数、产品性能、因果关系或发布时间；未披露内容必须标记‘来源未披露/需查原文’。严格分开‘来源明确事实’与‘编辑分析/研究假设’。facts须交代主体、动作、时间、对象和来源证据；tech须解释材料/反应/结构/工艺/系统机理，指出摘要确实披露的关键参数及测试边界，未披露则列出待核验参数；impact须分别分析上游材料与部件、MEA/电堆/系统集成、下游场景及商业化约束，不适用的维度明确说明；stack_relevance须给出可执行的PEM电堆研发验证方向、对照组或测试项目，但必须标注为研究建议而非新闻事实；uncertainty须列出证据缺口、样本/工况/寿命/成本/第三方验证等尚未披露项。避免空泛赞美和重复摘要，优先给出具体工程问题。只返回合法 JSON，结构为 {\"items\":[{\"id\":\"0\",\"zh_title\":\"...\",\"facts\":\"...\",\"tech\":\"...\",\"impact\":\"...\",\"stack_relevance\":\"...\",\"uncertainty\":\"...\"}]}。facts 写新闻事实/来源摘要；tech 写技术解读；impact 写产业链影响；stack_relevance 写对 PEM 燃料电池电堆研发的参考；uncertainty 写资料局限。"
+        + "\\n\\n" + json.dumps(payload_items, ensure_ascii=False)
     )
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{urllib.parse.quote(model, safe='')}:generateContent"
     body = json.dumps({
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"temperature": 0.2, "responseMimeType": "application/json"},
     }).encode("utf-8")
-    request = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", "x-goog-api-key": api_key, "User-Agent": USER_AGENT}, method="POST")
-    try:
-        response_data = None
-        for attempt in range(3):
+    retryable_statuses = {408, 429, 500, 502, 503, 504}
+    models = discover_gemini_models(api_key, model)
+    for model_name in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/{model_name}:generateContent"
+        request = urllib.request.Request(
+            url, data=body,
+            headers={"Content-Type": "application/json", "x-goog-api-key": api_key, "User-Agent": USER_AGENT},
+            method="POST",
+        )
+        for attempt in range(max_attempts):
             try:
-                with urllib.request.urlopen(request, timeout=90) as response:
+                with urllib.request.urlopen(request, timeout=35) as response:
                     response_data = json.loads(response.read().decode("utf-8"))
-                break
+                generated = _extract_response_text(response_data)
+                parsed = json.loads(generated)
+                by_id = {str(row.get("id")): row for row in parsed.get("items", []) if isinstance(row, dict)}
+                for index, item in enumerate(items):
+                    row = by_id.get(str(index))
+                    if not row:
+                        item.editorial = deterministic_editorial(item)
+                        continue
+                    fallback = deterministic_editorial(item)
+                    item.editorial = {
+                        key: clean_text(str(row.get(key, "")))[:5000] or fallback[key]
+                        for key in ("zh_title", "facts", "tech", "impact", "stack_relevance", "uncertainty")
+                    }
+                print(f"Gemini enrichment succeeded with {model_name}.")
+                return True
             except urllib.error.HTTPError as exc:
-                if exc.code not in {429, 500, 502, 503, 504} or attempt == 2:
-                    raise
-                retry_after = exc.headers.get("Retry-After", "") if exc.headers else ""
-                try:
-                    delay = min(8.0, max(0.0, float(retry_after)))
-                except (TypeError, ValueError):
-                    delay = float(2 ** attempt)
-                print(
-                    f"Gemini temporary HTTP {exc.code}; retrying attempt {attempt + 2}/3 after {delay:g}s.",
-                    file=sys.stderr,
-                )
-                exc.close()
+                if exc.code not in retryable_statuses:
+                    print(f"Gemini model {model_name} rejected the request (HTTP {exc.code}); trying next model if available.", file=sys.stderr)
+                    break
+                if attempt + 1 >= max_attempts:
+                    print(f"Gemini model {model_name} failed (HTTP {exc.code}) after {attempt + 1} attempt(s); trying next model if available.", file=sys.stderr)
+                    break
+                delay = _gemini_retry_delay(attempt, exc.headers.get("Retry-After") if exc.headers else None)
+                print(f"Gemini model {model_name} transient HTTP {exc.code}; retrying in {delay:g}s (attempt {attempt + 2}/{max_attempts}).", file=sys.stderr)
                 time.sleep(delay)
-        if response_data is None:
-            raise ValueError("Gemini returned no response after retries")
-        generated = _extract_response_text(response_data)
-        parsed = json.loads(generated)
-        by_id = {str(row.get("id")): row for row in parsed.get("items", []) if isinstance(row, dict)}
-        for index, item in enumerate(items):
-            row = by_id.get(str(index))
-            if not row:
-                item.editorial = deterministic_editorial(item)
-                continue
-            fallback = deterministic_editorial(item)
-            item.editorial = {
-                key: clean_text(str(row.get(key, "")))[:5000] or fallback[key]
-                for key in ("zh_title", "facts", "tech", "impact", "stack_relevance", "uncertainty")
-            }
-        return True
-    except urllib.error.HTTPError as exc:
-        # Log only the HTTP status; never print request headers, API keys, or response bodies.
-        print(f"Gemini API rejected the request (HTTP {exc.code}); using transparent RSS fallback.", file=sys.stderr)
-        return False
-    except (urllib.error.URLError, TimeoutError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
-        print(f"Gemini enrichment unavailable; using transparent RSS fallback ({type(exc).__name__}).", file=sys.stderr)
-        return False
-
+            except (urllib.error.URLError, TimeoutError) as exc:
+                if attempt + 1 >= max_attempts:
+                    print(f"Gemini model {model_name} network failure after {attempt + 1} attempt(s); trying next model if available ({type(exc).__name__}).", file=sys.stderr)
+                    break
+                delay = _gemini_retry_delay(attempt)
+                print(f"Gemini model {model_name} network error ({type(exc).__name__}); retrying in {delay:g}s.", file=sys.stderr)
+                time.sleep(delay)
+            except (ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
+                print(f"Gemini response unusable from {model_name}; using transparent RSS fallback ({type(exc).__name__}).", file=sys.stderr)
+                return False
+    print(f"Gemini enrichment unavailable after trying {len(models)} model(s); using transparent RSS fallback.", file=sys.stderr)
+    return False
 
 def _date_label(value: datetime | None) -> str:
     return value.astimezone(TZ).strftime("%Y-%m-%d %H:%M SGT") if value else "来源未提供发布时间"
@@ -552,6 +610,8 @@ def _date_label(value: datetime | None) -> str:
 def build_html(items: list[NewsItem], warnings: list[str], enriched: bool, now: datetime | None = None, breakthroughs: list[NewsItem] | None = None) -> str:
     now_local = (now or datetime.now(timezone.utc)).astimezone(TZ)
     cards: list[str] = []
+    technology_items = breakthroughs or []
+    print(f"Global technology selected {len(technology_items)} item(s); rendered {len(technology_items)} item(s).")
     for index, item in enumerate(items, 1):
         editorial = item.editorial or deterministic_editorial(item)
         image_html = ""
