@@ -374,3 +374,12 @@ test("fuel efficiency rejects positive inputs whose efficiency underflows to zer
 test("polarization rejects operating points where losses exceed reversible voltage",()=>{
  assert.throws(()=>calculatePolarizationPoint({reversibleVoltage:0.5,activationLoss:0.2,currentDensity:2,areaSpecificResistance:0.2,limitingCurrentDensity:3,concentrationCoefficient:0.1}),RangeError);
 });
+
+
+test("cell-voltage model rejects physically impossible negative terminal voltage",()=>{
+ assert.throws(()=>calculateCellVoltage({
+  reversibleVoltage:0.5,activationCoefficient:1,currentDensity:100,
+  exchangeCurrentDensity:1,areaSpecificResistance:1,
+  concentrationCoefficient:0,concentrationExponent:0
+ }),/polarization losses exceed the reversible cell voltage/);
+});
