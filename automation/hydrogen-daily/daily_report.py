@@ -71,8 +71,10 @@ CATEGORY_TERMS: dict[str, tuple[str, ...]] = {
         "制氢", "电解槽", "储氢", "运氢", "液氢", "输氢", "加氢站", "氨",
     ),
     "氢基燃料及交通航空应用": (
-        "sustainable aviation fuel", "e-saf", "e-fuel", "synthetic fuel", "hydrogen-based aviation",
-        "hydrogen-derived fuel", "green aviation fuel", "氢基燃料", "可持续航空燃料", "合成燃料",
+        "sustainable aviation fuel", "aviation fuel", "hydrogen-based aviation fuel",
+        "e-saf", "e-fuel", "synthetic fuel", "hydrogen-based aviation",
+        "hydrogen-derived fuel", "green aviation fuel", "green hydrogen-based", "氢基燃料",
+        "可持续航空燃料", "合成燃料",
     ),
     "产业化、政策与投资": (
         "investment", "commercialization", "commercial deployment", "mass production",
