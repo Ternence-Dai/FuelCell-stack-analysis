@@ -1,5 +1,6 @@
 import sys
 import unittest
+from unittest import mock
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -36,6 +37,36 @@ class GlobalBreakthroughTests(unittest.TestCase):
                 row.score = 4 + sum(2 for term in global_report.TECH_TERMS if term in text)
                 ranked.append(row)
         self.assertEqual(base.deduplicate(ranked), [item])
+
+    def test_collector_parses_rss_and_selects_one_recent_item(self):
+        xml = b"""<?xml version="1.0"?><rss><channel><item>
+        <title>Researchers demonstrate a new quantum processor</title>
+        <link>https://example.org/quantum-paper</link>
+        <description>Researchers demonstrate a new quantum processor architecture and report
+        experimental measurements under controlled laboratory conditions in a peer-reviewed study.</description>
+        <pubDate>Tue, 20 Oct 2026 00:30:00 GMT</pubDate>
+        <source>University research office</source>
+        </item></channel></rss>"""
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = xml
+        with mock.patch.object(global_report, "GLOBAL_SOURCES", (("Test source", "https://example.org/feed"),)), \
+             mock.patch.object(global_report.urllib.request, "urlopen", return_value=response), \
+             mock.patch.object(global_report.time, "sleep"):
+            selected, warnings = global_report.collect_breakthroughs(self.now)
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(selected[0].link, "https://example.org/quantum-paper")
+        self.assertEqual(warnings, [])
+
+    def test_malformed_feed_is_reported_and_skipped(self):
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = b"<rss><broken>"
+        with mock.patch.object(global_report, "GLOBAL_SOURCES", (("Broken source", "https://example.org/feed"),)), \
+             mock.patch.object(global_report.urllib.request, "urlopen", return_value=response), \
+             mock.patch.object(global_report.time, "sleep"):
+            selected, warnings = global_report.collect_breakthroughs(self.now)
+        self.assertEqual(selected, [])
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("Broken source", warnings[0])
 
     def test_render_includes_source_script_and_maturity_caveat(self):
         item = base.NewsItem(
