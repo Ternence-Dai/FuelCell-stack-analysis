@@ -434,6 +434,17 @@ def build_html(items: list[NewsItem], warnings: list[str], enriched: bool, now: 
     </body></html>"""
 
 
+def mask_email(address: str) -> str:
+    """Mask an email address for public Actions logs while retaining a useful suffix."""
+    value = (address or "").strip()
+    if "@" not in value:
+        return "<invalid-or-non-email-address>"
+    local, domain = value.rsplit("@", 1)
+    visible = local[-5:] if len(local) > 5 else local[:1]
+    masked = ("*" * max(0, len(local) - len(visible))) + visible
+    return f"{masked}@{domain}"
+
+
 def send_email(subject: str, html_body: str) -> None:
     username = os.environ.get("SMTP_USERNAME", "").strip()
     password = os.environ.get("SMTP_PASSWORD", "")
@@ -442,6 +453,11 @@ def send_email(subject: str, html_body: str) -> None:
     port = int(os.environ.get("SMTP_PORT", "465"))
     if not username or not password or not recipient:
         raise RuntimeError("Missing SMTP_USERNAME, SMTP_PASSWORD, or REPORT_RECIPIENT repository secrets.")
+    parsed_recipient = email.utils.parseaddr(recipient)[1]
+    if not parsed_recipient or parsed_recipient != recipient or "@" not in parsed_recipient:
+        raise RuntimeError("REPORT_RECIPIENT must contain one valid email address.")
+    print(f"SMTP sender configured: {mask_email(username)}")
+    print(f"SMTP recipient configured: {mask_email(recipient)}")
     message = EmailMessage()
     message["Subject"] = subject
     message["From"] = Address(display_name="全球氢燃料电池产业每日情报", addr_spec=username)
@@ -453,7 +469,9 @@ def send_email(subject: str, html_body: str) -> None:
         server.login(username, password)
         refused = server.send_message(message)
     if refused:
-        raise RuntimeError(f"SMTP refused recipient(s): {', '.join(refused)}")
+        refused_targets = ", ".join(mask_email(item) for item in refused)
+        raise RuntimeError(f"SMTP refused recipient(s): {refused_targets}")
+    print(f"SMTP relay accepted the envelope recipient: {mask_email(recipient)}")
 
 
 def main() -> int:
