@@ -320,3 +320,12 @@ test("power solver includes the maximum-current endpoint in its sampled grid",()
  assert.equal(current,4);
  assert.equal(samples.at(-1),4);
 });
+
+
+test("altitude pressure ratio remains finite when its numerator product would overflow",()=>{
+ const ratio=calculateAltitudeAdjustedPressureRatio({
+  basePressureRatio:1e200,referencePressureMPa:1e100,ambientPressureMPa:1e200
+ });
+ assert.ok(Number.isFinite(ratio));
+ assert.ok(Math.abs(ratio/1e100-1)<1e-12);
+});
