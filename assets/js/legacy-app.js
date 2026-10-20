@@ -123,7 +123,7 @@ function solveCurrentDensity(targetP_kW, p){
   try {
     vcell(maxCurrentDensity, p.T_K, p);
   } catch (error) {
-    if (!(error instanceof RangeError)) throw error;
+    if (!error || error.name !== 'RangeError') throw error;
     let feasible = minCurrentDensity;
     let infeasible = maxCurrentDensity;
     for (let iteration = 0; iteration < 64; iteration++) {
@@ -132,7 +132,7 @@ function solveCurrentDensity(targetP_kW, p){
         vcell(midpoint, p.T_K, p);
         feasible = midpoint;
       } catch (probeError) {
-        if (!(probeError instanceof RangeError)) throw probeError;
+        if (!probeError || probeError.name !== 'RangeError') throw probeError;
         infeasible = midpoint;
       }
     }
