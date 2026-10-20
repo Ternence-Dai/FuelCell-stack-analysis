@@ -231,7 +231,7 @@ def hydrate_article(item: NewsItem) -> None:
         headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml"},
     )
     try:
-        with urllib.request.urlopen(request, timeout=12) as response:
+        with urllib.request.urlopen(request, timeout=6) as response:
             body = response.read(1_500_000)
             content_type = response.headers.get("Content-Type", "")
         if "html" not in content_type.lower() and not body.lstrip().lower().startswith((b"<!doctype html", b"<html")):
@@ -628,7 +628,7 @@ def main() -> int:
     now = datetime.now(timezone.utc)
     items, warnings = collect_news(now)
     # Enrich a wider shortlist so weak or stock-only stories can be replaced by substantive reporting.
-    selected = select_top_news(items, limit=12, minimum=6)
+    selected = select_top_news(items, limit=8, minimum=5)
     for item in selected:
         hydrate_article(item)
     # Re-apply the 24-hour gate after publisher metadata has had a chance to correct RSS dates.
