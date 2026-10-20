@@ -264,6 +264,16 @@ test("power solver returns the minimum-current point when target is already met"
   powerAt:i=>i
  }),0.1);
 });
+test("power solver bisects safely when current-density endpoints would overflow when added",()=>{
+ const current=solveFirstPowerCrossing({
+  targetPower:1,minCurrentDensity:8e307,maxCurrentDensity:1.6e308,steps:2,
+  powerAt:i=>i/1e308
+ });
+ assert.ok(Number.isFinite(current));
+ assert.ok(current/1e308>=1,"returned operating point must meet the target");
+ assert.ok(Math.abs(current/1e308-1)<1e-12);
+});
+
 test("power solver rejects malformed intervals, steps and non-finite model output",()=>{
  const base={targetPower:1,minCurrentDensity:0.1,maxCurrentDensity:2,powerAt:i=>i};
  assert.throws(()=>solveFirstPowerCrossing({...base,maxCurrentDensity:0.1}),RangeError);
