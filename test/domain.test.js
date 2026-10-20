@@ -281,3 +281,13 @@ test("power solver rejects malformed intervals, steps and non-finite model outpu
  assert.throws(()=>solveFirstPowerCrossing({...base,powerAt:null}),TypeError);
  assert.throws(()=>solveFirstPowerCrossing({...base,powerAt:()=>NaN}),RangeError);
 });
+
+test("power solver scales grid fractions before multiplying extreme finite intervals",()=>{
+ const current=solveFirstPowerCrossing({
+  targetPower:0.75,minCurrentDensity:0,maxCurrentDensity:Number.MAX_VALUE,steps:3,
+  powerAt:i=>i/Number.MAX_VALUE
+ });
+ assert.ok(Number.isFinite(current));
+ assert.ok(current/Number.MAX_VALUE>=0.75);
+ assert.ok(Math.abs(current/Number.MAX_VALUE-0.75)<1e-12);
+});
