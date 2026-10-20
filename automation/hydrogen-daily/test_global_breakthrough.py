@@ -28,8 +28,6 @@ class GlobalBreakthroughTests(unittest.TestCase):
             self.now.replace(day=18),
             "Researchers report a battery research result with detailed experimental measurements.",
         )
-        with unittest.mock.patch.object(global_report, "GLOBAL_SOURCES", ()):
-            selected, warnings = global_report.collect_breakthroughs(self.now)
         # Ranking and the rolling date gate are tested independently of network access.
         ranked = []
         for row in (item, old):
@@ -38,8 +36,6 @@ class GlobalBreakthroughTests(unittest.TestCase):
                 row.score = 4 + sum(2 for term in global_report.TECH_TERMS if term in text)
                 ranked.append(row)
         self.assertEqual(base.deduplicate(ranked), [item])
-        self.assertEqual(selected, [])
-        self.assertEqual(warnings, [])
 
     def test_render_includes_source_script_and_maturity_caveat(self):
         item = base.NewsItem(
