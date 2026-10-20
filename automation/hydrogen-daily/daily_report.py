@@ -25,9 +25,11 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from email.headerregistry import Address
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Iterable
 from zoneinfo import ZoneInfo
+from urllib.parse import urlparse
 
 TZ = ZoneInfo("Asia/Singapore")
 USER_AGENT = "Ternence-Hydrogen-Industry-Intelligence/1.0 (+https://github.com/Ternence-Dai/FuelCell-stack-analysis)"
@@ -68,6 +70,10 @@ CATEGORY_TERMS: dict[str, tuple[str, ...]] = {
         "refueling station", "hydrogen station", "compressed hydrogen", "ammonia",
         "制氢", "电解槽", "储氢", "运氢", "液氢", "输氢", "加氢站", "氨",
     ),
+    "氢基燃料及交通航空应用": (
+        "sustainable aviation fuel", "e-saf", "e-fuel", "synthetic fuel", "hydrogen-based aviation",
+        "hydrogen-derived fuel", "green aviation fuel", "氢基燃料", "可持续航空燃料", "合成燃料",
+    ),
     "产业化、政策与投资": (
         "investment", "commercialization", "commercial deployment", "mass production",
         "production facility", "order", "contract", "subsidy", "policy", "funding",
@@ -100,6 +106,11 @@ CATEGORY_INSIGHTS = {
         "重点核对氢气纯度、压力/温度、储运形式、能耗边界及安全标准，区分规划产能与实际运行数据。",
         "氢源成本、交付能力和加注网络会决定燃料电池项目的全生命周期经济性及可部署范围。",
         "建议把氢气纯度、供氢压力、流量稳定性、加注协议和现场供氢成本纳入系统边界条件。",
+    ),
+    "氢基燃料及交通航空应用": (
+        "重点核对燃料路径、氢源属性、合成过程能耗、生命周期排放边界及最终用户承购安排；不可将氢基燃料项目等同于燃料电池部署。",
+        "氢基燃料可能拉动可再生氢需求，但其转化效率、成本和基础设施要求与 PEM 燃料电池不同。",
+        "对电堆研发的直接关联有限；可作为上游氢需求和竞争性应用跟踪，不应据此推导电堆订单或性能路线。",
     ),
     "产业化、政策与投资": (
         "重点区分签约、获批、开工、投产和实际交付等阶段，并核对公告中的投资额、产能与时间口径。",
@@ -170,6 +181,87 @@ def _extract_image(element: ET.Element, summary_raw: str) -> str:
     return html.unescape(match.group(1)) if match else ""
 
 
+class _ArticleHTMLParser(HTMLParser):
+    """Extract conservative article metadata without adding third-party dependencies."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.meta: dict[str, str] = {}
+        self.paragraphs: list[str] = []
+        self._in_p = False
+        self._current_p: list[str] = []
+        self._in_title = False
+        self.title_parts: list[str] = []
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag.lower() == "meta":
+            key = (attrs.get("property") or attrs.get("name") or attrs.get("itemprop") or "").lower()
+            value = (attrs.get("content") or "").strip()
+            if key and value:
+                self.meta.setdefault(key, value)
+        elif tag.lower() == "p":
+            self._in_p = True
+            self._current_p = []
+        elif tag.lower() == "title":
+            self._in_title = True
+
+    def handle_endtag(self, tag):
+        if tag.lower() == "p" and self._in_p:
+            text = clean_text(" ".join(self._current_p))
+            if len(text) >= 45:
+                self.paragraphs.append(text)
+            self._in_p = False
+            self._current_p = []
+        elif tag.lower() == "title":
+            self._in_title = False
+
+    def handle_data(self, data):
+        if self._in_p:
+            self._current_p.append(data)
+        if self._in_title:
+            self.title_parts.append(data)
+
+
+def hydrate_article(item: NewsItem) -> None:
+    """Fill missing RSS summaries and metadata from the publisher page when accessible."""
+    request = urllib.request.Request(
+        item.link,
+        headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=12) as response:
+            body = response.read(1_500_000)
+            content_type = response.headers.get("Content-Type", "")
+        if "html" not in content_type.lower() and not body.lstrip().lower().startswith((b"<!doctype html", b"<html")):
+            return
+        parser = _ArticleHTMLParser()
+        parser.feed(body.decode("utf-8", errors="replace"))
+        meta = parser.meta
+        if not item.summary:
+            description = (
+                meta.get("og:description") or meta.get("description")
+                or meta.get("twitter:description") or ""
+            )
+            if description:
+                item.summary = clean_text(description)[:1800]
+            elif parser.paragraphs:
+                item.summary = " ".join(parser.paragraphs[:5])[:1800]
+        if not item.image:
+            candidate_image = meta.get("og:image") or meta.get("twitter:image") or ""
+            if candidate_image.startswith("https://"):
+                item.image = candidate_image
+        if item.published is None:
+            date_value = (
+                meta.get("article:published_time") or meta.get("datepublished")
+                or meta.get("pubdate") or meta.get("publishdate") or ""
+            )
+            parsed_date = _parse_date(date_value)
+            if parsed_date:
+                item.published = parsed_date
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
+        print(f"Article page enrichment unavailable: {urlparse(item.link).netloc} ({type(exc).__name__}).")
+
+
 def parse_feed(xml_bytes: bytes, feed_name: str) -> list[NewsItem]:
     root = ET.fromstring(xml_bytes)
     elements = [node for node in root.iter() if _local_name(node.tag) in {"item", "entry"}]
@@ -190,6 +282,8 @@ def parse_feed(xml_bytes: bytes, feed_name: str) -> list[NewsItem]:
             continue
         summary_raw = _child_text(entry, {"description", "summary", "encoded", "content"})
         summary = clean_text(summary_raw)[:3500]
+        if _norm_title(summary) == _norm_title(title):
+            summary = ""
         published_text = _child_text(entry, {"pubdate", "published", "updated", "date", "issued"})
         source = _child_text(entry, {"source", "creator", "author"}) or feed_name
         image_url = _extract_image(entry, summary_raw)
@@ -201,12 +295,32 @@ def parse_feed(xml_bytes: bytes, feed_name: str) -> list[NewsItem]:
     return result
 
 
+def _url_publication_day(link: str):
+    """Read an explicit YYYY/MM/DD date embedded in an article URL, when present."""
+    path = urlparse(link).path
+    match = re.search(r"/(20\\d{2})/(\\d{1,2})/(\\d{1,2})(?:/|$)", path)
+    if not match:
+        return None
+    try:
+        return datetime(int(match.group(1)), int(match.group(2)), int(match.group(3))).date()
+    except ValueError:
+        return None
+
+
 def filter_recent(items: Iterable[NewsItem], now: datetime, window_hours: int = 24) -> list[NewsItem]:
-    """Keep only items with a verifiable publication timestamp inside the rolling window."""
+    """Keep timestamped items in the rolling window; reject URL dates that prove a repost is old."""
     if now.tzinfo is None:
         raise ValueError("now must be timezone-aware")
     cutoff = now.astimezone(timezone.utc) - timedelta(hours=window_hours)
-    return [item for item in items if item.published is not None and item.published >= cutoff]
+    kept = []
+    for item in items:
+        if item.published is None or item.published < cutoff:
+            continue
+        url_day = _url_publication_day(item.link)
+        if url_day is not None and url_day < cutoff.date():
+            continue
+        kept.append(item)
+    return kept
 
 
 def collect_news(now: datetime | None = None) -> tuple[list[NewsItem], list[str]]:
@@ -256,6 +370,14 @@ def classify_and_score(item: NewsItem, now: datetime) -> None:
         item.score -= 1.0
     if "fuelcellsworks" in item.source.lower():
         item.score += 2.0
+    if not item.summary.strip():
+        item.score -= 6.0
+    noise_terms = (
+        "stock price", "share price", "analyst rating", "price target",
+        "negative sentiment", "market weakness", "shares slide", "stock outlook",
+    )
+    if any(term in text for term in noise_terms):
+        item.score -= 25.0
     if len(item.summary) > 120:
         item.score += 1.0
     if len(item.title) < 18:
@@ -483,6 +605,14 @@ def main() -> int:
     now = datetime.now(timezone.utc)
     items, warnings = collect_news(now)
     selected = select_top_news(items, limit=5, minimum=3)
+    for item in selected:
+        hydrate_article(item)
+    # Re-apply the 24-hour gate after publisher metadata has had a chance to correct RSS dates.
+    selected = filter_recent(selected, now, window_hours=24)
+    for item in selected:
+        classify_and_score(item, now)
+        item.editorial = {}
+    selected = select_top_news(selected, limit=5, minimum=3)
     if not selected:
         raise RuntimeError("No usable news items were found in the last 24 hours; email was not sent.")
 
