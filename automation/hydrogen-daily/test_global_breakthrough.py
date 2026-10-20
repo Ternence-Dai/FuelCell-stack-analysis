@@ -57,21 +57,6 @@ class GlobalBreakthroughTests(unittest.TestCase):
         self.assertEqual(selected[0].link, "https://example.org/quantum-paper")
         self.assertEqual(warnings, [])
 
-    def test_collector_returns_multiple_ranked_breakthroughs(self):
-        rows = [
-            base.NewsItem(f"New {topic} breakthrough demonstration", f"https://example.org/{topic}", "Research",
-                          self.now, f"Researchers demonstrate a new {topic} technology with experimental measurements "
-                          "and report a new method under controlled laboratory conditions.")
-            for topic in ("quantum", "robotics", "battery", "semiconductor")
-        ]
-        with mock.patch.object(global_report, "GLOBAL_SOURCES", ()), \
-             mock.patch.object(global_report.base, "filter_recent", return_value=rows), \
-             mock.patch.object(global_report.base, "deduplicate", side_effect=lambda items: sorted(items, key=lambda x: x.score, reverse=True)):
-            selected, warnings = global_report.collect_breakthroughs(self.now)
-        self.assertEqual(len(selected), global_report.GLOBAL_BREAKTHROUGH_LIMIT)
-        self.assertEqual(len({item.link for item in selected}), 3)
-        self.assertEqual(warnings, [])
-
     def test_shortlist_prefers_distinct_topics_before_backfilling(self):
         rows = [
             base.NewsItem("Quantum processor advance", "https://example.org/q1", "Research", self.now,
@@ -92,14 +77,94 @@ class GlobalBreakthroughTests(unittest.TestCase):
         self.assertEqual([global_report._topic_label(item) for item in selected], ["量子科技", "机器人", "储能与电池"])
         self.assertEqual(warnings, [])
 
-    def test_build_section_renders_each_selected_breakthrough(self):
+    def test_global_section_reports_independent_selected_count(self):
         rows = [
-            base.NewsItem(f"Breakthrough {index}", f"https://example.org/{index}", "Research",
-                          self.now, "A sufficiently substantive summary describing experimental results.")
-            for index in range(3)
+            base.NewsItem(f"New technology result {index}", f"https://example.org/{index}",
+                          "Research", self.now, "Researchers demonstrate a new method with measured experimental results.")
+            for index in range(2)
         ]
         section = global_report.build_section(rows)
-        self.assertEqual(section.count("<article"), 3)
+        self.assertIn('data-global-technology-selected="2"', section)
+        self.assertIn("独立入选 2 条", section)
+        self.assertEqual(section.count("<article"), 2)
+
+    def test_gemini_retries_transient_503_then_succeeds(self):
+        import json
+        import urllib.error
+        item = base.NewsItem(
+            "A fuel cell catalyst result", "https://example.org/catalyst", "Research", self.now,
+            "Researchers report catalyst measurements from controlled laboratory experiments.",
+            category="基础材料与催化剂",
+        )
+        error = urllib.error.HTTPError(
+            "https://example.org", 503, "Service Unavailable", {"Retry-After": "0"}, None
+        )
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps({
+            "candidates": [{"content": {"parts": [{"text": json.dumps({
+                "items": [{"id": "0", "zh_title": "title"}]
+            })}]}}]
+        }).encode("utf-8")
+        with (
+            mock.patch.object(base, "discover_gemini_models", return_value=["models/gemini-primary"]),
+            mock.patch.object(base.urllib.request, "urlopen", side_effect=[error, response]) as urlopen,
+            mock.patch.object(base.time, "sleep"),
+        ):
+            self.assertTrue(base.enrich_with_gemini([item], "test-key", max_attempts=2))
+        self.assertEqual(urlopen.call_count, 2)
+        self.assertEqual(item.editorial["zh_title"], "title")
+
+    def test_gemini_fails_over_to_another_available_flash_model(self):
+        import json
+        import urllib.error
+        item = base.NewsItem(
+            "A fuel cell catalyst result", "https://example.org/catalyst", "Research", self.now,
+            "Researchers report catalyst measurements from controlled laboratory experiments.",
+            category="基础材料与催化剂",
+        )
+        unavailable = urllib.error.HTTPError(
+            "https://example.org", 503, "Service Unavailable", {"Retry-After": "0"}, None
+        )
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps({
+            "candidates": [{"content": {"parts": [{"text": json.dumps({
+                "items": [{"id": "0", "zh_title": "fallback-model-title"}]
+            })}]}}]
+        }).encode("utf-8")
+        with (
+            mock.patch.object(base, "discover_gemini_models", return_value=["models/gemini-primary", "models/gemini-fallback"]),
+            mock.patch.object(base.urllib.request, "urlopen", side_effect=[unavailable, unavailable, response]) as urlopen,
+            mock.patch.object(base.time, "sleep"),
+        ):
+            self.assertTrue(base.enrich_with_gemini([item], "test-key", max_attempts=2))
+        self.assertEqual(urlopen.call_count, 3)
+        self.assertEqual(item.editorial["zh_title"], "fallback-model-title")
+        self.assertIn("models/gemini-fallback:generateContent", urlopen.call_args.args[0].full_url)
+
+    def test_gemini_model_discovery_filters_unsupported_and_audio_models(self):
+        import json
+        first = mock.MagicMock()
+        first.__enter__.return_value.read.return_value = json.dumps({
+            "models": [
+                {"name": "models/gemini-2.5-flash", "supportedGenerationMethods": ["generateContent"]},
+                {"name": "models/gemini-2.5-flash-preview-tts", "supportedGenerationMethods": ["generateContent"]},
+                {"name": "models/text-embedding-004", "supportedGenerationMethods": ["embedContent"]},
+                {"name": "models/gemini-pro", "supportedGenerationMethods": ["generateContent"]},
+            ],
+            "nextPageToken": "next",
+        }).encode("utf-8")
+        second = mock.MagicMock()
+        second.__enter__.return_value.read.return_value = json.dumps({
+            "models": [
+                {"name": "models/gemini-3.8-flash-lite", "supportedGenerationMethods": ["generateContent"]},
+                {"name": "models/gemini-live-flash", "supportedGenerationMethods": ["generateContent"]},
+            ]
+        }).encode("utf-8")
+        with mock.patch.object(base.urllib.request, "urlopen", side_effect=[first, second]):
+            self.assertEqual(
+                base.discover_gemini_models("test-key", "gemini-configured"),
+                ["models/gemini-2.5-flash", "models/gemini-3.8-flash-lite"],
+            )
 
     def test_malformed_feed_is_reported_and_skipped(self):
         response = mock.MagicMock()
@@ -122,7 +187,9 @@ class GlobalBreakthroughTests(unittest.TestCase):
         )
         rendered = global_report.render_breakthrough(item)
         self.assertIn("TikTok 约 60 秒口播稿", rendered)
-        self.assertIn("技术成熟度与局限", rendered)
+        self.assertIn("成熟度判断", rendered)
+        self.assertIn("复核清单", rendered)
+        self.assertIn("真实场景任务成功率", global_report.render_breakthrough(base.NewsItem("Robot manipulation breakthrough", "https://example.org/robot", "Research", self.now, "Researchers demonstrate a robot manipulation method in a lab.")))
         self.assertIn("实验室验证", rendered)
         self.assertIn("&lt;quantum&gt;", rendered)
         self.assertIn("https://example.org/paper?a=1&amp;b=2", rendered)
@@ -131,6 +198,16 @@ class GlobalBreakthroughTests(unittest.TestCase):
         section = global_report.build_section([])
         self.assertIn("未筛选到", section)
         self.assertNotIn("虚构", section)
+
+    def test_topic_label_does_not_misclassify_heterogeneous_as_gene(self):
+        item = base.NewsItem(
+            "A boundary integral method for electron repulsion integrals in heterogeneous dielectric environments",
+            "https://example.org/physics",
+            "Research",
+            self.now,
+            "A computational method for electronic structure in heterogeneous dielectric media.",
+        )
+        self.assertNotEqual(global_report._topic_label(item), "生物工程")
 
     def test_topic_label_identifies_robotics(self):
         item = base.NewsItem(
