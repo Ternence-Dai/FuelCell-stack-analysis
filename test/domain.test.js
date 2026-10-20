@@ -339,3 +339,13 @@ test("coolant pump power preserves representable results when SI flow conversion
  assert.ok(power>0 && Number.isFinite(power));
  assert.ok(Math.abs(power/expected-1)<1e-12);
 });
+
+test("coolant pump rejects unrepresentable positive power without rejecting scaled representable power",()=>{
+ assert.throws(()=>calculateCoolantPumpPower({
+  volumeFlowLPerMinute:Number.MIN_VALUE,pressureDropKPa:1,pumpEfficiency:1
+ }),RangeError);
+ const scaled=calculateCoolantPumpPower({
+  volumeFlowLPerMinute:Number.MIN_VALUE,pressureDropKPa:1e300,pumpEfficiency:1
+ });
+ assert.ok(Number.isFinite(scaled) && scaled>0);
+});

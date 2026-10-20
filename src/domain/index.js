@@ -101,6 +101,9 @@ export function calculateCoolantPumpPower({
     Math.log(volumeFlowLPerMinute) + Math.log(pressureDropKPa) -
     Math.log(60000) - Math.log(pumpEfficiency)
   );
+  if (powerKw === 0) {
+    throw new RangeError("positive coolant pump inputs produce power below the representable numeric range");
+  }
   return finiteResult(powerKw, "coolant pump electrical power");
 }
 
