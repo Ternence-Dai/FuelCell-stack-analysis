@@ -27,7 +27,8 @@ class DailyReportTests(unittest.TestCase):
             "https://generativelanguage.googleapis.com/test", 503, "Unavailable",
             {"Retry-After": "0"}, None
         )
-        with mock.patch.object(report.urllib.request, "urlopen", side_effect=[temporary, success]) as urlopen, \
+        with mock.patch.object(report, "discover_gemini_models", return_value=["models/gemini-test"]), \
+             mock.patch.object(report.urllib.request, "urlopen", side_effect=[temporary, success]) as urlopen, \
              mock.patch.object(report.time, "sleep") as sleep:
             self.assertTrue(report.enrich_with_gemini([item], "test-key"))
         self.assertEqual(urlopen.call_count, 2)
@@ -43,7 +44,8 @@ class DailyReportTests(unittest.TestCase):
             urllib.error.HTTPError("https://example.org", 503, "Unavailable", {}, None)
             for _ in range(3)
         ]
-        with mock.patch.object(report.urllib.request, "urlopen", side_effect=errors), \
+        with mock.patch.object(report, "discover_gemini_models", return_value=["models/gemini-test"]), \
+             mock.patch.object(report.urllib.request, "urlopen", side_effect=errors), \
              mock.patch.object(report.time, "sleep"):
             self.assertFalse(report.enrich_with_gemini([item], "test-key"))
         self.assertEqual(item.editorial, {})
