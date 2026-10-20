@@ -93,10 +93,15 @@ export function calculateCoolantPumpPower({
       pumpEfficiency <= 0 || pumpEfficiency > 1) {
     throw new RangeError("coolant flow and pressure drop must be non-negative and pump efficiency must be in (0, 1]");
   }
-  // kW = kPa × m³/s; convert L/min to m³/s before applying efficiency.
-  const flowM3PerSecond = volumeFlowLPerMinute / 60000;
-  return finiteResult(pressureDropKPa * flowM3PerSecond / pumpEfficiency,
-    "coolant pump electrical power");
+  if (volumeFlowLPerMinute === 0 || pressureDropKPa === 0) return 0;
+  // Combine scale factors before exponentiation. Converting an extremely small
+  // L/min value to m³/s first can underflow to zero even when the final kW is
+  // representable after multiplication by a large pressure drop.
+  const powerKw = Math.exp(
+    Math.log(volumeFlowLPerMinute) + Math.log(pressureDropKPa) -
+    Math.log(60000) - Math.log(pumpEfficiency)
+  );
+  return finiteResult(powerKw, "coolant pump electrical power");
 }
 
 export function calculateNetElectricalPower({ stackPowerKw, balanceOfPlantPowerKw }) {

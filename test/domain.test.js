@@ -329,3 +329,13 @@ test("altitude pressure ratio remains finite when its numerator product would ov
  assert.ok(Number.isFinite(ratio));
  assert.ok(Math.abs(ratio/1e100-1)<1e-12);
 });
+
+
+test("coolant pump power preserves representable results when SI flow conversion would underflow",()=>{
+ const power=calculateCoolantPumpPower({
+  volumeFlowLPerMinute:1e-320,pressureDropKPa:1e308,pumpEfficiency:0.5
+ });
+ const expected=(1e-320*1e308)/60000/0.5;
+ assert.ok(power>0 && Number.isFinite(power));
+ assert.ok(Math.abs(power/expected-1)<1e-12);
+});
