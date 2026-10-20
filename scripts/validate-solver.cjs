@@ -74,7 +74,12 @@ async function main() {
   const powerAt = i => p.N * sandbox.vcell(i, p.T_K, p) * i * p.area / 1000;
   let peakI = 0.01, peakPower = powerAt(peakI);
   for (let i=0.01; i<=3; i+=0.001) {
-    const power = powerAt(i);
+    let power;
+    try { power = powerAt(i); }
+    catch (error) {
+      if (error instanceof RangeError) break;
+      throw error;
+    }
     if (Number.isFinite(power) && power > peakPower) { peakPower = power; peakI = i; }
   }
   assert.ok(peakPower > 80, 'test parameters must support the 80 kW target');
