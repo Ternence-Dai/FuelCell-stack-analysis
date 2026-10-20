@@ -1,6 +1,6 @@
 import sys
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -48,6 +48,13 @@ class DailyReportTests(unittest.TestCase):
         for row in rows:
             report.classify_and_score(row, now)
         self.assertEqual(len(report.deduplicate(rows)), 2)
+
+    def test_24_hour_filter_excludes_old_and_undated_items(self):
+        now = datetime(2026, 10, 20, 0, 0, tzinfo=timezone.utc)
+        recent = report.NewsItem("Recent story", "https://x.test/recent", "Test", now - timedelta(hours=23))
+        old = report.NewsItem("Old story", "https://x.test/old", "Test", now - timedelta(hours=25))
+        undated = report.NewsItem("Undated story", "https://x.test/undated", "Test", None)
+        self.assertEqual(report.filter_recent([recent, old, undated], now), [recent])
 
     def test_selection_limits_to_five_without_inventing(self):
         now = datetime.now(timezone.utc)

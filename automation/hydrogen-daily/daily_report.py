@@ -34,13 +34,13 @@ USER_AGENT = "Ternence-Hydrogen-Industry-Intelligence/1.0 (+https://github.com/T
 
 RSS_SOURCES: tuple[tuple[str, str], ...] = (
     ("FuelCellsWorks", "https://fuelcellsworks.com/feed/"),
-    ("Google News · 全球氢燃料电池", "https://news.google.com/rss/search?q=hydrogen+fuel+cell+when%3A3d&hl=en-US&gl=US&ceid=US:en"),
-    ("Google News · PEM、膜电极与催化剂", "https://news.google.com/rss/search?q=PEM+fuel+cell+membrane+catalyst+MEA+when%3A3d&hl=en-US&gl=US&ceid=US:en"),
-    ("Google News · 电堆与双极板", "https://news.google.com/rss/search?q=fuel+cell+stack+bipolar+plate+when%3A3d&hl=en-US&gl=US&ceid=US:en"),
-    ("Google News · 氢气制储运与加注", "https://news.google.com/rss/search?q=hydrogen+production+storage+transport+refueling+when%3A3d&hl=en-US&gl=US&ceid=US:en"),
-    ("Google News · 商业化与应用", "https://news.google.com/rss/search?q=fuel+cell+commercialization+vehicle+stationary+power+when%3A3d&hl=en-US&gl=US&ceid=US:en"),
-    ("Google News · 欧洲氢能产业", "https://news.google.com/rss/search?q=hydrogen+fuel+cell+industry+Europe+when%3A3d&hl=en-GB&gl=GB&ceid=GB:en"),
-    ("Google News · 亚洲氢能产业", "https://news.google.com/rss/search?q=hydrogen+fuel+cell+industry+Asia+when%3A3d&hl=en-SG&gl=SG&ceid=SG:en"),
+    ("Google News · 全球氢燃料电池", "https://news.google.com/rss/search?q=hydrogen+fuel+cell+when%3A1d&hl=en-US&gl=US&ceid=US:en"),
+    ("Google News · PEM、膜电极与催化剂", "https://news.google.com/rss/search?q=PEM+fuel+cell+membrane+catalyst+MEA+when%3A1d&hl=en-US&gl=US&ceid=US:en"),
+    ("Google News · 电堆与双极板", "https://news.google.com/rss/search?q=fuel+cell+stack+bipolar+plate+when%3A1d&hl=en-US&gl=US&ceid=US:en"),
+    ("Google News · 氢气制储运与加注", "https://news.google.com/rss/search?q=hydrogen+production+storage+transport+refueling+when%3A1d&hl=en-US&gl=US&ceid=US:en"),
+    ("Google News · 商业化与应用", "https://news.google.com/rss/search?q=fuel+cell+commercialization+vehicle+stationary+power+when%3A1d&hl=en-US&gl=US&ceid=US:en"),
+    ("Google News · 欧洲氢能产业", "https://news.google.com/rss/search?q=hydrogen+fuel+cell+industry+Europe+when%3A1d&hl=en-GB&gl=GB&ceid=GB:en"),
+    ("Google News · 亚洲氢能产业", "https://news.google.com/rss/search?q=hydrogen+fuel+cell+industry+Asia+when%3A1d&hl=en-SG&gl=SG&ceid=SG:en"),
 )
 
 CATEGORY_TERMS: dict[str, tuple[str, ...]] = {
@@ -201,6 +201,14 @@ def parse_feed(xml_bytes: bytes, feed_name: str) -> list[NewsItem]:
     return result
 
 
+def filter_recent(items: Iterable[NewsItem], now: datetime, window_hours: int = 24) -> list[NewsItem]:
+    """Keep only items with a verifiable publication timestamp inside the rolling window."""
+    if now.tzinfo is None:
+        raise ValueError("now must be timezone-aware")
+    cutoff = now.astimezone(timezone.utc) - timedelta(hours=window_hours)
+    return [item for item in items if item.published is not None and item.published >= cutoff]
+
+
 def collect_news(now: datetime | None = None) -> tuple[list[NewsItem], list[str]]:
     now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     all_items: list[NewsItem] = []
@@ -219,8 +227,10 @@ def collect_news(now: datetime | None = None) -> tuple[list[NewsItem], list[str]
             print(warning, file=sys.stderr)
         time.sleep(0.2)
 
-    cutoff = now - timedelta(days=7)
-    recent = [item for item in all_items if item.published is None or item.published >= cutoff]
+    undated_count = sum(1 for item in all_items if item.published is None)
+    if undated_count:
+        warnings.append(f"Excluded {undated_count} RSS item(s) without publication timestamps from the 24-hour window.")
+    recent = filter_recent(all_items, now, window_hours=24)
     for item in recent:
         classify_and_score(item, now)
     unique = deduplicate(recent)
@@ -403,7 +413,7 @@ def build_html(items: list[NewsItem], warnings: list[str], enriched: bool, now: 
     if warnings:
         warning_html = "<p style='color:#8a5200;background:#fff7e6;padding:10px;border-radius:8px;'><strong>采集提醒：</strong>部分 RSS 来源本次不可用，已跳过，未编造补齐。</p>"
     mode_note = "已使用 Gemini 对 RSS 材料进行中文编辑；分析严格受所提供来源内容约束。" if enriched else "未配置或暂不可用的 AI API：事实区保留 RSS 原始摘要，分析区使用透明的规则化技术提示；没有补造事实。"
-    empty = "<p>最近 7 天内没有采集到可用新闻。系统未编造新闻，也不会发送空白日报。</p>" if not cards else "".join(cards)
+    empty = "<p>最近 24 小时内没有采集到可用新闻。系统未编造新闻，也不会发送空白日报。</p>" if not cards else "".join(cards)
     return f"""<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"></head>
     <body style="margin:0;padding:20px;background:#f3f6f9;font-family:Arial,'Microsoft YaHei',sans-serif;color:#243b53;">
       <main style="max-width:820px;margin:0 auto;background:#ffffff;border-radius:16px;padding:24px;">
@@ -454,7 +464,7 @@ def main() -> int:
     items, warnings = collect_news(now)
     selected = select_top_news(items, limit=5, minimum=3)
     if not selected:
-        raise RuntimeError("No usable news items were found in the last 7 days; email was not sent.")
+        raise RuntimeError("No usable news items were found in the last 24 hours; email was not sent.")
 
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     model = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash").strip()
