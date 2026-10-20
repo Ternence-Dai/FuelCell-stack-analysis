@@ -5,6 +5,7 @@ import html
 import re
 import sys
 import time
+import xml.etree.ElementTree as ET
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -43,7 +44,7 @@ def collect_breakthroughs(now: datetime | None = None) -> tuple[list[base.NewsIt
                 entries = base.parse_feed(response.read(4_000_000), source)
             candidates.extend(entries)
             print(f"Global technology source OK: {source}: {len(entries)} items")
-        except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
+        except (urllib.error.URLError, TimeoutError, OSError, ValueError, ET.ParseError) as exc:
             warnings.append(f"Global technology source unavailable: {source} ({type(exc).__name__})")
             print(warnings[-1], file=sys.stderr)
         time.sleep(0.15)
