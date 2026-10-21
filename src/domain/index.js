@@ -270,3 +270,123 @@ export function calculateCellVoltage({ reversibleVoltage, activationCoefficient,
   for (const [name, value] of Object.entries({ activationLoss, ohmicLoss, concentrationLoss, cellVoltage })) finiteResult(value, name);
   return Object.freeze({ cellVoltage, activationLoss, ohmicLoss, concentrationLoss });
 }
+
+
+/**
+ * Amphlett static PEMFC polarization point based on the published OPEM
+ * implementation equations. Pressures are partial pressures in atm;
+ * current is A; area and membrane thickness are cm² and cm.
+ * This is a separate model from the project's existing empirical helper.
+ */
+export function calculateAmphlettPolarizationPoint({
+  temperatureK,
+  hydrogenPartialPressureAtm,
+  oxygenPartialPressureAtm,
+  currentA,
+  activeAreaCm2,
+  membraneThicknessCm,
+  membraneWaterContentLambda,
+  electronicResistanceOhm = 0,
+  maxCurrentDensityAcm2 = 1.5,
+  numberOfCells = 1
+}) {
+  const inputs = {
+    temperatureK, hydrogenPartialPressureAtm, oxygenPartialPressureAtm,
+    currentA, activeAreaCm2, membraneThicknessCm, membraneWaterContentLambda,
+    electronicResistanceOhm, maxCurrentDensityAcm2
+  };
+  for (const [name, value] of Object.entries(inputs)) {
+    if (!Number.isFinite(value)) throw new TypeError(name + " must be finite");
+  }
+  if (temperatureK <= 0 || hydrogenPartialPressureAtm <= 0 || oxygenPartialPressureAtm <= 0 ||
+      currentA < 0 || activeAreaCm2 <= 0 || membraneThicknessCm <= 0 ||
+      electronicResistanceOhm < 0 || maxCurrentDensityAcm2 <= 0) {
+    throw new RangeError("Amphlett model inputs are outside their positive physical domain");
+  }
+  if (membraneWaterContentLambda < 14 || membraneWaterContentLambda > 23) {
+    throw new RangeError("membraneWaterContentLambda must be between 14 and 23");
+  }
+  if (!Number.isSafeInteger(numberOfCells) || numberOfCells < 1 || numberOfCells > 100000) {
+    throw new RangeError("numberOfCells must be a positive safe integer no greater than 100000");
+  }
+
+  const currentDensityAcm2 = currentA / activeAreaCm2;
+  if (currentDensityAcm2 >= maxCurrentDensityAcm2) {
+    throw new RangeError("current density must remain below the Amphlett limiting current density");
+  }
+  const membraneDenominator = membraneWaterContentLambda - 0.634 - 3 * currentDensityAcm2;
+  if (membraneDenominator <= 0) {
+    throw new RangeError("Amphlett membrane-resistivity denominator must remain positive");
+  }
+
+  const hydrogenConcentrationMolPerCm3 =
+    hydrogenPartialPressureAtm / (1.09e6 * Math.exp(77 / temperatureK));
+  const oxygenConcentrationMolPerCm3 =
+    oxygenPartialPressureAtm / (5.08e6 * Math.exp(-498 / temperatureK));
+  const nernstVoltageV = 1.229 - 8.5e-4 * (temperatureK - 298.15) +
+    4.308e-5 * temperatureK *
+    (Math.log(hydrogenPartialPressureAtm) + 0.5 * Math.log(oxygenPartialPressureAtm));
+
+  let activationLossV = 0;
+  let ohmicLossV = 0;
+  let concentrationLossV = 0;
+  let membraneResistivityOhmCm = 0;
+  let protonResistanceOhm = 0;
+  if (currentA > 0) {
+    const xi2 = 0.00286 + 0.0002 * Math.log(activeAreaCm2) +
+      4.3e-5 * Math.log(hydrogenConcentrationMolPerCm3);
+    activationLossV = -(
+      -0.948 + xi2 * temperatureK +
+      7.6e-5 * temperatureK * Math.log(oxygenConcentrationMolPerCm3) -
+      1.93e-4 * temperatureK * Math.log(currentA)
+    );
+
+    const densityRatio = currentDensityAcm2;
+    membraneResistivityOhmCm = 181.6 *
+      (1 + 0.03 * densityRatio +
+        0.062 * Math.pow(temperatureK / 303, 2) * Math.pow(densityRatio, 2.5)) /
+      (membraneDenominator * Math.exp(4.18 * ((temperatureK - 303) / temperatureK)));
+    protonResistanceOhm = membraneResistivityOhmCm * membraneThicknessCm / activeAreaCm2;
+    ohmicLossV = currentA * (protonResistanceOhm + electronicResistanceOhm);
+
+    const gasConstantJPerKmolK = 8314.47;
+    const faradayCPerKmol = 96484600;
+    const electronsTransferred = 2;
+    const concentrationCoefficientV =
+      (gasConstantJPerKmolK * temperatureK) / (electronsTransferred * faradayCPerKmol);
+    concentrationLossV = -concentrationCoefficientV *
+      Math.log(1 - currentDensityAcm2 / maxCurrentDensityAcm2);
+  }
+
+  const cellVoltageV = nernstVoltageV - activationLossV - ohmicLossV - concentrationLossV;
+  const stackVoltageV = numberOfCells * cellVoltageV;
+  const cellPowerW = cellVoltageV * currentA;
+  const stackPowerW = numberOfCells * cellPowerW;
+  const result = {
+    model: "Amphlett static PEMFC",
+    temperatureK,
+    hydrogenPartialPressureAtm,
+    oxygenPartialPressureAtm,
+    currentA,
+    currentDensityAcm2,
+    hydrogenConcentrationMolPerCm3,
+    oxygenConcentrationMolPerCm3,
+    nernstVoltageV,
+    activationLossV,
+    ohmicLossV,
+    concentrationLossV,
+    membraneResistivityOhmCm,
+    protonResistanceOhm,
+    cellVoltageV,
+    numberOfCells,
+    stackVoltageV,
+    cellPowerW,
+    stackPowerW
+  };
+  for (const [name, value] of Object.entries(result)) {
+    if (typeof value === "number" && !Number.isFinite(value)) {
+      throw new RangeError("Amphlett result " + name + " exceeds the finite numeric range");
+    }
+  }
+  return Object.freeze(result);
+}

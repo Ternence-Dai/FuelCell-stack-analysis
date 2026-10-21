@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow, calculateReactantMassFlows, calculateAltitudeAdjustedPressureRatio, calculateFuelToElectricEfficiency, calculateCoolantPumpPower, calculateNetElectricalPower, solveFirstPowerCrossing } from "../src/domain/index.js";
+import { calculatePolarizationPoint, calculateNernstPotential, calculateCellVoltage, calculateCoolantFlow, calculateReactantMassFlows, calculateAltitudeAdjustedPressureRatio, calculateFuelToElectricEfficiency, calculateCoolantPumpPower, calculateNetElectricalPower, solveFirstPowerCrossing, calculateAmphlettPolarizationPoint } from "../src/domain/index.js";
 const base = { reversibleVoltage:1.18, activationLoss:0.04, currentDensity:0.5, areaSpecificResistance:0.12, limitingCurrentDensity:2, concentrationCoefficient:0.03 };
 test("altitude compensation raises compressor pressure ratio as inlet pressure falls",()=>{
  const seaLevel=calculateAltitudeAdjustedPressureRatio({basePressureRatio:2.5,ambientPressureMPa:0.1013});
@@ -382,4 +382,44 @@ test("cell-voltage model rejects physically impossible negative terminal voltage
   exchangeCurrentDensity:1,areaSpecificResistance:1,
   concentrationCoefficient:0,concentrationExponent:0
  }),/polarization losses exceed the reversible cell voltage/);
+});
+
+
+test("Amphlett static model reproduces the published OPEM reference operating point", () => {
+ const result = calculateAmphlettPolarizationPoint({
+  temperatureK:343.15,
+  hydrogenPartialPressureAtm:1,
+  oxygenPartialPressureAtm:1,
+  currentA:2,
+  activeAreaCm2:50.6,
+  membraneThicknessCm:0.0178,
+  membraneWaterContentLambda:23,
+  electronicResistanceOhm:0,
+  maxCurrentDensityAcm2:1.5,
+  numberOfCells:1
+ });
+ assert.ok(Math.abs(result.nernstVoltageV-1.19075)<1e-12);
+ assert.ok(Math.abs(result.activationLossV-0.3164719546471556)<1e-12);
+ assert.ok(Math.abs(result.ohmicLossV-0.0035257966966703337)<1e-12);
+ assert.ok(Math.abs(result.concentrationLossV-0.0003948249255815907)<1e-12);
+ assert.ok(Math.abs(result.cellVoltageV-0.8703574237305924)<1e-12);
+ assert.ok(Math.abs(result.stackPowerW-1.7407148474611849)<1e-12);
+});
+
+test("Amphlett model rejects invalid operating conditions instead of extrapolating silently", () => {
+ const base={
+  temperatureK:343.15,hydrogenPartialPressureAtm:1,oxygenPartialPressureAtm:1,
+  currentA:2,activeAreaCm2:50.6,membraneThicknessCm:0.0178,
+  membraneWaterContentLambda:23,maxCurrentDensityAcm2:1.5
+ };
+ assert.throws(()=>calculateAmphlettPolarizationPoint({...base,hydrogenPartialPressureAtm:0}),RangeError);
+ assert.throws(()=>calculateAmphlettPolarizationPoint({...base,currentA:76}),RangeError);
+ assert.throws(()=>calculateAmphlettPolarizationPoint({...base,membraneWaterContentLambda:24}),RangeError);
+ assert.throws(()=>calculateAmphlettPolarizationPoint({...base,temperatureK:0}),RangeError);
+ assert.throws(()=>calculateAmphlettPolarizationPoint({...base,electronicResistanceOhm:-0.1}),RangeError);
+ assert.throws(()=>calculateAmphlettPolarizationPoint({...base,numberOfCells:0}),RangeError);
+ const openCircuit=calculateAmphlettPolarizationPoint({...base,currentA:0});
+ assert.equal(openCircuit.activationLossV,0);
+ assert.equal(openCircuit.ohmicLossV,0);
+ assert.equal(openCircuit.concentrationLossV,0);
 });
