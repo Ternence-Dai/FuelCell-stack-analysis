@@ -34,7 +34,10 @@ const { chromium } = require('playwright');
     }
     const slider = page.locator('#content .sim-slider').first();
     const oldValue = await slider.inputValue();
-    await slider.fill(String(Number(oldValue) + 5));
+    await slider.evaluate((el, value) => {
+      el.value = String(value);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }, Number(oldValue) + 5);
     const sliderLabel = await page.locator('#simPVal').textContent();
     if (!sliderLabel.includes(String(Number(oldValue) + 5))) {
       throw new Error('Simulation parameter slider did not update its visible value');
