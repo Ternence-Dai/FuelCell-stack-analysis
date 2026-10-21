@@ -1,0 +1,23 @@
+/* FuelCell engineering workspace — Frontiers / OPEM / ECSIM visual language */
+:root{--fc-ink:#dceaf5;--fc-muted:#8faabd;--fc-line:rgba(111,165,195,.22);--fc-accent:#43c7d8;--fc-green:#57d6a5}
+body[data-workspace="fuelcell"] .main{background:radial-gradient(ellipse at 82% 0,rgba(25,111,139,.2),transparent 42%),linear-gradient(180deg,#091624,#0c1c2c 62%,#0a1724)}
+body[data-workspace="fuelcell"] .topbar{background:rgba(7,19,31,.92);border-bottom:1px solid var(--fc-line);backdrop-filter:blur(14px)}
+body[data-workspace="fuelcell"] .hyhub-intro{position:relative;overflow:hidden;margin:22px 26px 18px;padding:30px 32px;border:1px solid rgba(67,199,216,.3);border-radius:20px;background:linear-gradient(115deg,rgba(13,46,66,.98),rgba(12,34,52,.94) 58%,rgba(15,49,62,.86));box-shadow:0 20px 55px rgba(0,0,0,.2)}
+body[data-workspace="fuelcell"] .hyhub-intro:after{content:"POLARIZATION · STACK MODEL · VALIDATION";position:absolute;right:28px;bottom:18px;color:rgba(150,210,224,.22);font:700 10px/1.2 ui-monospace,monospace;letter-spacing:1.6px}
+body[data-workspace="fuelcell"] .hyhub-intro h2{font-size:clamp(24px,3vw,34px);letter-spacing:-.7px;color:#f1fbff}
+body[data-workspace="fuelcell"] .hyhub-intro p{max-width:760px;color:#a9c4d2;font-size:14px;line-height:1.75}
+body[data-workspace="fuelcell"] .hyhub-intro .chips span{padding:7px 11px;border-radius:7px;background:rgba(55,171,191,.1);border:1px solid rgba(89,203,216,.2);color:#bcebf0}
+body[data-workspace="fuelcell"] .product-workflow{margin:0 26px 20px;padding:20px;border:1px solid var(--fc-line);border-radius:18px;background:rgba(14,33,49,.88)}
+body[data-workspace="fuelcell"] .product-workflow__grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+body[data-workspace="fuelcell"] .product-workflow__item{min-height:128px;padding:16px;border:1px solid rgba(110,174,196,.2);border-radius:13px;background:linear-gradient(145deg,rgba(22,53,72,.95),rgba(13,31,47,.95));text-align:left}
+body[data-workspace="fuelcell"] .product-workflow__item i{color:#63d8e4;background:rgba(67,199,216,.12)}
+body[data-workspace="fuelcell"] .product-workflow__item b{color:#e9f7fb;font-size:14px}
+body[data-workspace="fuelcell"] .product-workflow__item small{color:#9eb8c7;font-size:12px}
+body[data-workspace="fuelcell"] .product-workflow__item span{color:#6ed6c0}
+body[data-workspace="fuelcell"] #content{padding:8px 26px 34px}
+body[data-workspace="fuelcell"] #content :is(.card,.panel,.metric-card,.stat-card,.module-card){border:1px solid var(--fc-line);border-radius:15px;background:linear-gradient(155deg,rgba(19,42,60,.96),rgba(12,28,43,.96));box-shadow:0 12px 34px rgba(0,0,0,.14);color:var(--fc-ink)}
+body[data-workspace="fuelcell"] #content :is(h2,h3,h4){color:#e5f5fb}
+body[data-workspace="fuelcell"] #content :is(table,th,td){border-color:var(--fc-line);color:#c8dce8}
+body[data-workspace="fuelcell"] #content :is(input,select,textarea){background:#0a1c2b;border-color:#31556a;color:#e4f3f8}
+@media(max-width:900px){body[data-workspace="fuelcell"] .product-workflow__grid{grid-template-columns:repeat(2,minmax(0,1fr))}body[data-workspace="fuelcell"] .hyhub-intro,body[data-workspace="fuelcell"] .product-workflow{margin-left:14px;margin-right:14px}}
+@media(max-width:560px){body[data-workspace="fuelcell"] .product-workflow__grid{grid-template-columns:1fr}body[data-workspace="fuelcell"] .hyhub-intro{padding:20px 17px}body[data-workspace="fuelcell"] #content{padding:8px 12px 24px}}
