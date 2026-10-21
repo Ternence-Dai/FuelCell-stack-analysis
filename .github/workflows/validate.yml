@@ -21,6 +21,8 @@ jobs:
           node-version: 22
       - name: Validate current-density solver branch
         run: node scripts/validate-solver.cjs
+      - name: Validate readable typography and focus states
+        run: node scripts/validate-readability.cjs
       - name: Parse embedded JavaScript
         run: |
           node <<'NODE'
