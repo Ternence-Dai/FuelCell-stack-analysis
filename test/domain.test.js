@@ -431,7 +431,7 @@ test("Amphlett model rejects gas-concentration underflow even at open circuit", 
   membraneWaterContentLambda:23,maxCurrentDensityAcm2:1.5
  };
  assert.throws(
-  ()=>calculateAmphlettPolarizationPoint({...base,temperatureK:1}),
+  ()=>calculateAmphlettPolarizationPoint({...base,temperatureK:0.1}),
   /gas concentrations must remain finite and positive/
  );
 });
