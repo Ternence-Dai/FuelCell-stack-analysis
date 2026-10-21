@@ -423,3 +423,28 @@ test("Amphlett model rejects invalid operating conditions instead of extrapolati
  assert.equal(openCircuit.ohmicLossV,0);
  assert.equal(openCircuit.concentrationLossV,0);
 });
+
+test("Amphlett model rejects gas-concentration underflow even at open circuit", () => {
+ const base={
+  temperatureK:343.15,hydrogenPartialPressureAtm:1,oxygenPartialPressureAtm:1,
+  currentA:0,activeAreaCm2:50.6,membraneThicknessCm:0.0178,
+  membraneWaterContentLambda:23,maxCurrentDensityAcm2:1.5
+ };
+ assert.throws(
+  ()=>calculateAmphlettPolarizationPoint({...base,temperatureK:0.1}),
+  /gas concentrations must remain finite and positive/
+ );
+});
+
+test("Amphlett model rejects a negative cell-voltage operating point", () => {
+ const base={
+  temperatureK:10000,hydrogenPartialPressureAtm:1,oxygenPartialPressureAtm:1,
+  currentA:0,activeAreaCm2:50.6,membraneThicknessCm:0.0178,
+  membraneWaterContentLambda:23,maxCurrentDensityAcm2:1.5
+ };
+ assert.throws(
+  ()=>calculateAmphlettPolarizationPoint(base),
+  /outside the feasible cell-voltage domain/
+ );
+});
+

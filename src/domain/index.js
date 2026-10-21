@@ -323,6 +323,12 @@ export function calculateAmphlettPolarizationPoint({
     hydrogenPartialPressureAtm / (1.09e6 * Math.exp(77 / temperatureK));
   const oxygenConcentrationMolPerCm3 =
     oxygenPartialPressureAtm / (5.08e6 * Math.exp(-498 / temperatureK));
+  if (!Number.isFinite(hydrogenConcentrationMolPerCm3) ||
+      hydrogenConcentrationMolPerCm3 <= 0 ||
+      !Number.isFinite(oxygenConcentrationMolPerCm3) ||
+      oxygenConcentrationMolPerCm3 <= 0) {
+    throw new RangeError("Amphlett gas concentrations must remain finite and positive within the model's numeric domain");
+  }
   const nernstVoltageV = 1.229 - 8.5e-4 * (temperatureK - 298.15) +
     4.308e-5 * temperatureK *
     (Math.log(hydrogenPartialPressureAtm) + 0.5 * Math.log(oxygenPartialPressureAtm));
@@ -359,6 +365,9 @@ export function calculateAmphlettPolarizationPoint({
   }
 
   const cellVoltageV = nernstVoltageV - activationLossV - ohmicLossV - concentrationLossV;
+  if (cellVoltageV < 0) {
+    throw new RangeError("Amphlett polarization losses exceed the reversible voltage; operating point is outside the feasible cell-voltage domain");
+  }
   const stackVoltageV = numberOfCells * cellVoltageV;
   const cellPowerW = cellVoltageV * currentA;
   const stackPowerW = numberOfCells * cellPowerW;
