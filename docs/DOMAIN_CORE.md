@@ -48,3 +48,14 @@ Parameter and composition safeguards:
 - Activation coefficient, exchange current density, area-specific resistance, concentration coefficient, concentration exponent, coolant properties, and operating limits remain stack- or coolant-specific inputs. They require a source, calibration record, uncertainty, and valid operating range before use for engineering decisions.
 - A comparison with OPEM is valid only after selecting a matching model family and aligning temperature, pressure basis, active area, membrane properties, current-density range, and parameter definitions. Similar-looking polarization curves alone do not establish model equivalence.
 
+
+
+## Amphlett static PEMFC reference model
+
+`calculateAmphlettPolarizationPoint` adds a separately named Amphlett static model; it does not replace the existing project's empirical polarization helper. Its inputs are explicit: temperature in K, hydrogen/oxygen partial pressures in atm, current in A, active area in cm², membrane thickness in cm, membrane water-content parameter `lambda` (14–23), electronic resistance in Ω, and limiting current density in A/cm².
+
+The implementation follows the published OPEM Amphlett equations for Nernst potential, activation loss, membrane/proton resistance, ohmic loss, and concentration loss. It returns each loss term and the cell/stack voltage and power separately. Current density at or above the configured limiting current is rejected; values are not silently clamped.
+
+The implementation is independently written and tested against the OPEM v1.4 documented reference vector (T=343.15 K, PH₂=1 atm, PO₂=1 atm, i=2 A, A=50.6 cm², membrane thickness=0.0178 cm, lambda=23, JMax=1.5 A/cm²). The reference point is a software regression fixture, not a calibration certificate or proof of accuracy for a particular physical stack. Real use still requires parameter provenance, unit review, calibration against measured polarization data, and independent validation.
+
+Reference: [ECSIM/OPEM Amphlett static model documentation](https://www.ecsim.site/opem/doc/Static/Amphlett.html) and [ECSIM/opem source repository](https://github.com/ECSIM/opem). The underlying model reference is Amphlett et al., *Performance Modeling of the Ballard Mark IV Solid Polymer Electrolyte Fuel Cell*, Journal of The Electrochemical Society 142(1), 1995, DOI: 10.1149/1.2043959.
