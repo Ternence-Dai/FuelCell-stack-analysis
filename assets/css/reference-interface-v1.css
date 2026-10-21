@@ -21,3 +21,25 @@ body[data-workspace="fuelcell"] #content :is(table,th,td){border-color:var(--fc-
 body[data-workspace="fuelcell"] #content :is(input,select,textarea){background:#0a1c2b;border-color:#31556a;color:#e4f3f8}
 @media(max-width:900px){body[data-workspace="fuelcell"] .product-workflow__grid{grid-template-columns:repeat(2,minmax(0,1fr))}body[data-workspace="fuelcell"] .hyhub-intro,body[data-workspace="fuelcell"] .product-workflow{margin-left:14px;margin-right:14px}}
 @media(max-width:560px){body[data-workspace="fuelcell"] .product-workflow__grid{grid-template-columns:1fr}body[data-workspace="fuelcell"] .hyhub-intro{padding:20px 17px}body[data-workspace="fuelcell"] #content{padding:8px 12px 24px}}
+
+
+/* HyHub engineering console v2: model assurance and operating-envelope hierarchy */
+body[data-workspace="fuelcell"]{--fc-cyan:#58c9dc;--fc-mint:#54d4b2;--fc-panel:#10283a}
+body[data-workspace="fuelcell"] .hyhub-intro{position:relative;overflow:hidden;min-height:218px;padding:30px 32px;border:1px solid #31566b;border-radius:20px;background:radial-gradient(circle at 84% 20%,rgba(58,188,203,.2),transparent 25%),linear-gradient(115deg,#0b1d2d,#12384a 62%,#10434b)}
+body[data-workspace="fuelcell"] .hyhub-intro h2{font-size:clamp(28px,3vw,42px);letter-spacing:-.035em;color:#e7f7fb}
+body[data-workspace="fuelcell"] .hyhub-intro p{max-width:780px;color:#a9c5d0;font-size:14px;line-height:1.8}
+body[data-workspace="fuelcell"] .product-workflow{margin-top:18px;padding:22px;border:1px solid #294b60;border-radius:18px;background:linear-gradient(145deg,rgba(15,39,57,.98),rgba(9,26,40,.98));box-shadow:0 14px 36px rgba(0,0,0,.16)}
+body[data-workspace="fuelcell"] .product-workflow__head h3{font-size:19px;color:#e5f6fa}
+body[data-workspace="fuelcell"] .product-workflow__grid{gap:12px}
+body[data-workspace="fuelcell"] .product-workflow__item{min-height:146px;padding:17px;border:1px solid #31566b;border-radius:14px;background:linear-gradient(150deg,#15364b,#102a3c);transition:transform .18s,border-color .18s,box-shadow .18s}
+body[data-workspace="fuelcell"] .product-workflow__item:hover{transform:translateY(-2px);border-color:#51b7bd;box-shadow:0 12px 26px rgba(0,0,0,.22)}
+body[data-workspace="fuelcell"] .product-workflow__item i{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:rgba(73,194,200,.14);color:#73dbe0;font-style:normal}
+body[data-workspace="fuelcell"] #content{max-width:1720px;margin-inline:auto}
+body[data-workspace="fuelcell"] #content .sec-title{margin:24px 0 13px;color:#d8edf3;font-size:15px;letter-spacing:.025em}
+body[data-workspace="fuelcell"] #content :is(.card,.panel,.metric-card,.stat-card,.module-card){border-color:#294b60;border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.17)}
+body[data-workspace="fuelcell"] #content :is(input,select,textarea){min-height:40px;border-radius:9px}
+body[data-workspace="fuelcell"] #content button{border-radius:9px;transition:filter .15s,border-color .15s}
+body[data-workspace="fuelcell"] #content button:hover{filter:brightness(1.12)}
+body[data-workspace="fuelcell"] .bottomnav{backdrop-filter:blur(16px)}
+@media(max-width:760px){body[data-workspace="fuelcell"] .hyhub-intro{padding:22px 18px;min-height:0}body[data-workspace="fuelcell"] .product-workflow{padding:16px}body[data-workspace="fuelcell"] #content{padding:8px 12px 24px}}
+@media(prefers-reduced-motion:reduce){body[data-workspace="fuelcell"] .product-workflow__item{transition:none}}
