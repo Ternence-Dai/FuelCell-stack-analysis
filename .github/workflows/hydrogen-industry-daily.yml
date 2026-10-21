@@ -9,8 +9,6 @@ on:
     paths:
       - ".github/workflows/hydrogen-industry-daily.yml"
       - "automation/hydrogen-daily/**"
-  schedule:
-    - cron: "7 0 * * *" # 08:07 Asia/Singapore (UTC)
   workflow_dispatch:
     inputs:
       mode:
