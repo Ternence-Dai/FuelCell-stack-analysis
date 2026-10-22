@@ -39,7 +39,7 @@ assert.ok(block.includes("p:128, powerLabel:'最大输出功率（原厂规格�
   'OEM power, cell, density, net output, mass and service-life fields must match the source-backed record set');
 assert.ok(block.includes('249 kg（engine bay）/ 287 kg（rooftop）') &&
   block.includes('燃料电池模块') &&
-  block.includes('fuel cell system'),
+  block.includes('重型车辆燃料电池系统'),
   'module and system boundaries must remain explicit rather than being labeled as bare-stack data');
 
 assert.ok(app.includes("t:'制造商公开规格'") &&
