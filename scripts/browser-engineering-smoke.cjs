@@ -63,6 +63,10 @@ const { chromium } = require('playwright');
       throw new Error('FuelCell desktop workspace is constrained or offset instead of filling its main column: ' + JSON.stringify(wideShell));
     }
 
+    await page.waitForFunction(() => document.querySelector('.fc-engineering-workspace'));
+    const referenceWorkspace = await page.locator('#content .fc-engineering-workspace').count();
+    if (referenceWorkspace !== 1) throw new Error('FuelCell reference engineering workspace is not mounted as the dashboard');
+
     const skipLink = page.locator('a.skip-link[href="#main-content"]');
     if (await skipLink.count() !== 1) throw new Error('Keyboard skip-navigation link is missing');
     await page.keyboard.press('Tab');
