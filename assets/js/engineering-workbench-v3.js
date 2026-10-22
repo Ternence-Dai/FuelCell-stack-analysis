@@ -206,7 +206,7 @@
         safe(item.netPower) + ' kW' + (item.netPowerLabel ? ' · ' + safe(item.netPowerLabel) : '');
       const massLife = [
         item.massNote || (item.systemMassKg == null ? '' : safe(item.systemMassKg) + ' kg'),
-        item.serviceLifeHours == null ? '' : safe(item.serviceLifeHours) + ' h（厂商标称系统寿命）'
+        item.serviceLifeHours == null ? '' : safe(Number(item.serviceLifeHours).toLocaleString('en-US')) + ' h（厂商标称系统寿命）'
       ].filter(Boolean).join(' / ') || '未披露';
       return '<tr><td><strong>' + safe(item.n) + '</strong><small>' + safe(item.sourceDate) + '</small></td>' +
         '<td>' + safe(item.productScope) + '</td><td>' + power + '</td><td>' + netPower + '</td>' +
