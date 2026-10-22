@@ -27,6 +27,28 @@ const { chromium } = require('playwright');
         engineeringLayout.display !== 'grid' || !engineeringLayout.columns.startsWith('248px')) {
       throw new Error('Reference engineering layout was not loaded/applied: ' + JSON.stringify(engineeringLayout));
     }
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    const wideShell = await page.evaluate(() => {
+      const rect = selector => {
+        const node = document.querySelector(selector);
+        if (!node) return null;
+        const box = node.getBoundingClientRect();
+        return { left: box.left, right: box.right, width: box.width };
+      };
+      return {
+        viewport: innerWidth,
+        app: rect('.app'),
+        main: rect('.main'),
+        content: rect('#content')
+      };
+    });
+    if (!wideShell.app || !wideShell.main || !wideShell.content ||
+        wideShell.app.width < wideShell.viewport * 0.94 ||
+        wideShell.content.width < wideShell.main.width * 0.88 ||
+        wideShell.content.left < wideShell.main.left ||
+        wideShell.content.right > wideShell.main.right + 2) {
+      throw new Error('FuelCell desktop workspace is constrained or offset instead of filling its main column: ' + JSON.stringify(wideShell));
+    }
 
     const skipLink = page.locator('a.skip-link[href="#main-content"]');
     if (await skipLink.count() !== 1) throw new Error('Keyboard skip-navigation link is missing');
