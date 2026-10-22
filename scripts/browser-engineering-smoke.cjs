@@ -137,7 +137,7 @@ const { chromium } = require('playwright');
     await page.locator('#content [data-action="param-reset"]').click();
     await page.waitForFunction(() => Number(document.querySelector('#pSlider')?.value) === 150);
     const energyFlow = await page.evaluate(() => {
-      const panel = document.querySelector('#content .fc-power-flow');
+      const panel = document.querySelector('#content .fc-energy-panel');
       const required = ['mH2','Pstack','Vstack','I','Pnet','pCmp','pPump','pRecirc','pDcdc','Q','etaStack'];
       const values = Object.fromEntries(required.map(key => [
         key, panel?.querySelector('[data-live="' + key + '"]')?.textContent.trim() || ''
