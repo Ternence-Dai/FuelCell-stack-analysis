@@ -57,11 +57,11 @@ const { chromium } = require('playwright');
     if (!firstKeyboardTarget) throw new Error('Skip navigation is not the first keyboard focus target');
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => document.activeElement?.getAttribute('id') === 'main-content');
-    await page.waitForSelector('#content .fc-reference-card');
+    await page.waitForSelector('#content .fc-engineering-workspace .fc-reference-table tbody tr');
     const referenceEvidence = await page.evaluate(() => ({
-      cards: [...document.querySelectorAll('#content .fc-reference-card')].map(card => ({
-        title: card.querySelector('strong')?.textContent || '',
-        source: card.querySelector('a[href]')?.href || ''
+      cards: [...document.querySelectorAll('#content .fc-reference-table tbody tr')].map(row => ({
+        title: row.querySelector('strong')?.textContent || '',
+        source: row.querySelector('a[href]')?.href || ''
       })),
       text: document.querySelector('#content')?.innerText || ''
     }));
@@ -80,6 +80,49 @@ const { chromium } = require('playwright');
     if (dashboard.length < 10 || dashboard.some(value => value.trim() === '—')) {
       throw new Error('Dashboard did not render computed stack metrics: ' + JSON.stringify(dashboard));
     }
+
+    const engineeringWorkbench = await page.evaluate(() => {
+      const root = document.querySelector('#content .fc-engineering-workspace');
+      const main = document.querySelector('#main-content');
+      const inspector = root?.querySelector('.fc-engineering-inspector');
+      const primary = root?.querySelector('.fc-engineering-primary');
+      const rect = node => {
+        if (!node) return null;
+        const box = node.getBoundingClientRect();
+        return { left: box.left, right: box.right, width: box.width, top: box.top, bottom: box.bottom };
+      };
+      return {
+        present: !!root,
+        oldPromoGone: !root?.querySelector('.dashboard-command'),
+        main: rect(main),
+        primary: rect(primary),
+        inspector: rect(inspector),
+        metricCards: root?.querySelectorAll('.fc-live-metric').length || 0,
+        parameterGroups: root?.querySelectorAll('.fc-parameter-inspector .param-group').length || 0
+      };
+    });
+    if (!engineeringWorkbench.present || !engineeringWorkbench.oldPromoGone ||
+        engineeringWorkbench.metricCards !== 12 || engineeringWorkbench.parameterGroups < 4 ||
+        !engineeringWorkbench.primary || !engineeringWorkbench.inspector ||
+        engineeringWorkbench.inspector.left < engineeringWorkbench.primary.right - 2 ||
+        engineeringWorkbench.inspector.right > engineeringWorkbench.main.right + 2) {
+      throw new Error('FuelCell product-level engineering workbench structure or inspector geometry failed: ' +
+        JSON.stringify(engineeringWorkbench));
+    }
+
+    const oldTarget = Number(await page.locator('#pSlider').inputValue());
+    await page.locator('#pSlider').evaluate((node, value) => {
+      node.value = String(value);
+      node.dispatchEvent(new Event('input', { bubbles: true }));
+    }, Math.min(400, oldTarget + 7));
+    await page.waitForFunction(expected => {
+      const slider = document.querySelector('#pSlider');
+      const readout = document.querySelector('#pNum')?.textContent.trim();
+      const metric = document.querySelector('#autoGrid [data-live="Pstack"]')?.textContent || '';
+      return Number(slider?.value) === expected && Number(readout) === expected && metric.trim() !== '—';
+    }, Math.min(400, oldTarget + 7));
+    await page.locator('#content [data-action="param-reset"]').click();
+    await page.waitForFunction(() => Number(document.querySelector('#pSlider')?.value) === 150);
     const energyFlow = await page.evaluate(() => {
       const panel = document.querySelector('#content .fc-power-flow');
       const required = ['mH2','Pstack','Vstack','I','Pnet','pCmp','pPump','pRecirc','pDcdc','Q','etaStack'];
