@@ -93,10 +93,10 @@
         return;
       }
       visibleItems.forEach((item, index) => {
-        const button = document.createElement('button');
-        button.type = 'button';
+        const button = document.createElement('div');
         button.className = 'w5-command-entry' + (index === activeIndex ? ' active' : '');
         button.id = 'w5-command-option-' + index;
+        button.tabIndex = -1;
         button.setAttribute('role', 'option');
         button.setAttribute('aria-selected', index === activeIndex ? 'true' : 'false');
         const title = document.createElement('span');
