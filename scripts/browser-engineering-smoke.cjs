@@ -28,7 +28,7 @@ const { chromium } = require('playwright');
         !cockpitBootstrap.dashboardRoot) {
       throw new Error('Engineering cockpit bootstrap failed: ' + JSON.stringify({state:cockpitBootstrap,pageErrors}));
     }
-    const referenceStylesheet = page.locator('link[rel="stylesheet"][href*="workspace.css"]');
+    const referenceStylesheet = page.locator('link[rel="stylesheet"][href*="reference-platform-v4.css"]');
     if (await referenceStylesheet.count() !== 1) throw new Error('Reference engineering workbench stylesheet is not linked');
     const referenceCssResponse = await page.request.get(await referenceStylesheet.evaluate(node => node.href));
     const referenceCssText = await referenceCssResponse.text();
