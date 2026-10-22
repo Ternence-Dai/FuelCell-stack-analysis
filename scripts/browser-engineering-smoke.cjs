@@ -54,6 +54,96 @@ const { chromium } = require('playwright');
       throw new Error('Simulation parameter slider did not update its visible value');
     }
 
+    // Prove that an edited operating point is consumed by the solver output, not just echoed in its label.
+    const adjustedPower = Number(oldValue) + 5;
+    await page.locator('#content [data-action="sim-run"]').click();
+    await page.waitForFunction(expectedPeak => {
+      const result = document.querySelector('#simResult')?.innerText || '';
+      return result.includes('假设瞬态峰值') && result.includes(String(expectedPeak));
+    }, Math.round(adjustedPower * 1.05));
+    const adjustedCanvas = await page.evaluate(() => {
+      const canvas = document.querySelector('#simResult canvas');
+      if (!canvas || canvas.width < 200 || canvas.height < 100) return { width: 0, height: 0, inkedPixels: 0 };
+      const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+      let inkedPixels = 0;
+      for (let i = 3; i < pixels.length; i += 4) if (pixels[i] > 0) inkedPixels += 1;
+      return { width: canvas.width, height: canvas.height, inkedPixels };
+    });
+    if (adjustedCanvas.width < 200 || adjustedCanvas.inkedPixels < 100) {
+      throw new Error('Dynamic simulation chart did not paint visible data after the operating point changed: ' + JSON.stringify(adjustedCanvas));
+    }
+
+    // Reset must restore the default operating point and the next simulation must use it.
+    await page.locator('#content [data-action="sim-reset"]').click();
+    await page.waitForFunction(() => {
+      const slider = document.querySelector('#content .sim-slider');
+      return !!slider && Number(slider.value) === 150 &&
+        (document.querySelector('#simPVal')?.textContent || '').trim() === '150 kW';
+    });
+    await page.locator('#content [data-action="sim-run"]').click();
+    await page.waitForFunction(() => (document.querySelector('#simResult')?.innerText || '')
+      .includes('假设瞬态峰值') && (document.querySelector('#simResult')?.innerText || '').includes('158'));
+
+    // Exercise every advertised simulation mode and prove each one paints a non-empty chart.
+    const simulationModes = [
+      ['steady', '电堆效率'],
+      ['dynamic', '响应模型时间常数'],
+      ['cold', '启动响应时间假设'],
+      ['durab', '假设老化模型 SOH'],
+      ['bench', '合成样本 RMSE'],
+      ['limit', '80℃模型边界电流密度'],
+      ['eis', '欧姆阻抗 R_ohm'],
+      ['cv', 'ECSA'],
+      ['water', '最高单片温度']
+    ];
+    const simulationEvidence = [];
+    for (const [modeId, expectedLabel] of simulationModes) {
+      await page.locator('#content .mode[data-id="' + modeId + '"]').click();
+      await page.locator('#content [data-action="sim-run"]').click();
+      await page.waitForFunction(() => {
+        const canvas = document.querySelector('#simResult canvas');
+        return !!canvas && canvas.width >= 200 && canvas.height >= 100;
+      });
+      const evidence = await page.evaluate(() => {
+        const root = document.querySelector('#simResult');
+        const canvases = [...(root?.querySelectorAll('canvas') || [])];
+        let inkedPixels = 0;
+        for (const canvas of canvases) {
+          if (canvas.width < 200 || canvas.height < 100) continue;
+          const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+          for (let i = 3; i < pixels.length; i += 4) if (pixels[i] > 0) inkedPixels += 1;
+        }
+        return {
+          text: root?.innerText || '',
+          canvasCount: canvases.length,
+          inkedPixels,
+          kpiCount: root?.querySelectorAll('.kpi').length || 0,
+          boundaryNote: root?.querySelector('[role="note"]')?.innerText || ''
+        };
+      });
+      if (!evidence.text.includes(expectedLabel) || evidence.canvasCount < 1 ||
+          evidence.inkedPixels < 100 || evidence.kpiCount < 4 ||
+          !evidence.boundaryNote.includes('不代表台架实测')) {
+        throw new Error('Simulation mode acceptance failed for ' + modeId + ': ' + JSON.stringify({
+          expectedLabel, canvasCount: evidence.canvasCount, inkedPixels: evidence.inkedPixels,
+          kpiCount: evidence.kpiCount, text: evidence.text.slice(0, 500),
+          boundaryNote: evidence.boundaryNote
+        }));
+      }
+      if (modeId === 'bench' &&
+          (!evidence.text.includes('合成扰动样本') || !evidence.text.includes('非实测'))) {
+        throw new Error('Bench comparison did not clearly identify synthetic samples as non-measurements');
+      }
+      if (modeId === 'cold' && !evidence.text.includes('标准符合性判定')) {
+        throw new Error('Cold-start view omitted its standard-conformance status');
+      }
+      if (modeId === 'durab' && !evidence.text.includes('未标定')) {
+        throw new Error('Durability view omitted its uncalibrated-model disclosure');
+      }
+      simulationEvidence.push({ modeId, canvasCount: evidence.canvasCount, inkedPixels: evidence.inkedPixels });
+    }
+    if (simulationEvidence.length !== 9) throw new Error('Not all nine advertised simulation modes were exercised');
+
     await page.locator('#sideNav .nav-item[data-id="calc"]').click();
     await page.locator('#content [data-action="calc-run"][data-id="elec"]').click();
     await page.waitForSelector('#calcRes .res-box');
