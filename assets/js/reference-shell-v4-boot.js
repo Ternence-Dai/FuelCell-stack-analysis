@@ -8,6 +8,13 @@
     if (!html) return false;
     target.innerHTML = html;
     target.dataset.referenceMounted = 'v4';
+    const slider = document.getElementById('pSlider');
+    if (slider) {
+      slider.addEventListener('input', function () {
+        if (window.state && window.state.params) window.state.params.stackPower = Number(this.value);
+        mount();
+      });
+    }
     return true;
   }
   function scheduleMount() {
