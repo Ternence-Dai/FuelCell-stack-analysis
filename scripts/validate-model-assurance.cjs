@@ -4,10 +4,11 @@ const assert = require('node:assert/strict');
 
 const html = fs.readFileSync('index.html', 'utf8');
 const script = fs.readFileSync('assets/js/workspace-v5-model-assurance.js', 'utf8');
-const css = fs.readFileSync('assets/css/workspace-v5.css', 'utf8');
+const css = fs.readFileSync('assets/css/workspace.css', 'utf8');
 
-assert.ok(html.includes('workspace-v5-model-assurance.js?v=20261019-v53'),
-  'FuelCell workspace must load the model assurance disclosure script');
+assert.ok(html.includes('workspace-v5-model-assurance.js?v=20261019-v53') &&
+          html.includes('workspace.css?v=20261022-unified-v2'),
+  'FuelCell workspace must load the model assurance disclosure script and current workspace stylesheet');
 assert.doesNotThrow(() => new Function(script),
   'model assurance disclosure must be valid JavaScript');
 for (const token of [
