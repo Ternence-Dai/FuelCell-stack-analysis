@@ -66,6 +66,10 @@ const { chromium } = require('playwright');
     await page.waitForFunction(() => document.querySelector('.fc-engineering-workspace'));
     const referenceWorkspace = await page.locator('#content .fc-engineering-workspace').count();
     if (referenceWorkspace !== 1) throw new Error('FuelCell reference engineering workspace is not mounted as the dashboard');
+    const referenceBoot = await page.locator('script[src*="reference-shell-v4-boot.js"]').getAttribute('src');
+    if (!referenceBoot || !referenceBoot.includes('v=20261022-reference-v6')) {
+      throw new Error('FuelCell route-safe reference boot cache version is missing');
+    }
 
     const skipLink = page.locator('a.skip-link[href="#main-content"]');
     if (await skipLink.count() !== 1) throw new Error('Keyboard skip-navigation link is missing');
@@ -155,6 +159,17 @@ const { chromium } = require('playwright');
 
     await page.locator('#sideNav .nav-item[data-id="sim"]').click();
     await page.waitForSelector('#content .mode[data-id="dynamic"]');
+    // Re-fire the late startup fallback deliberately: it must not replace an
+    // active simulation route with the engineering dashboard.
+    await page.evaluate(() => window.dispatchEvent(new Event('load')));
+    await page.waitForTimeout(240);
+    const routeAfterLateLoad = await page.evaluate(() => ({
+      view: typeof state !== 'undefined' ? state.view : '',
+      dynamicMode: !!document.querySelector('#content .mode[data-id="dynamic"]')
+    }));
+    if (routeAfterLateLoad.view !== 'sim' || !routeAfterLateLoad.dynamicMode) {
+      throw new Error('Late engineering shell boot overwrote the active simulation route: ' + JSON.stringify(routeAfterLateLoad));
+    }
     await page.locator('#content .mode[data-id="dynamic"]').click();
     await page.locator('#content [data-action="sim-run"]').click();
     await page.waitForSelector('#simResult canvas');
