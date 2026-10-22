@@ -63,15 +63,6 @@
         '<div class="param-group-body">' + group.items.map(function (item) { return paramItemHtml(item); }).join('') +
         '</div></section>';
     }).join('');
-    const referenceRows = GLOBAL_DB.map(function (item) {
-      return '<tr><td><strong>' + safe(item.n) + '</strong><small>' + safe(item.sourceDate) + '</small></td>' +
-        '<td>' + safe(item.productScope) + '</td><td>' + safe(item.p) + ' kW</td>' +
-        '<td>' + (item.N ? safe(item.N) + ' 片' : '未披露') + '</td>' +
-        '<td>' + (item.vpd ? safe(item.vpd) + ' kW/L' : '未披露') + '</td>' +
-        '<td><a href="' + safe(item.sourceUrl) + '" target="_blank" rel="noopener noreferrer">' +
-        safe(item.sourceLabel) + ' ↗</a></td></tr>';
-    }).join('');
-
     return '<section class="fc-engineering-workspace" aria-label="燃料电池电堆工程控制台">' +
       '<header class="fc-workspace-head"><div>' +
         '<div class="fc-breadcrumb">ENGINEERING / STACK MODEL / OPERATING POINT</div>' +
