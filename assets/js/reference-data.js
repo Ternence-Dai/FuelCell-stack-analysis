@@ -2,19 +2,47 @@
 /* ================= 全球电堆数据库 ================= */
 /* The following comparison figures currently lack per-field public source records and are labeled source-pending in the UI. Do not use as verified manufacturer measurements or design inputs. */
 const GLOBAL_DB = [
-  { n:'Toyota Mirai 2', r:'日本·丰田', p:128, N:330, area:400, vpd:5.4, sp:4.0, i:1.30, eta:60.0, life:15000, cold:-30, mem:10, pt:0.20, bpp:'钛合金', note:'3D 细密流场 + 增强复合膜' },
-  { n:'Hyundai NEXO', r:'韩国·现代', p:95, N:440, area:250, vpd:3.1, sp:2.3, i:1.20, eta:60.0, life:5000, cold:-30, mem:15, pt:0.30, bpp:'不锈钢', note:'金属板 + 石墨复合' },
-  { n:'Honda Clarity', r:'日本·本田', p:103, N:390, area:300, vpd:3.1, sp:2.0, i:1.10, eta:59.0, life:5000, cold:-20, mem:12, pt:0.25, bpp:'钛合金', note:'薄型化流场板' },
-  { n:'GM Hydrotec', r:'美国·通用', p:100, N:400, area:280, vpd:4.0, sp:3.0, i:1.15, eta:58.5, life:15000, cold:-30, mem:15, pt:0.26, bpp:'金属', note:'商用车平台' },
-  { n:'Ballard FCmove-HD', r:'加拿大·巴拉德', p:120, N:400, area:300, vpd:4.2, sp:2.8, i:1.10, eta:58.0, life:30000, cold:-30, mem:18, pt:0.28, bpp:'石墨/金属', note:'重卡长寿命设计' },
-  { n:'Cummins HD120', r:'美国·康明斯', p:120, N:380, area:330, vpd:4.0, sp:2.9, i:1.15, eta:58.5, life:25000, cold:-30, mem:16, pt:0.26, bpp:'金属', note:'Hydrogenics 平台' },
-  { n:'Plug GenDrive', r:'美国·Plug Power', p:80, N:300, area:280, vpd:3.0, sp:2.2, i:1.00, eta:57.0, life:20000, cold:-20, mem:20, pt:0.32, bpp:'石墨', note:'叉车/仓储应用' },
-  { n:'Nikola TRE FCEV', r:'美国·Nikola', p:200, N:450, area:450, vpd:4.5, sp:3.0, i:1.15, eta:58.0, life:25000, cold:-30, mem:16, pt:0.27, bpp:'金属', note:'重卡 800V 平台' },
-  { n:'亿华通 G120', r:'中国·亿华通', p:120, N:380, area:340, vpd:4.5, sp:3.2, i:1.20, eta:58.0, life:15000, cold:-30, mem:15, pt:0.25, bpp:'金属', note:'公交/重卡主力机型' },
-  { n:'重塑 Prisma 12+', r:'中国·重塑集团', p:130, N:390, area:350, vpd:4.8, sp:3.5, i:1.25, eta:58.0, life:20000, cold:-30, mem:14, pt:0.24, bpp:'金属', note:'镜星系列高功率密度' },
-  { n:'捷氢 PROME P4', r:'中国·捷氢科技', p:130, N:360, area:380, vpd:5.0, sp:3.6, i:1.30, eta:59.0, life:15000, cold:-30, mem:12, pt:0.22, bpp:'金属', note:'乘用车/商用车通用' },
-  { n:'国鸿鸿芯 G 系列', r:'中国·国鸿氢能', p:110, N:360, area:320, vpd:4.0, sp:2.8, i:1.10, eta:57.5, life:18000, cold:-30, mem:16, pt:0.27, bpp:'石墨/金属', note:'电堆与系统集成' },
-];
+  {
+    n:'Toyota Mirai (2023) · TFCS',
+    r:'Toyota Motor North America',
+    productScope:'整车燃料电池系统（TFCS）',
+    p:128, netPower:null, N:330, vpd:null, sp:null,
+    sourceLabel:'2023 Mirai eBrochure',
+    sourceDate:'2023',
+    sourceUrl:'https://www.toyota.com/content/dam/toyota/brochures/pdf/2023/mirai_ebrochure.pdf',
+    note:'制造商规格列出 TFCS 最大输出 128 kW、330 个单电池。该数据属于车辆燃料电池系统规格，不是独立台架实测电堆报告。'
+  },
+  {
+    n:'Hyundai NEXO (2018)',
+    r:'Hyundai Motor Europe',
+    productScope:'车辆燃料电池电堆',
+    p:95, netPower:null, N:440, vpd:3.1, sp:null,
+    sourceLabel:'NEXO Technical Specifications',
+    sourceDate:'2018',
+    sourceUrl:'https://www.hyundai.news/newsroom/dam/eu/press-kits/20180709_nexo/hyundai_nexo_technical_specifications.pdf',
+    note:'制造商规格列出燃料电池电堆输出 95 kW、堆体积功率密度 3.1 kW/L、440 个单电池。整车 135 kW 系统输出还包含 40 kW 电池，不能当作电堆输出。'
+  },
+  {
+    n:'Hyundai All-New NEXO',
+    r:'Hyundai Motor Group',
+    productScope:'新一代车辆燃料电池系统',
+    p:110, netPower:94, N:null, vpd:null, sp:null,
+    sourceLabel:'All-New NEXO powertrain announcement',
+    sourceDate:'2025',
+    sourceUrl:'https://www.hyundai.com/worldwide/en/newsroom/detail/hyundai-motor%E2%80%99s-all-new-nexo-sets-new-standards-in-hydrogen-technology-and-electrified-mobility-0000001056.html',
+    note:'制造商公布燃料电池最大总输出 110 kW、净系统输出 94 kW。该值是系统边界下的 gross / net 规格，不与裸堆输出混为一谈。'
+  },
+  {
+    n:'Ballard FCmove-HD+',
+    r:'Ballard Power Systems',
+    productScope:'重型车辆燃料电池模块',
+    p:120, netPower:null, N:null, vpd:null, sp:null,
+    sourceLabel:'Ballard FCmove product specifications',
+    sourceDate:'Manufacturer product page',
+    sourceUrl:'https://www.ballard.com/fcmove/',
+    note:'制造商产品页列出 FCmove-HD+ 额定功率 120 kW、堆芯型号 FCgen-LCS。该值是完整燃料电池模块规格，不等同于裸电堆；公开页面未列出的指标不作推算。'
+  }
+]
 
 /* ================= 知识库 ================= */
 const KB_CATS = [
