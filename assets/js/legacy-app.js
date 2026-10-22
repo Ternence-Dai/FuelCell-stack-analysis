@@ -627,10 +627,11 @@ const LIB = [
     { id:'test.cycle', k:'耐久循环', v:'5000 – 15000 h', u:'—', range:'—', note:'启停循环 / 变载循环 / 怠速循环 三类' },
     { id:'test.cold', k:'冷启动测试', v:'-30 / -35 / -40', u:'℃', range:'-40 – 0', note:'环境仓浸泡 ≥ 8h 至热平衡' },
   ]},
-  { id:'global', t:'全球电堆数据库', ico:'', desc:'机型参数整理稿 · 来源未逐条核验，当前仅供研究线索参考，不可作为实测对标或设计输入', items: GLOBAL_DB.map((g,i) => ({
-    id:'g.'+i, k:g.n, v:`${g.p} kW / ${g.vpd} kW/L / ${g.sp} kW/kg`, u:'—', range:'—',
-    evidenceStatus:'source-pending', evidenceLabel:'来源待核验',
-    note:`${g.N} 片 · ${g.area} cm² · ${g.i} A/cm² · 效率 ${g.eta}% · 寿命 ${g.life}h · ${g.r} · 当前无逐项来源登记，数值不得视为厂家实测数据`
+  { id:'global', t:'制造商公开规格', ico:'', desc:'仅收录带制造商公开来源的规格；按产品边界区分整车系统、电堆与燃料电池模块', items: GLOBAL_DB.map((g,i) => ({
+    id:'g.'+i, k:g.n, v:`${g.p} kW${g.netPower ? ' gross / '+g.netPower+' kW net' : ''}`, u:'—', range:g.productScope,
+    evidenceStatus:'source-verified', evidenceLabel:'制造商公开规格',
+    sourceUrl:g.sourceUrl,
+    note:`${g.productScope} · ${g.sourceLabel}（${g.sourceDate}）。${g.note}`
   }))},
 ];
 
@@ -825,50 +826,32 @@ function viewDashboard(){
     <div style="font-size:11.5px;color:#8aa7c4;line-height:1.7"><b style="color:${r.tier.color}">适用场景：</b>${r.tier.scenes}</div>
   </div>
 
-  <div class="sec-title">全球电堆数据库对标（${GLOBAL_DB.length} 款）</div>
-  <div class="card">
-    <div class="card-h"><h3>当前方案 vs 全球主流电堆</h3><span class="tag">实时对比</span></div>
-    ${GLOBAL_DB.map(g => {
-      const cmp = (v, ref) => v >= ref ? 'var(--green)' : v >= ref * 0.9 ? 'var(--orange)' : 'var(--red)';
-      const myVpd = r.vpd, mySp = r.sp, myEta = r.etaStack * 100;
-      return `
-      <div class="gcard">
-        <div class="gcard-h">
-          <span class="rn">${g.n}</span>
-          <span class="rt">${g.r}</span>
-        </div>
-        <div class="gcard-grid">
-          <div class="gcard-i"><div class="gcard-k">额定功率</div><div class="gcard-v">${g.p} kW</div></div>
-          <div class="gcard-i"><div class="gcard-k">体积功率密度</div><div class="gcard-v">${g.vpd} kW/L</div></div>
-          <div class="gcard-i"><div class="gcard-k">比功率</div><div class="gcard-v">${g.sp} kW/kg</div></div>
-          <div class="gcard-i"><div class="gcard-k">电堆效率</div><div class="gcard-v">${g.eta}%</div></div>
-        </div>
-        <div class="gcmp-bar">
-          <span>VPD</span>
-          <div class="track"><i style="width:${Math.min(myVpd / g.vpd * 100, 100)}%;background:${cmp(myVpd, g.vpd)}"></i></div>
-          <span>${fmt(myVpd, 2)}</span>
-        </div>
-        <div class="gcmp-bar">
-          <span>比功率</span>
-          <div class="track"><i style="width:${Math.min(mySp / g.sp * 100, 100)}%;background:${cmp(mySp, g.sp)}"></i></div>
-          <span>${fmt(mySp, 2)}</span>
-        </div>
-        <div class="gcmp-bar">
-          <span>效率</span>
-          <div class="track"><i style="width:${Math.min(myEta / g.eta * 100, 100)}%;background:${cmp(myEta, g.eta)}"></i></div>
-          <span>${fmt(myEta, 1)}</span>
-        </div>
-        <div style="font-size:10px;color:#6b87ab;margin-top:6px;line-height:1.6">${g.note}</div>
-      </div>`;
-    }).join('')}
-    <div class="res-box" style="margin-top:12px">
-      <div class="res-row"><span class="res-k">当前方案体积功率密度</span><span class="res-v">${fmt(r.vpd,2)}<small>kW/L</small></span></div>
-      <div class="res-row"><span class="res-k">当前方案比功率</span><span class="res-v">${fmt(r.sp,2)}<small>kW/kg</small></span></div>
-      <div class="res-row"><span class="res-k">当前方案电堆效率</span><span class="res-v">${fmt(r.etaStack*100,1)}<small>%</small></span></div>
-      <div class="res-row"><span class="res-k">全球领先体积功率密度</span><span class="res-v" style="color:#22d3ee">5.40<small>kW/L</small></span></div>
+  <section class="fc-reference-section" aria-labelledby="fc-reference-title">
+    <div class="fc-reference-heading">
+      <div><span class="fc-reference-eyebrow">MANUFACTURER-PUBLISHED SPECIFICATIONS</span>
+        <h3 id="fc-reference-title">制造商公开规格参考 <span>${GLOBAL_DB.length} 项</span></h3>
+        <p>仅呈现可追溯的公开字段；整车系统、电堆和燃料电池模块分别标注，不做跨边界性能排名。</p></div>
+      <a class="fc-reference-index" href="https://www.toyota.com/content/dam/toyota/brochures/pdf/2023/mirai_ebrochure.pdf" target="_blank" rel="noopener noreferrer">查看原始规格 ↗</a>
     </div>
-  </div>
-
+    <div class="fc-reference-grid">
+      ${GLOBAL_DB.map(g => {
+        const metrics = [
+          { label:'最大总输出', value:g.p, unit:'kW' },
+          ...(g.netPower ? [{ label:'净系统输出', value:g.netPower, unit:'kW' }] : []),
+          ...(g.N ? [{ label:'单电池数量', value:g.N, unit:'片' }] : []),
+          ...(g.vpd ? [{ label:'体积功率密度', value:g.vpd, unit:'kW/L' }] : []),
+        ];
+        return `<article class="fc-reference-card">
+          <div class="fc-reference-card__top"><strong>${g.n}</strong><span>${g.sourceDate}</span></div>
+          <div class="fc-reference-scope">${g.productScope}</div>
+          <div class="fc-reference-metrics">${metrics.map(m => `<div><small>${m.label}</small><b>${m.value}<i>${m.unit}</i></b></div>`).join('')}</div>
+          <p>${g.note}</p>
+          <a href="${g.sourceUrl}" target="_blank" rel="noopener noreferrer">${g.sourceLabel} · ${g.r} ↗</a>
+        </article>`;
+      }).join('')}
+    </div>
+    <div class="fc-reference-disclaimer">比较前必须核对产品边界、gross / net 定义、额定工况与测试标准。来源未披露的参数不填补、不推算，也不用于模型校准。</div>
+  </section>
   <div class="sec-title">快捷功能</div>
   <div class="grid g4">
     <div class="quick" data-action="nav" data-id="model"><span class="qi">✦</span><span class="ql">大模型</span></div>
@@ -2199,7 +2182,7 @@ function viewLib(){
   <div class="lib-toolbar">
     <div class="search-wrap">
       <span class="si">⌕</span>
-      <input type="text" id="libSearchInput" placeholder="搜索电堆参数名称、单位、说明、全球机型…" value="${state.libSearch}">
+      <input type="text" id="libSearchInput" placeholder="搜索电堆参数名称、单位、说明、公开规格…" value="${state.libSearch}">
       <span class="clr" data-action="lib-clear-search">✕</span>
     </div>
     <div class="preset-row">
@@ -2216,7 +2199,7 @@ function viewLib(){
     <span>当前筛选 <b>${filtered.length}</b></span>
     <span>已收藏 <b>${favCount}</b></span>
     <span>类别 <b>${catData.length}</b>/${LIB.length}</span>
-    <span>全球机型 <b>${GLOBAL_DB.length}</b></span>
+    <span>公开规格 <b>${GLOBAL_DB.length}</b></span>
   </div>
 
   <div class="lib-actions">
@@ -2629,34 +2612,16 @@ function viewData(){
       </div>`).join('')}
   </div>
 
-  <div class="sec-title">数据溯源</div>
-  <div class="card">
-    <div class="res-row"><span class="res-k">数据总条数</span><span class="res-v">42,847</span></div>
-    <div class="res-row"><span class="res-k">电堆仿真数据</span><span class="res-v">18,210</span></div>
-    <div class="res-row"><span class="res-k">实测数据</span><span class="res-v">21,936</span></div>
-    <div class="res-row"><span class="res-k">计算记录</span><span class="res-v">2,701</span></div>
-    <div class="res-row"><span class="res-k">全球数据库对标</span><span class="res-v">${GLOBAL_DB.length} 款</span></div>
-    <div class="res-row"><span class="res-k">最近同步</span><span class="res-v" style="font-size:12px">2026-09-30 08:14</span></div>
+  <div class="sec-title">数据资产与来源状态</div>
+  <div class="fc-data-provenance-grid">
+    <article><small>内置场景参数</small><b>${state.projects.length} 套</b><span>仅供模型方案演示；不是客户项目或实测报告。</span></article>
+    <article><small>制造商公开规格</small><b>${GLOBAL_DB.length} 项</b><span>逐项提供制造商来源链接；不同产品边界不作直接排名。</span></article>
+    <article><small>已核验台架实测记录</small><b>未接入</b><span>当前浏览器没有关联可追溯的原始台架数据。</span></article>
+    <article><small>外部数据库同步</small><b>未配置</b><span>不再显示虚构的数据总量、分类数量或最近同步时间。</span></article>
   </div>
-
-  <div class="sec-title">数据分类统计</div>
-  <div class="card">
-    ${[
-      ['电堆稳态数据', 8420, '#0a84ff', 100],
-      ['动态变载数据', 5210, '#00d48a', 62],
-      ['低温启动数据', 2180, '#22d3ee', 26],
-      ['耐久循环数据', 9860, '#a78bfa', 117],
-      ['EIS 阻抗数据', 3260, '#ff9f0a', 39],
-      ['CV 测试数据', 1640, '#f472b6', 19],
-      ['水热联合数据', 2860, '#7d8fb3', 34],
-    ].map(x => `
-      <div class="bar-row">
-        <span class="bar-k">${x[0]}</span>
-        <div class="bar-track"><i style="width:${x[3]/120*100}%;background:${x[2]}"></i></div>
-        <span class="bar-v">${x[1]}</span>
-      </div>`).join('')}
+  <div class="card fc-data-provenance-note">
+    <strong>数据解释规则</strong><p>求解器生成值属于模型计算；内置方案属于演示参数；制造商规格属于公开产品声明；只有具备原始文件、测量时间、设备和校准来源的记录，才可标为台架实测。以上类别不可合并统计。</p>
   </div>
-
   <div class="sec-title">数据导出与报表</div>
   <div class="grid g2">
     <button class="btn ghost" data-action="report" data-id="export">⇩ 批量导出数据</button>
@@ -2748,7 +2713,7 @@ function viewKb(){
   return `
   <div class="kb-search">
     <span class="si">⌕</span>
-    <input type="text" id="kbSearchInput" placeholder="搜索标准号、电堆关键词、场景、全球机型…" value="${state.kbSearch}">
+    <input type="text" id="kbSearchInput" placeholder="搜索标准号、电堆关键词、场景、公开规格…" value="${state.kbSearch}">
     <span class="clr" data-action="kb-clear-search">✕</span>
   </div>
 
