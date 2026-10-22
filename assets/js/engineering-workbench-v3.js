@@ -41,18 +41,18 @@
       ['氢循环', result.pRecirc, 'pRecirc', '#8878ce'],
       ['DC-DC 损耗', result.pDcdc, 'pDcdc', '#cf9a42']
     ];
-    const tierButtons = TIERS.map(function (tier) {
+    const tierButtonsHtml = TIERS.map(function (tier) {
       const selected = tier.id === result.tier.id;
       return '<button type="button" class="fc-tier-option ' + (selected ? 'active' : '') +
         '" data-action="preset-tier" data-id="' + safe(tier.id) + '" aria-pressed="' + (selected ? 'true' : 'false') + '">' +
         '<i style="background:' + safe(tier.color) + '"></i><span>' + safe(tier.name) +
         '</span><small>' + safe(tier.min) + '–' + safe(tier.max) + ' kW</small></button>';
     }).join('');
-    const presetButtons = PRESETS.map(function (preset, index) {
+    const presetButtonsHtml = PRESETS.map(function (preset, index) {
       return '<button type="button" class="fc-preset ' + (state.presetIdx === index ? 'active' : '') +
         '" data-action="apply-preset" data-id="' + index + '">' + safe(preset.name) + '</button>';
     }).join('');
-    const parameterGroups = PARAM_GROUPS.map(function (group) {
+    const parameterGroupsHtml = PARAM_GROUPS.map(function (group) {
       const open = !!state.paramOpen[group.id];
       return '<section class="param-group ' + (open ? 'open' : '') + '" data-pgroup="' + safe(group.id) + '">' +
         '<button type="button" class="param-group-head" data-action="param-toggle" data-id="' + safe(group.id) +
@@ -136,9 +136,9 @@
 
       '<aside class="fc-engineering-inspector" aria-label="模型参数与工况设置">' +
         '<section class="fc-inspector-card fc-profile-card"><div class="fc-panel-kicker">STACK CLASSIFICATION</div><h3>电堆功率区间</h3>' +
-          '<div class="fc-tier-track">' + tierButtons() + '</div>' +
+          '<div class="fc-tier-track">' + tierButtonsHtml + '</div>' +
           '<p class="fc-tier-description"><b>当前区间：</b>' + safe(result.tier.scenes) + '</p>' +
-          '<div class="fc-preset-label">快速工况预设</div><div class="fc-preset-grid">' + presetButtons() + '</div></section>' +
+          '<div class="fc-preset-label">快速工况预设</div><div class="fc-preset-grid">' + presetButtonsHtml + '</div></section>' +
         '<section class="fc-inspector-card fc-parameter-inspector"><div class="fc-inspector-title"><div>' +
           '<div class="fc-panel-kicker">MODEL PARAMETERS</div><h3>模型参数检查器</h3>' +
           '<p>按物理子系统分组调整。变更只作用于本地模型工况，不会写入台架。</p></div></div>' +
