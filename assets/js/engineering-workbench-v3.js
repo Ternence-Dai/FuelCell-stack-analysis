@@ -248,5 +248,6 @@
     };
   }
 
-  if (typeof window.navigate === 'function') window.navigate('dashboard');
+  // The original application boots asynchronously after importing the domain solver.
+  // Let that validated boot call navigate('dashboard') using this renderer override.
 })();
