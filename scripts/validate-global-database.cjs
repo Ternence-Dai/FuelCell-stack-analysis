@@ -11,20 +11,36 @@ const blockEnd = referenceData.indexOf('\n];', blockStart);
 assert.ok(blockStart >= 0 && blockEnd > blockStart, 'manufacturer source-backed dataset must exist');
 const block = referenceData.slice(blockStart, blockEnd);
 const records = block.match(/^\s*\{\s*n:/gm) || [];
-assert.equal(records.length, 4, 'only the four manufacturer records with verified public product specifications should be listed');
+assert.equal(records.length, 5, 'only manufacturer records with traceable public product specifications should be listed');
 
-assert.equal((block.match(/sourceUrl:/g) || []).length, 4,
+assert.equal((block.match(/sourceUrl:/g) || []).length, 5,
   'each manufacturer product entry must have its own source URL');
-assert.equal((block.match(/sourceLabel:/g) || []).length, 4,
+assert.equal((block.match(/sourceLabel:/g) || []).length, 5,
   'each manufacturer product entry must identify the source document');
-assert.equal((block.match(/productScope:/g) || []).length, 4,
+assert.equal((block.match(/productScope:/g) || []).length, 5,
   'each entry must identify whether it is a stack, system or fuel-cell module');
 for (const source of [
   'https://www.toyota.com/content/dam/toyota/brochures/pdf/2023/mirai_ebrochure.pdf',
   'https://www.hyundai.news/newsroom/dam/eu/press-kits/20180709_nexo/hyundai_nexo_technical_specifications.pdf',
   'https://www.hyundai.com/worldwide/en/newsroom/detail/',
-  'https://www.ballard.com/fcmove/'
+  'https://www.ballard.com/fcmove/',
+  'https://cdn-global.refire.com/content/media/2024/05/PRISMA-12_20250319.pdf'
 ]) assert.ok(block.includes(source), 'manufacturer source is missing: ' + source);
+
+assert.ok(block.includes("p:128, powerLabel:'最大输出功率（原厂规格）'") &&
+  block.includes("N:330, vpd:4.4, sp:5.4") &&
+  block.includes("p:95, powerLabel:'燃料电池堆输出功率'") &&
+  block.includes("N:440, vpd:3.1") &&
+  block.includes("p:110, powerLabel:'最大总输出（Gross）'") &&
+  block.includes("netPower:94") &&
+  block.includes("p:117, powerLabel:'额定系统功率'") &&
+  block.includes("systemMassKg:278") &&
+  block.includes("serviceLifeHours:25000"),
+  'OEM power, cell, density, net output, mass and service-life fields must match the source-backed record set');
+assert.ok(block.includes('249 kg（engine bay）/ 287 kg（rooftop）') &&
+  block.includes('燃料电池模块') &&
+  block.includes('fuel cell system'),
+  'module and system boundaries must remain explicit rather than being labeled as bare-stack data');
 
 assert.ok(app.includes("t:'制造商公开规格'") &&
   app.includes("evidenceStatus:'source-verified'") &&
