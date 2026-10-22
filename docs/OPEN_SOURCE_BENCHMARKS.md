@@ -42,13 +42,14 @@
 - [Amphlett 回归测试](https://github.com/ECSIM/opem/blob/master/test/test_Amphlett.py)
 
 
-## 6. 2026-10-19 实施补充：全球机型数据来源状态
+## 6. 2026-10-22 实施补充：制造商公开规格库与口径核验
 
-- 复核发现 12 条全球电堆机型对比记录没有逐字段登记公开规格书/测试报告 URL、版本和核验日期，原分类标题“实测参数对标”会造成来源已核验的误解。
-- 已将分类描述改为“机型参数整理稿 · 来源未逐条核验”，并给每张卡片增加“来源待核验”警示；`assets/js/reference-data.js` 也明确记录这组数据当前不应视为厂家实测数据或工程设计输入。
-- 未凭猜测改写任何厂家数字。下一步逐字段补齐厂商规格书、公开测试报告和适用工况，再将有证据的字段逐个转为已核验状态。
-- 新增 `scripts/validate-global-database.cjs` 并加入 standalone CI，检查 12 条记录都保持未核验提示，不允许界面重新使用“实测参数对标”的误导性描述。
-
+- 首页公开规格库目前仅保留 5 条可追溯的制造商产品记录：Toyota Mirai TFCS、Hyundai NEXO (2018)、Hyundai All-New NEXO、Ballard FCmove-HD+、REFIRE PRISMA XII+。
+- 字段来源：Toyota 2023 Mirai 官方 eBrochure；Hyundai 2018 NEXO 技术规格；Hyundai 2025 All-New NEXO 官方新闻稿；Ballard FCmove 官方产品规格页；REFIRE PRISMA XII+ 官方产品资料。每条记录直接链接到原厂资料。
+- 现有数据按产品边界分别标记为车辆燃料电池系统、燃料电池堆、重型车辆模块或完整燃料电池系统。gross stack output、net system output、rated module power 和 rated system power 不合并排名。
+- 仅在原厂资料明确披露时填入单电池数、体积功率密度、重量功率密度、模块质量或系统寿命。未披露字段保留为空，不通过额定功率和外形尺寸反推，也不填入第三方估算。
+- 这些记录是制造商发布的规格，不等于本项目台架实测、独立第三方验证、寿命实测或设计输入。模型标定仍需单独的测试报告、工况、单位、测量不确定度和复现数据。
+- 已更新 `scripts/validate-global-database.cjs` 与浏览器验收，校验 5 条数据、来源 URL、gross/net 口径、模块/系统边界及关键字段，不允许恢复旧版无出处的“全球领先”或虚构同步统计。
 
 ## 7. 扩展开源对标：模型计算与多尺度验证
 
