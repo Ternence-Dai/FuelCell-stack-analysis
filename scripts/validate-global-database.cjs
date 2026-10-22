@@ -45,8 +45,9 @@ assert.ok(css.includes('.fc-reference-card{') &&
   css.includes('.fc-reference-metrics{') &&
   css.includes('.fc-reference-disclaimer{'),
   'manufacturer reference section must have its own structured workspace presentation');
-assert.ok(!app.includes('source-pending') &&
-  !app.includes("desc:'机型参数整理稿 · 来源未逐条核验"),
-  'removed pending-source global placeholders must not remain in active UI code');
+assert.ok(!block.includes("evidenceStatus:'source-pending'") &&
+  !app.includes("desc:'机型参数整理稿 · 来源未逐条核验") &&
+  app.includes("evidenceStatus:'source-verified'"),
+  'the public manufacturer reference set must be verified while generic parameter-library provenance warnings remain available');
 
 console.log('Global stack database provenance checks passed.');
