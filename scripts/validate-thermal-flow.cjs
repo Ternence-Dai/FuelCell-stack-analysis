@@ -4,9 +4,9 @@ const assert = require('node:assert/strict');
 const app = fs.readFileSync('assets/js/legacy-app.js', 'utf8');
 const domain = fs.readFileSync('src/domain/index.js', 'utf8');
 const html = fs.readFileSync('index.html', 'utf8');
-const productCss = fs.readFileSync('assets/css/product-system.css', 'utf8');
-assert.ok(html.includes('product-system.css?v=20261019-v8'),
-  'HyHub must load the current V8 engineering workspace stylesheet');
+const productCss = fs.readFileSync('assets/css/workspace.css', 'utf8');
+assert.ok(html.includes('workspace.css?v=20261022-unified-v2'),
+  'HyHub must load the current unified engineering workspace stylesheet');
 assert.ok(html.includes('viewport-fit=cover') && !html.includes('user-scalable=no'),
   'HyHub must retain mobile safe-area support and browser zoom accessibility');
 assert.ok(productCss.includes('HyHub V3') || productCss.includes('visible product interface refresh'),
@@ -20,8 +20,8 @@ assert.ok(productCss.includes('@media(max-width:760px)') &&
           productCss.includes('@media(max-width:420px)'),
   'HyHub V3 must include tablet/mobile responsive layouts');
 
-assert.ok(html.includes('product-system.css?v=20261019-v8'),
-  'HyHub must load the cache-busted V4 dashboard and parameter-library theme');
+assert.ok(html.includes('workspace.css?v=20261022-unified-v2'),
+  'HyHub must load the cache-busted dashboard and parameter-library theme');
 for (const selector of [
   '.lib-categories-grid{', '.lib-cat{', '.lib-cat-head{', '.lib-cat-body{',
   '.lib-cat.open .lib-cat-body{', '.lib-item{', '.hyhub-intro{'
