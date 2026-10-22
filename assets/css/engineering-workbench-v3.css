@@ -112,7 +112,7 @@ body[data-workspace="fuelcell"] .fc-parameter-inspector .param-item-body .pslide
 body[data-workspace="fuelcell"] .fc-parameter-inspector .param-item-body .pnum{width:67px;min-width:0;padding:5px;border:1px solid #dbe5e9;border-radius:5px;background:#fbfcfd;color:#27556b;font-size:9px}
 body[data-workspace="fuelcell"] .fc-reference-count{display:inline-flex;vertical-align:middle;margin-left:5px;padding:3px 6px;border-radius:4px;background:#edf5f7;color:#648592;font-size:8px}
 body[data-workspace="fuelcell"] .fc-reference-table-wrap{max-width:100%;overflow:auto;border:1px solid #e3ebef;border-radius:7px}
-body[data-workspace="fuelcell"] .fc-reference-table{width:100%;min-width:620px;border-collapse:collapse;font-size:9px}
+body[data-workspace="fuelcell"] .fc-reference-table{width:100%;min-width:1120px;border-collapse:collapse;font-size:9px}
 body[data-workspace="fuelcell"] .fc-reference-table th,body[data-workspace="fuelcell"] .fc-reference-table td{padding:8px;border-bottom:1px solid #e8eef1;text-align:left;vertical-align:top}
 body[data-workspace="fuelcell"] .fc-reference-table th{background:#f4f8fa;color:#6d8491;font-size:8px;font-weight:800;white-space:nowrap}
 body[data-workspace="fuelcell"] .fc-reference-table td{color:#456476}
