@@ -3,7 +3,10 @@
   'use strict';
   function mount() {
     const target = document.getElementById('content');
-    if (!target || typeof window.renderEngineeringWorkbench !== 'function') return false;
+    // The legacy router owns every non-dashboard view. Delayed startup/load
+    // callbacks may only mount the cockpit while the dashboard is active.
+    if (!target || typeof state === 'undefined' || state.view !== 'dashboard' ||
+        typeof window.renderEngineeringWorkbench !== 'function') return false;
     const html = window.renderEngineeringWorkbench();
     if (!html) return false;
     target.innerHTML = html;
