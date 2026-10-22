@@ -78,6 +78,48 @@ const { chromium } = require('playwright');
     if (!firstKeyboardTarget) throw new Error('Skip navigation is not the first keyboard focus target');
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => document.activeElement?.getAttribute('id') === 'main-content');
+
+    const commandTrigger = page.locator('.w5-command-trigger');
+    if (await commandTrigger.count() !== 1) throw new Error('Quick navigation trigger is missing');
+    await commandTrigger.click();
+    const commandDialog = page.locator('#w5-command-dialog');
+    await commandDialog.waitFor({ state: 'visible' });
+    const commandSemantics = await page.evaluate(() => {
+      const trigger = document.querySelector('.w5-command-trigger');
+      const dialog = document.querySelector('#w5-command-dialog');
+      const input = document.querySelector('#w5-command-input');
+      const list = document.querySelector('#w5-command-list');
+      const activeId = input?.getAttribute('aria-activedescendant');
+      return {
+        triggerControls: trigger?.getAttribute('aria-controls'),
+        dialogRole: dialog?.getAttribute('role'),
+        dialogLabelledBy: dialog?.getAttribute('aria-labelledby'),
+        inputControls: input?.getAttribute('aria-controls'),
+        listRole: list?.getAttribute('role'),
+        activeExists: !!activeId && !!document.getElementById(activeId),
+        focusInside: !!dialog?.contains(document.activeElement)
+      };
+    });
+    if (commandSemantics.triggerControls !== 'w5-command-dialog' ||
+        commandSemantics.dialogRole !== 'dialog' || !commandSemantics.dialogLabelledBy ||
+        commandSemantics.inputControls !== 'w5-command-list' || commandSemantics.listRole !== 'listbox' ||
+        !commandSemantics.activeExists || !commandSemantics.focusInside) {
+      throw new Error('Quick navigation dialog semantics or initial focus failed: ' + JSON.stringify(commandSemantics));
+    }
+    await page.locator('#w5-command-input').focus();
+    await page.keyboard.press('Tab');
+    if (!(await page.evaluate(() => document.activeElement?.classList.contains('w5-command-close')))) {
+      throw new Error('Quick navigation Tab sequence did not remain within the modal');
+    }
+    await page.keyboard.press('Shift+Tab');
+    if (await page.locator('#w5-command-input').evaluate(node => document.activeElement !== node)) {
+      throw new Error('Quick navigation Shift+Tab sequence did not remain within the modal');
+    }
+    await page.keyboard.press('Escape');
+    if (await page.locator('#w5-command-dialog').isVisible() ||
+        !(await page.evaluate(() => document.activeElement?.classList.contains('w5-command-trigger')))) {
+      throw new Error('Quick navigation close did not restore focus to its trigger');
+    }
     await page.waitForSelector('#content .fc-engineering-workspace .fc-reference-table tbody tr');
     const referenceEvidence = await page.evaluate(() => ({
       cards: [...document.querySelectorAll('#content .fc-reference-table tbody tr')].map(row => ({
