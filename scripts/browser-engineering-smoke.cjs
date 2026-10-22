@@ -54,9 +54,19 @@ const { chromium } = require('playwright');
       throw new Error('Simulation parameter slider did not update its visible value');
     }
 
+    const waitForSimulationChartPaint = () => page.waitForFunction(() => {
+      const canvas = document.querySelector('#simResult canvas');
+      if (!canvas || canvas.width < 200 || canvas.height < 100) return false;
+      const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+      let inkedPixels = 0;
+      for (let i = 3; i < pixels.length; i += 4) if (pixels[i] > 0) inkedPixels += 1;
+      return inkedPixels > 100;
+    }, null, { timeout: 10000 });
+
     // Prove that an edited operating point is consumed by the solver output, not just echoed in its label.
     const adjustedPower = Number(oldValue) + 5;
     await page.locator('#content [data-action="sim-run"]').click();
+    await waitForSimulationChartPaint();
     await page.waitForFunction(expectedPeak => {
       const result = document.querySelector('#simResult')?.innerText || '';
       return result.includes('假设瞬态峰值') && result.includes(String(expectedPeak));
@@ -100,10 +110,7 @@ const { chromium } = require('playwright');
     for (const [modeId, expectedLabel] of simulationModes) {
       await page.locator('#content .mode[data-id="' + modeId + '"]').click();
       await page.locator('#content [data-action="sim-run"]').click();
-      await page.waitForFunction(() => {
-        const canvas = document.querySelector('#simResult canvas');
-        return !!canvas && canvas.width >= 200 && canvas.height >= 100;
-      });
+      await waitForSimulationChartPaint();
       const evidence = await page.evaluate(() => {
         const root = document.querySelector('#simResult');
         const canvases = [...(root?.querySelectorAll('canvas') || [])];
