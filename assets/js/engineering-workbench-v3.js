@@ -128,7 +128,7 @@
           '<div class="fc-section-heading"><div><span class="fc-panel-kicker">PUBLISHED REFERENCE DATA</span>' +
           '<h3 id="fc-reference-title">制造商公开规格库 <span class="fc-reference-count">' + GLOBAL_DB.length + ' 条</span></h3>' +
           '<p>只展示公开来源明确披露的字段；净功率、堆功率与系统边界不混合排名。</p></div><span class="fc-source-chip">逐条来源链接</span></div>' +
-          '<div class="fc-reference-table-wrap"><table class="fc-reference-table"><thead><tr><th>产品 / 来源</th><th>系统边界</th><th>公开功率</th><th>电池数量</th><th>体积功率密度</th><th>来源</th></tr></thead>' +
+          '<div class="fc-reference-table-wrap"><table class="fc-reference-table"><thead><tr><th>产品 / 来源</th><th>产品边界</th><th>公开功率口径</th><th>净系统输出</th><th>单电池数</th><th>体积功率密度</th><th>重量功率密度</th><th>质量 / 寿命</th><th>原厂来源</th></tr></thead>' +
           '<tbody>' + referenceRows() + '</tbody></table></div>' +
           '<p class="fc-reference-disclaimer">比较前请核对 gross / net、额定工况、系统边界与测试标准。来源未披露的参数保持空缺，不推算、不用于模型校准。</p>' +
         '</section>' +
@@ -201,10 +201,19 @@
 
   function referenceRows() {
     return GLOBAL_DB.map(function (item) {
+      const power = safe(item.p) + ' kW' + (item.powerLabel ? ' · ' + safe(item.powerLabel) : '');
+      const netPower = item.netPower == null ? '未披露' :
+        safe(item.netPower) + ' kW' + (item.netPowerLabel ? ' · ' + safe(item.netPowerLabel) : '');
+      const massLife = [
+        item.massNote || (item.systemMassKg == null ? '' : safe(item.systemMassKg) + ' kg'),
+        item.serviceLifeHours == null ? '' : safe(item.serviceLifeHours) + ' h（厂商标称系统寿命）'
+      ].filter(Boolean).join(' / ') || '未披露';
       return '<tr><td><strong>' + safe(item.n) + '</strong><small>' + safe(item.sourceDate) + '</small></td>' +
-        '<td>' + safe(item.productScope) + '</td><td>' + safe(item.p) + ' kW</td>' +
-        '<td>' + (item.N ? safe(item.N) + ' 片' : '未披露') + '</td>' +
-        '<td>' + (item.vpd ? safe(item.vpd) + ' kW/L' : '未披露') + '</td>' +
+        '<td>' + safe(item.productScope) + '</td><td>' + power + '</td><td>' + netPower + '</td>' +
+        '<td>' + (item.N == null ? '未披露' : safe(item.N) + ' 片') + '</td>' +
+        '<td>' + (item.vpd == null ? '未披露' : safe(item.vpd) + ' kW/L') + '</td>' +
+        '<td>' + (item.sp == null ? '未披露' : safe(item.sp) + ' kW/kg') + '</td>' +
+        '<td>' + safe(massLife) + '</td>' +
         '<td><a href="' + safe(item.sourceUrl) + '" target="_blank" rel="noopener noreferrer">' +
         safe(item.sourceLabel) + ' ↗</a></td></tr>';
     }).join('');
