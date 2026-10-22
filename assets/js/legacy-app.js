@@ -716,7 +716,8 @@ function navigate(id){
 function renderView(){
   const c = $('#content');
   const V = {
-    dashboard: viewDashboard, model: viewModel, sim: viewSim, calc: viewCalc,
+    dashboard: typeof window.renderEngineeringWorkbench === 'function' ? window.renderEngineeringWorkbench : viewDashboard,
+    model: viewModel, sim: viewSim, calc: viewCalc,
     lib: viewLib, monitor: viewMonitor, data: viewData, kb: viewKb,
   };
   c.innerHTML = (V[state.view] || (() => ''))();
