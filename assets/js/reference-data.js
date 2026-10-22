@@ -1,48 +1,73 @@
-/* Reference datasets: validate source provenance before changing technical values. */
-/* ================= 全球电堆数据库 ================= */
-/* The following comparison figures currently lack per-field public source records and are labeled source-pending in the UI. Do not use as verified manufacturer measurements or design inputs. */
+/* Manufacturer reference data: published OEM/product specifications only.
+   Missing fields remain null; stack, system and module boundaries are never mixed. */
 const GLOBAL_DB = [
   {
     n:'Toyota Mirai (2023) · TFCS',
     r:'Toyota Motor North America',
-    productScope:'整车燃料电池系统（TFCS）',
-    p:128, netPower:null, N:330, vpd:null, sp:null,
+    productScope:'车辆燃料电池系统（TFCS）',
+    p:128, powerLabel:'最大输出功率（原厂规格）',
+    netPower:null, N:330, vpd:4.4, sp:5.4,
+    systemMassKg:32, massNote:'32 kg · 原厂 TFCS 规格',
+    serviceLifeHours:null,
     sourceLabel:'2023 Mirai eBrochure',
     sourceDate:'2023',
     sourceUrl:'https://www.toyota.com/content/dam/toyota/brochures/pdf/2023/mirai_ebrochure.pdf',
-    note:'制造商规格列出 TFCS 最大输出 128 kW、330 个单电池。该数据属于车辆燃料电池系统规格，不是独立台架实测电堆报告。'
+    note:'Toyota 2023 Mirai 官方规格列出 128 kW、330 片、4.4 kW/L 与 5.4 kW/kg。这里按原厂 TFCS 规格展示；未将其改写为独立电堆台架实测数据。'
   },
   {
     n:'Hyundai NEXO (2018)',
     r:'Hyundai Motor Europe',
-    productScope:'车辆燃料电池电堆',
-    p:95, netPower:null, N:440, vpd:3.1, sp:null,
+    productScope:'车辆燃料电池堆',
+    p:95, powerLabel:'燃料电池堆输出功率',
+    netPower:null, N:440, vpd:3.1, sp:null,
+    systemMassKg:null, massNote:null,
+    serviceLifeHours:null,
     sourceLabel:'NEXO Technical Specifications',
     sourceDate:'2018',
     sourceUrl:'https://www.hyundai.news/newsroom/dam/eu/press-kits/20180709_nexo/hyundai_nexo_technical_specifications.pdf',
-    note:'制造商规格列出燃料电池电堆输出 95 kW、堆体积功率密度 3.1 kW/L、440 个单电池。整车 135 kW 系统输出还包含 40 kW 电池，不能当作电堆输出。'
+    note:'Hyundai 官方技术规格列出燃料电池堆 95 kW、440 个单电池和 3.1 kW/L；整车 135 kW 系统输出另含 40 kW 电池，不作为电堆功率。'
   },
   {
     n:'Hyundai All-New NEXO',
     r:'Hyundai Motor Group',
-    productScope:'新一代车辆燃料电池系统',
-    p:110, netPower:94, N:null, vpd:null, sp:null,
+    productScope:'新一代车辆燃料电池堆 / 系统',
+    p:110, powerLabel:'最大总输出（Gross）',
+    netPower:94, netPowerLabel:'净燃料电池系统输出',
+    N:null, vpd:null, sp:null,
+    systemMassKg:null, massNote:null,
+    serviceLifeHours:null,
     sourceLabel:'All-New NEXO powertrain announcement',
     sourceDate:'2025',
     sourceUrl:'https://www.hyundai.com/worldwide/en/newsroom/detail/hyundai-motor%E2%80%99s-all-new-nexo-sets-new-standards-in-hydrogen-technology-and-electrified-mobility-0000001056.html',
-    note:'制造商公布燃料电池最大总输出 110 kW、净系统输出 94 kW。该值是系统边界下的 gross / net 规格，不与裸堆输出混为一谈。'
+    note:'Hyundai 官方公告分别列出 110 kW 最大总输出（Gross）和 94 kW 净燃料电池系统输出；两个口径分别展示，不相互替代。'
   },
   {
     n:'Ballard FCmove-HD+',
     r:'Ballard Power Systems',
-    productScope:'重型车辆燃料电池模块',
-    p:120, netPower:null, N:null, vpd:null, sp:null,
+    productScope:'重型车辆燃料电池模块（FCmove-HD+）',
+    p:120, powerLabel:'额定模块功率',
+    netPower:null, N:null, vpd:null, sp:null,
+    systemMassKg:null, massNote:'249 kg（engine bay）/ 287 kg（rooftop）',
+    serviceLifeHours:null,
     sourceLabel:'Ballard FCmove product specifications',
-    sourceDate:'Manufacturer product page',
+    sourceDate:'Manufacturer product page · accessed 2026-10-22',
     sourceUrl:'https://www.ballard.com/fcmove/',
-    note:'制造商产品页列出 FCmove-HD+ 额定功率 120 kW、堆芯型号 FCgen-LCS。该值是完整燃料电池模块规格，不等同于裸电堆；公开页面未列出的指标不作推算。'
+    note:'Ballard 官方产品页列出 FCmove-HD+ 额定功率 120 kW、质量 249 kg（发动机舱）/ 287 kg（车顶）及 FCgen-LCS 堆芯型号。该数据属于完整模块，不是裸堆质量。'
+  },
+  {
+    n:'REFIRE PRISMA XII+',
+    r:'REFIRE',
+    productScope:'重型车辆燃料电池系统',
+    p:117, powerLabel:'额定系统功率',
+    netPower:null, N:null, vpd:null, sp:null,
+    systemMassKg:278, massNote:'278 kg · 原厂系统质量',
+    serviceLifeHours:25000,
+    sourceLabel:'PRISMA XII+ official product datasheet',
+    sourceDate:'2025-03-19',
+    sourceUrl:'https://cdn-global.refire.com/content/media/2024/05/PRISMA-12_20250319.pdf',
+    note:'REFIRE 官方产品资料列出 117 kW 额定功率、278 kg 系统质量、25,000 h 系统寿命、58% 峰值效率和 42% 额定效率；寿命为厂商标称值，不表示独立耐久试验验证。'
   }
-]
+];
 
 /* ================= 知识库 ================= */
 const KB_CATS = [
