@@ -57,6 +57,22 @@ const { chromium } = require('playwright');
     if (!firstKeyboardTarget) throw new Error('Skip navigation is not the first keyboard focus target');
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => document.activeElement?.getAttribute('id') === 'main-content');
+    await page.waitForSelector('#content .fc-reference-card');
+    const referenceEvidence = await page.evaluate(() => ({
+      cards: [...document.querySelectorAll('#content .fc-reference-card')].map(card => ({
+        title: card.querySelector('strong')?.textContent || '',
+        source: card.querySelector('a[href]')?.href || ''
+      })),
+      text: document.querySelector('#content')?.innerText || ''
+    }));
+    if (referenceEvidence.cards.length !== 4 ||
+        referenceEvidence.cards.some(card => !card.title || !/^https:\/\//.test(card.source)) ||
+        referenceEvidence.text.includes('全球领先体积功率密度') ||
+        referenceEvidence.text.includes('42,847') ||
+        referenceEvidence.text.includes('最近同步')) {
+      throw new Error('Manufacturer source-backed reference or demo-data provenance failed: ' + JSON.stringify(referenceEvidence));
+    }
+
     await page.waitForFunction(() => !!window.FuelCellDomain &&
       document.querySelector('#sideNav .nav-item[data-id="dashboard"]') &&
       document.querySelector('#autoGrid [data-live="Vc"]'));
