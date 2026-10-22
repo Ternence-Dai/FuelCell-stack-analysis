@@ -68,6 +68,18 @@ const { chromium } = require('playwright');
     if (dashboard.length < 10 || dashboard.some(value => value.trim() === '—')) {
       throw new Error('Dashboard did not render computed stack metrics: ' + JSON.stringify(dashboard));
     }
+    const energyFlow = await page.evaluate(() => {
+      const panel = document.querySelector('#content .fc-power-flow');
+      const required = ['mH2','Pstack','Vstack','I','Pnet','pCmp','pPump','pRecirc','pDcdc','Q','etaStack'];
+      const values = Object.fromEntries(required.map(key => [
+        key, panel?.querySelector('[data-live="' + key + '"]')?.textContent.trim() || ''
+      ]));
+      return { present: !!panel, heading: panel?.querySelector('h3')?.textContent || '',
+        populated: required.every(key => values[key] && values[key] !== '—'), values };
+    });
+    if (!energyFlow.present || !energyFlow.heading.includes('能量流') || !energyFlow.populated) {
+      throw new Error('Live stack energy-balance cockpit failed to render solver outputs: ' + JSON.stringify(energyFlow));
+    }
 
     await page.locator('#sideNav .nav-item[data-id="sim"]').click();
     await page.waitForSelector('#content .mode[data-id="dynamic"]');
