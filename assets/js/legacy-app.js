@@ -250,6 +250,29 @@ function solveSystem(){
   };
 }
 
+/* ================= 可行域极化曲线采样 ================= */
+function sampleFeasiblePolarizationCurve({
+  temperatureK, parameters, maxCurrentDensity = 3.0,
+  step = 0.05, minimumCellVoltage = 0.15
+}) {
+  const samples = [];
+  for (let currentDensity = 0.05; currentDensity <= maxCurrentDensity; currentDensity += step) {
+    let voltage;
+    try {
+      voltage = vcell(currentDensity, temperatureK, parameters);
+    } catch (error) {
+      // The domain solver deliberately rejects negative cell voltage. Stop the
+      // visualization at that physical boundary, but never hide other failures.
+      if (error && error.name === 'RangeError' &&
+          error.message === 'polarization losses exceed the reversible cell voltage') break;
+      throw error;
+    }
+    if (voltage < minimumCellVoltage) break;
+    samples.push([currentDensity, voltage]);
+  }
+  return samples;
+}
+
 /* ================= 参数组 ================= */
 const PARAM_GROUPS = [
   { id:'struct', ico:'▤', name:'电堆结构与规格', desc:'额定功率、片数、有效面积、板厚、封装压缩', items:[
@@ -1414,12 +1437,14 @@ function runSim(){
   let html = '';
 
   if(state.simMode === 'steady'){
-    const data = [];
-    for(let i = 0.05; i <= 3.0; i += 0.05){
-      const v = vcell(i, T_K, { N:P.N, area:P.area, pH2:P.pH2, pAir:P.pAir, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
-      if(v < 0.15) break;
-      data.push([i, v]);
-    }
+    const curveParameters = {
+      N:P.N, area:P.area, pH2:P.pH2, pAir:P.pAir,
+      R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n
+    };
+    const data = sampleFeasiblePolarizationCurve({
+      temperatureK:T_K, parameters:curveParameters,
+      maxCurrentDensity:3.0, step:0.05, minimumCellVoltage:0.15
+    });
     const d2 = data.filter(d => d[0] <= 2.5).map(d => [d[0], d[1]*d[0]*1000]);
     const maxPD = Math.max(...d2.map(d => d[1]), 1);
     const effData = data.filter(d => d[0] <= 2.5).map(d => [d[0], d[1]/E_IDEAL*100]);
@@ -1648,14 +1673,16 @@ function runSim(){
     });
   }
   else {
+    const curveParameters = {
+      N:P.N, area:P.area, pH2:P.pH2, pAir:P.pAir,
+      R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n
+    };
     const series = [40, 60, 80, 95].map((tempC, idx) => {
-      const d = [];
       const T2 = tempC + 273.15;
-      for(let i = 0.05; i <= 3.0; i += 0.07){
-        const v = vcell(i, T2, { N:P.N, area:P.area, pH2:P.pH2, pAir:P.pAir, R:P.R, Aact:P.Aact, i0:P.i0, m:P.m, n:P.n });
-        if(v < 0.12) break;
-        d.push([i, v]);
-      }
+      const d = sampleFeasiblePolarizationCurve({
+        temperatureK:T2, parameters:curveParameters,
+        maxCurrentDensity:3.0, step:0.07, minimumCellVoltage:0.12
+      });
       return { data:d, color:['#22d3ee','#00d48a','#0a84ff','#ff9f0a'][idx] };
     });
     const referenceCurve = series[2].data;
