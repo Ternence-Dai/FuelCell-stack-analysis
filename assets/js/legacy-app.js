@@ -764,6 +764,38 @@ function viewDashboard(){
         </div>`).join('')}
     </div>
   </div>
+  <section class="fc-power-flow" aria-label="电堆能量与辅机功率流">
+    <div class="fc-power-flow__head">
+      <div><span class="fc-power-flow__eyebrow">SYSTEM ENERGY BALANCE</span><h3>电堆能量流与辅机负载</h3>
+      <p>由当前参数求解结果生成；电功率平衡为电堆输出减去辅机功耗，产热按当前电堆效率估算。</p></div>
+      <span class="fc-power-flow__source">MODEL-DERIVED · LIVE SOLVER</span>
+    </div>
+    <div class="fc-power-flow__track">
+      <article class="fc-flow-node fc-flow-reactants">
+        <span class="fc-flow-label">反应物供给</span><strong>H₂ / Air</strong>
+        <div class="fc-flow-value" data-live="mH2">—<small>kg H₂ / h</small></div>
+        <small>氢气进料模型值</small>
+      </article>
+      <div class="fc-flow-connector" aria-hidden="true"><i></i><span>电化学反应</span></div>
+      <article class="fc-flow-node fc-flow-stack">
+        <span class="fc-flow-label">STACK · 电堆</span><strong class="fc-flow-primary" data-live="Pstack">—<small>kW</small></strong>
+        <div class="fc-flow-pair"><span>电堆电压 <b data-live="Vstack">—<small>V</small></b></span><span>电堆电流 <b data-live="I">—<small>A</small></b></span></div>
+      </article>
+      <div class="fc-flow-connector" aria-hidden="true"><i></i><span>功率分配</span></div>
+      <article class="fc-flow-node fc-flow-output">
+        <span class="fc-flow-label">净电功率 · 可用输出</span><strong class="fc-flow-primary" data-live="Pnet">—<small>kW</small></strong>
+        <small>扣除压缩机、泵、氢循环与 DC-DC 损耗</small>
+      </article>
+    </div>
+    <div class="fc-flow-losses">
+      <div class="fc-flow-loss"><span>空压机</span><b data-live="pCmp">—<small>kW</small></b></div>
+      <div class="fc-flow-loss"><span>冷却水泵</span><b data-live="pPump">—<small>kW</small></b></div>
+      <div class="fc-flow-loss"><span>氢循环</span><b data-live="pRecirc">—<small>kW</small></b></div>
+      <div class="fc-flow-loss"><span>DC-DC 损耗</span><b data-live="pDcdc">—<small>kW</small></b></div>
+      <div class="fc-flow-loss fc-flow-heat"><span>电堆产热估算</span><b data-live="Q">—<small>kW</small></b></div>
+      <div class="fc-flow-loss fc-flow-eff"><span>电堆效率</span><b data-live="etaStack">—<small>%</small></b></div>
+    </div>
+  </section>
   <section class="dashboard-command" aria-label="工程工作流快捷入口">
     <div class="dashboard-command-copy">
       <div class="eyebrow">ENGINEERING WORKFLOW</div>
@@ -1054,6 +1086,8 @@ function updateLiveValues(){
   set('mH2', r.mH2, 2); set('gkwh', r.gkwh, 1);
   set('pBop', r.pBop, 2); set('Q', r.Q, 1);
   set('Pnet', r.Pnet, 1); set('Pstack', r.Pstack, 1);
+  set('pCmp', r.pCmp, 2); set('pPump', r.pPump, 2);
+  set('pRecirc', r.pRecirc, 2); set('pDcdc', r.pDcdc, 2);
   set('lamH2', r.lamH2, 3); set('lamAir', r.lamAir, 2);
   set('Vstack', r.Vstack, 0); set('I', r.I, 0);
   set('flow', r.flow, 0); set('vpd', r.vpd, 2); set('sp', r.sp, 2);
