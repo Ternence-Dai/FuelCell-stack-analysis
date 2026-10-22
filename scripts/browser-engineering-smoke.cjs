@@ -86,10 +86,16 @@ const { chromium } = require('playwright');
       })),
       text: document.querySelector('#content')?.innerText || ''
     }));
-    if (referenceEvidence.cards.length !== 4 ||
+    if (referenceEvidence.cards.length !== 5 ||
         referenceEvidence.cards.some(card => !card.title || !/^https:\/\//.test(card.source)) ||
         referenceEvidence.text.includes('全球领先体积功率密度') ||
         referenceEvidence.text.includes('42,847') ||
+        !referenceEvidence.text.includes('4.4 kW/L') ||
+        !referenceEvidence.text.includes('5.4 kW/kg') ||
+        !referenceEvidence.text.includes('110 kW') ||
+        !referenceEvidence.text.includes('94 kW') ||
+        !referenceEvidence.text.includes('117 kW') ||
+        !referenceEvidence.text.includes('25,000 h') ||
         referenceEvidence.text.includes('最近同步')) {
       throw new Error('Manufacturer source-backed reference or demo-data provenance failed: ' + JSON.stringify(referenceEvidence));
     }
