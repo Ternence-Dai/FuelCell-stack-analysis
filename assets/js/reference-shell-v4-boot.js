@@ -11,8 +11,10 @@
     const slider = document.getElementById('pSlider');
     if (slider) {
       slider.addEventListener('input', function () {
-        if (window.state && window.state.params) window.state.params.stackPower = Number(this.value);
-        mount();
+        const nextPower = Number(this.value);
+        if (typeof state !== 'undefined' && state.params) state.params.stackPower = nextPower;
+        if (typeof syncTopPower === 'function') syncTopPower(nextPower);
+        if (typeof updateLiveValues === 'function') updateLiveValues();
       });
     }
     return true;
