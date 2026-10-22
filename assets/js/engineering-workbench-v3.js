@@ -17,7 +17,7 @@
       '<small>' + item[3] + '</small></article>';
   }
 
-  window.viewDashboard = function () {
+  window.renderEngineeringWorkbench = function () {
     const result = solveSystem();
     const target = Number(state.params.stackPower);
     const sliderPct = (target - 10) / 390 * 100;
