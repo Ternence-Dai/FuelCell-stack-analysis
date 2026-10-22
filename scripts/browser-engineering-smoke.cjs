@@ -18,7 +18,7 @@ const { chromium } = require('playwright');
     await page.waitForTimeout(250);
     const cockpitBootstrap = await page.evaluate(() => ({
       appScript: [...document.scripts].some(node => node.src.includes('engineering-workbench-v3.js')),
-      scriptLoaded: typeof window.viewDashboard === 'function',
+      scriptLoaded: typeof window.renderEngineeringWorkbench === 'function',
       navigateAvailable: typeof window.navigate === 'function',
       dashboardRoot: !!document.querySelector('#content .fc-engineering-workspace'),
       pageTitle: document.querySelector('#pageTitle')?.textContent || '',
