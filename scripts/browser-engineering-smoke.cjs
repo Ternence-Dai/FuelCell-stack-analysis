@@ -15,6 +15,19 @@ const { chromium } = require('playwright');
 
   try {
     await page.goto('http://127.0.0.1:4173/', { waitUntil: 'networkidle', timeout: 30000 });
+    await page.waitForTimeout(250);
+    const cockpitBootstrap = await page.evaluate(() => ({
+      appScript: [...document.scripts].some(node => node.src.includes('engineering-workbench-v3.js')),
+      scriptLoaded: typeof window.viewDashboard === 'function',
+      navigateAvailable: typeof window.navigate === 'function',
+      dashboardRoot: !!document.querySelector('#content .fc-engineering-workspace'),
+      pageTitle: document.querySelector('#pageTitle')?.textContent || '',
+      contentStart: document.querySelector('#content')?.innerText.slice(0,240) || ''
+    }));
+    if (!cockpitBootstrap.appScript || !cockpitBootstrap.scriptLoaded || !cockpitBootstrap.navigateAvailable ||
+        !cockpitBootstrap.dashboardRoot) {
+      throw new Error('Engineering cockpit bootstrap failed: ' + JSON.stringify({state:cockpitBootstrap,pageErrors}));
+    }
     const referenceStylesheet = page.locator('link[rel="stylesheet"][href*="workspace.css"]');
     if (await referenceStylesheet.count() !== 1) throw new Error('Reference engineering workbench stylesheet is not linked');
     const referenceCssResponse = await page.request.get(await referenceStylesheet.evaluate(node => node.href));
