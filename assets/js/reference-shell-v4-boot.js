@@ -19,9 +19,14 @@
     }
     return true;
   }
-  function scheduleMount() {
-    window.setTimeout(mount, 0);
-    window.setTimeout(mount, 120);
+  function scheduleMount(attempt) {
+    const tries = Number(attempt) || 0;
+    if (window.FuelCellDomain && typeof window.renderEngineeringWorkbench === 'function') {
+      window.setTimeout(mount, 0);
+      window.setTimeout(mount, 120);
+      return;
+    }
+    if (tries < 120) window.setTimeout(() => scheduleMount(tries + 1), 50);
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', scheduleMount, { once: true });
