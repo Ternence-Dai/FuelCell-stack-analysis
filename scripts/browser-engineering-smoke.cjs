@@ -1,6 +1,7 @@
 'use strict';
 
 const { chromium } = require('playwright');
+const fs = require('node:fs');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -178,6 +179,110 @@ const { chromium } = require('playwright');
       throw new Error('FuelCell product-level engineering workbench structure or inspector geometry failed: ' +
         JSON.stringify(engineeringWorkbench));
     }
+
+
+    const scenarioPanel = page.locator('#content .fc-scenario-compare');
+    if (await scenarioPanel.count() !== 1 ||
+        !(await scenarioPanel.innerText()).includes('工况方案对比') ||
+        !(await scenarioPanel.innerText()).includes('本机快照')) {
+      throw new Error('Engineering scenario comparison workspace did not mount with its local-data boundary');
+    }
+    await page.locator('#pSlider').evaluate(node => {
+      node.value = '120';
+      node.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.waitForFunction(() => Number(document.querySelector('#pNum')?.textContent.trim()) === 120);
+    await page.locator('#fcScenarioName').fill('120 kW 基准方案 A');
+    // Let the debounced live-solver refresh complete while the draft is still in the field.
+    await page.waitForTimeout(80);
+    const preservedScenarioDraft = await page.locator('#fcScenarioName').inputValue();
+    if (preservedScenarioDraft !== '120 kW 基准方案 A') {
+      throw new Error('Live solver refresh erased the unsaved scenario name: ' + preservedScenarioDraft);
+    }
+    await page.locator('#fcScenarioSave').click();
+    await page.waitForSelector('.fc-scenario-saved-card');
+    const scenarioSaved = await page.evaluate(() => ({
+      name: document.querySelector('.fc-scenario-saved-card strong')?.textContent || '',
+      rowCount: document.querySelectorAll('.fc-scenario-table tbody tr').length,
+      currentPower: document.querySelector('[data-scenario-current="Pstack"]')?.textContent.trim() || '',
+      savedPower: document.querySelector('[data-scenario-saved]')?.textContent.trim() || '',
+      savedParameters: JSON.parse(localStorage.getItem('hyhub.scenario-compare.v1') || '{"scenarios":[]}').scenarios?.[0]?.params || null,
+      local: JSON.parse(localStorage.getItem('hyhub.scenario-compare.v1') || '{"scenarios":[]}').scenarios?.length || 0
+    }));
+    if (scenarioSaved.name !== '120 kW 基准方案 A' || scenarioSaved.rowCount !== 12 ||
+        !scenarioSaved.currentPower || !scenarioSaved.savedPower || scenarioSaved.local !== 1 ||
+        Number(scenarioSaved.savedParameters?.stackPower) !== 120) {
+      throw new Error('Scenario snapshot did not preserve a complete, locally stored set of solver outputs: ' +
+        JSON.stringify(scenarioSaved));
+    }
+    await page.locator('#pSlider').evaluate(node => {
+      node.value = '150';
+      node.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.waitForFunction(() => {
+      const current = document.querySelector('tr[data-metric="Pstack"] [data-scenario-current]')?.textContent || '';
+      const saved = document.querySelector('tr[data-metric="Pstack"] [data-scenario-saved]')?.textContent || '';
+      return current.includes('150.00') && saved.includes('120.00');
+    });
+    const contrast = await page.evaluate(() => ({
+      title: getComputedStyle(document.querySelector('#fc-scenario-title')).color,
+      rowLabel: getComputedStyle(document.querySelector('.fc-scenario-table tbody th')).color,
+      metricValue: getComputedStyle(document.querySelector('.fc-scenario-table tbody td[data-scenario-current]')).color
+    }));
+    if (contrast.title !== 'rgb(23, 59, 82)' ||
+        contrast.rowLabel !== 'rgb(62, 91, 107)' ||
+        contrast.metricValue !== 'rgb(8, 114, 126)') {
+      throw new Error('Scenario comparison foreground colors were overridden by the legacy theme: ' +
+        JSON.stringify(contrast));
+    }
+    fs.mkdirSync('artifacts', { recursive: true });
+    await page.evaluate(() => document.activeElement?.blur());
+    await page.locator('.fc-scenario-compare').screenshot({ path: 'artifacts/fuelcell-scenario-comparison-desktop.png' });
+    await page.setViewportSize({ width: 390, height: 844 });
+    const mobileScenarioLayout = await page.evaluate(() => {
+      const main = document.querySelector('.main')?.getBoundingClientRect();
+      const content = document.querySelector('#content')?.getBoundingClientRect();
+      const panel = document.querySelector('.fc-scenario-compare')?.getBoundingClientRect();
+      const table = document.querySelector('.fc-scenario-table-wrap');
+      const hint = document.querySelector('.fc-scenario-scroll-hint');
+      return { viewport: innerWidth, mainWidth: main?.width, contentWidth: content?.width,
+        panelLeft: panel?.left, panelRight: panel?.right, panelWidth: panel?.width,
+        tableClientWidth: table?.clientWidth, tableScrollWidth: table?.scrollWidth,
+        scrollHint: !!hint && getComputedStyle(hint).display !== 'none' };
+    });
+    if (!mobileScenarioLayout.mainWidth || mobileScenarioLayout.mainWidth < 380 ||
+        !mobileScenarioLayout.contentWidth || mobileScenarioLayout.contentWidth < 360 ||
+        mobileScenarioLayout.panelLeft < 0 || mobileScenarioLayout.panelRight > 391 ||
+        mobileScenarioLayout.panelWidth < 340 ||
+        mobileScenarioLayout.tableScrollWidth <= mobileScenarioLayout.tableClientWidth ||
+        !mobileScenarioLayout.scrollHint) {
+      throw new Error('Mobile scenario table does not expose its full comparison range: ' +
+        JSON.stringify(mobileScenarioLayout));
+    }
+    await page.evaluate(() => {
+      document.activeElement?.blur();
+      document.querySelector('.fc-scenario-table-wrap')?.scrollTo(0, 0);
+    });
+    await page.locator('.fc-scenario-compare').screenshot({ path: 'artifacts/fuelcell-scenario-comparison-mobile.png' });
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    const scenarioPowerBefore = await page.locator('[data-scenario-current="Pstack"]').textContent();
+    await page.locator('#pSlider').evaluate(node => {
+      node.value = String(Math.min(400, Number(node.value) + 9));
+      node.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.waitForFunction(previous => {
+      const cell = document.querySelector('[data-scenario-current="Pstack"]');
+      return !!cell && cell.textContent !== previous;
+    }, scenarioPowerBefore);
+    const savedPowerAfterEdit = await page.locator('[data-scenario-saved]').first().textContent();
+    if (savedPowerAfterEdit.trim() !== scenarioSaved.savedPower) {
+      throw new Error('Saved scenario snapshot changed when the live operating point was edited');
+    }
+    await page.locator('[data-scenario-action="remove"]').click();
+    await page.waitForFunction(() =>
+      !document.querySelector('.fc-scenario-saved-card') &&
+      JSON.parse(localStorage.getItem('hyhub.scenario-compare.v1') || '{"scenarios":[]}').scenarios.length === 0
+    );
 
     const oldTarget = Number(await page.locator('#pSlider').inputValue());
     await page.locator('#pSlider').evaluate((node, value) => {
