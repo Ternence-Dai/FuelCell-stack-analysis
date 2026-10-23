@@ -179,6 +179,47 @@ const { chromium } = require('playwright');
         JSON.stringify(engineeringWorkbench));
     }
 
+
+    const scenarioPanel = page.locator('#content .fc-scenario-compare');
+    if (await scenarioPanel.count() !== 1 ||
+        !(await scenarioPanel.innerText()).includes('工况方案对比') ||
+        !(await scenarioPanel.innerText()).includes('本机快照')) {
+      throw new Error('Engineering scenario comparison workspace did not mount with its local-data boundary');
+    }
+    await page.locator('#fcScenarioName').fill('低温对照 A');
+    await page.locator('#fcScenarioSave').click();
+    await page.waitForSelector('.fc-scenario-saved-card');
+    const scenarioSaved = await page.evaluate(() => ({
+      name: document.querySelector('.fc-scenario-saved-card strong')?.textContent || '',
+      rowCount: document.querySelectorAll('.fc-scenario-table tbody tr').length,
+      currentPower: document.querySelector('[data-scenario-current="Pstack"]')?.textContent.trim() || '',
+      savedPower: document.querySelector('[data-scenario-saved]')?.textContent.trim() || '',
+      local: JSON.parse(localStorage.getItem('hyhub.scenario-compare.v1') || '{"scenarios":[]}').scenarios?.length || 0
+    }));
+    if (scenarioSaved.name !== '低温对照 A' || scenarioSaved.rowCount !== 12 ||
+        !scenarioSaved.currentPower || !scenarioSaved.savedPower || scenarioSaved.local !== 1) {
+      throw new Error('Scenario snapshot did not preserve a complete, locally stored set of solver outputs: ' +
+        JSON.stringify(scenarioSaved));
+    }
+    const scenarioPowerBefore = await page.locator('[data-scenario-current="Pstack"]').textContent();
+    await page.locator('#pSlider').evaluate(node => {
+      node.value = String(Math.min(400, Number(node.value) + 9));
+      node.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.waitForFunction(previous => {
+      const cell = document.querySelector('[data-scenario-current="Pstack"]');
+      return !!cell && cell.textContent !== previous;
+    }, scenarioPowerBefore);
+    const savedPowerAfterEdit = await page.locator('[data-scenario-saved]').first().textContent();
+    if (savedPowerAfterEdit.trim() !== scenarioSaved.savedPower) {
+      throw new Error('Saved scenario snapshot changed when the live operating point was edited');
+    }
+    await page.locator('[data-scenario-action="remove"]').click();
+    await page.waitForFunction(() =>
+      !document.querySelector('.fc-scenario-saved-card') &&
+      JSON.parse(localStorage.getItem('hyhub.scenario-compare.v1') || '{"scenarios":[]}').scenarios.length === 0
+    );
+
     const oldTarget = Number(await page.locator('#pSlider').inputValue());
     await page.locator('#pSlider').evaluate((node, value) => {
       node.value = String(value);
