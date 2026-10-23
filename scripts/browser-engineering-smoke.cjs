@@ -214,8 +214,8 @@ const fs = require('node:fs');
       node.dispatchEvent(new Event('input', { bubbles: true }));
     });
     await page.waitForFunction(() => {
-      const current = document.querySelector('[data-scenario-current="Pstack"]')?.textContent || '';
-      const saved = document.querySelector('[data-scenario-saved]')?.textContent || '';
+      const current = document.querySelector('tr[data-metric="Pstack"] [data-scenario-current]')?.textContent || '';
+      const saved = document.querySelector('tr[data-metric="Pstack"] [data-scenario-saved]')?.textContent || '';
       return current.includes('150.00') && saved.includes('120.00');
     });
     const contrast = await page.evaluate(() => ({
