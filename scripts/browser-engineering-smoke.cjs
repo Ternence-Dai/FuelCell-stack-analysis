@@ -147,9 +147,47 @@ const fs = require('node:fs');
       document.querySelector('#sideNav .nav-item[data-id="dashboard"]') &&
       document.querySelector('#autoGrid [data-live="Vc"]'));
     const dashboard = await page.locator('#autoGrid [data-live]').allTextContents();
-    if (dashboard.length < 10 || dashboard.some(value => value.trim() === '—')) {
-      throw new Error('Dashboard did not render computed stack metrics: ' + JSON.stringify(dashboard));
+    if (dashboard.length !== 12 || dashboard.some(value => !value.trim() || value.trim() === '—')) {
+      throw new Error('Dashboard did not render all 12 computed stack metrics: ' + JSON.stringify(dashboard));
     }
+    const firstLiveValues = await page.evaluate(() => ({
+      stackPower:Number(document.querySelector('#pNum')?.textContent),
+      stackOutput:Number.parseFloat(document.querySelector('[data-live="Pstack"]')?.textContent || ''),
+      cellVoltage:Number.parseFloat(document.querySelector('[data-live="Vc"]')?.textContent || ''),
+      hydrogenFeed:Number.parseFloat(document.querySelector('[data-live="mH2"]')?.textContent || ''),
+      placeholderCount:[...document.querySelectorAll('#autoGrid [data-live]')].filter(node =>
+        node.textContent.trim() === '—' || !Number.isFinite(Number.parseFloat(node.textContent))
+      ).length
+    }));
+    if (!Number.isFinite(firstLiveValues.stackPower) ||
+        !Number.isFinite(firstLiveValues.stackOutput) || firstLiveValues.stackOutput <= 0 ||
+        !Number.isFinite(firstLiveValues.cellVoltage) || firstLiveValues.cellVoltage <= 0 ||
+        !Number.isFinite(firstLiveValues.hydrogenFeed) || firstLiveValues.hydrogenFeed <= 0 ||
+        firstLiveValues.placeholderCount !== 0) {
+      throw new Error('Reference shell did not initialize solver-backed dashboard output values: ' +
+        JSON.stringify(firstLiveValues));
+    }
+    const sliderBefore = await page.locator('#pSlider').inputValue();
+    const stackOutputBefore = firstLiveValues.stackOutput;
+    await page.evaluate(value => { window.__fuelcellPreviousOutput = value; }, stackOutputBefore);
+    const sliderNext = Number(sliderBefore) >= 390 ? Number(sliderBefore) - 10 : Number(sliderBefore) + 10;
+    await page.locator('#pSlider').evaluate((node, value) => {
+      node.value = String(value);
+      node.dispatchEvent(new Event('input',{bubbles:true}));
+    }, sliderNext);
+    await page.waitForFunction(expected => Number(document.querySelector('#pNum')?.textContent) === expected &&
+      Number.parseFloat(document.querySelector('[data-live="Pstack"]')?.textContent || '') > 0 &&
+      Number.parseFloat(document.querySelector('[data-live="Pstack"]')?.textContent || '') !== window.__fuelcellPreviousOutput,
+      sliderNext);
+    const changedStackOutput=await page.locator('[data-live="Pstack"]').first().innerText();
+    if (Number.parseFloat(changedStackOutput) === stackOutputBefore) {
+      throw new Error('Changing operating-point power did not recompute the visible stack output');
+    }
+    await page.locator('#pSlider').evaluate((node,value) => {
+      node.value=String(value);
+      node.dispatchEvent(new Event('input',{bubbles:true}));
+    },Number(sliderBefore));
+
 
     const engineeringWorkbench = await page.evaluate(() => {
       const root = document.querySelector('#content .fc-engineering-workspace');
