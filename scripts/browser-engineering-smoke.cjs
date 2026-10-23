@@ -203,9 +203,22 @@ const fs = require('node:fs');
         JSON.stringify(scenarioSaved));
     }
     fs.mkdirSync('artifacts', { recursive: true });
-    await page.screenshot({ path: 'artifacts/fuelcell-scenario-comparison-desktop.png', fullPage: true });
+    await page.locator('.fc-scenario-compare').screenshot({ path: 'artifacts/fuelcell-scenario-comparison-desktop.png' });
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.screenshot({ path: 'artifacts/fuelcell-scenario-comparison-mobile.png', fullPage: true });
+    const mobileScenarioLayout = await page.evaluate(() => {
+      const main = document.querySelector('.main')?.getBoundingClientRect();
+      const content = document.querySelector('#content')?.getBoundingClientRect();
+      const panel = document.querySelector('.fc-scenario-compare')?.getBoundingClientRect();
+      return { viewport: innerWidth, mainWidth: main?.width, contentWidth: content?.width,
+        panelLeft: panel?.left, panelRight: panel?.right, panelWidth: panel?.width };
+    });
+    if (!mobileScenarioLayout.mainWidth || mobileScenarioLayout.mainWidth < 380 ||
+        !mobileScenarioLayout.contentWidth || mobileScenarioLayout.contentWidth < 360 ||
+        mobileScenarioLayout.panelLeft < 0 || mobileScenarioLayout.panelRight > 391 ||
+        mobileScenarioLayout.panelWidth < 340) {
+      throw new Error('Mobile engineering workbench is clipped or not full-width: ' + JSON.stringify(mobileScenarioLayout));
+    }
+    await page.locator('.fc-scenario-compare').screenshot({ path: 'artifacts/fuelcell-scenario-comparison-mobile.png' });
     await page.setViewportSize({ width: 1440, height: 1000 });
     const scenarioPowerBefore = await page.locator('[data-scenario-current="Pstack"]').textContent();
     await page.locator('#pSlider').evaluate(node => {
