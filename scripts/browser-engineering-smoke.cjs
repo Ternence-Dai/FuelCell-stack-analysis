@@ -193,6 +193,12 @@ const fs = require('node:fs');
     });
     await page.waitForFunction(() => Number(document.querySelector('#pNum')?.textContent.trim()) === 120);
     await page.locator('#fcScenarioName').fill('120 kW 基准方案 A');
+    // Let the debounced live-solver refresh complete while the draft is still in the field.
+    await page.waitForTimeout(80);
+    const preservedScenarioDraft = await page.locator('#fcScenarioName').inputValue();
+    if (preservedScenarioDraft !== '120 kW 基准方案 A') {
+      throw new Error('Live solver refresh erased the unsaved scenario name: ' + preservedScenarioDraft);
+    }
     await page.locator('#fcScenarioSave').click();
     await page.waitForSelector('.fc-scenario-saved-card');
     const scenarioSaved = await page.evaluate(() => ({
