@@ -1,6 +1,7 @@
 'use strict';
 
 const { chromium } = require('playwright');
+const fs = require('node:fs');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -201,6 +202,11 @@ const { chromium } = require('playwright');
       throw new Error('Scenario snapshot did not preserve a complete, locally stored set of solver outputs: ' +
         JSON.stringify(scenarioSaved));
     }
+    fs.mkdirSync('artifacts', { recursive: true });
+    await page.screenshot({ path: 'artifacts/fuelcell-scenario-comparison-desktop.png', fullPage: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.screenshot({ path: 'artifacts/fuelcell-scenario-comparison-mobile.png', fullPage: true });
+    await page.setViewportSize({ width: 1440, height: 1000 });
     const scenarioPowerBefore = await page.locator('[data-scenario-current="Pstack"]').textContent();
     await page.locator('#pSlider').evaluate(node => {
       node.value = String(Math.min(400, Number(node.value) + 9));
