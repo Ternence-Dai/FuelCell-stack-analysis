@@ -113,7 +113,8 @@
       return '<tr data-metric="' + metric.key + '"><th scope="row">' + escapeHtml(metric.label) +
         '</th>' + cells + '</tr>';
     }).join('');
-    return '<div class="fc-scenario-table-wrap" role="region" aria-label="当前工况与已保存方案指标对比" tabindex="0">' +
+    return '<p class="fc-scenario-scroll-hint">手机端可左右滑动表格，查看当前工况与已保存方案的完整指标。</p>' +
+      '<div class="fc-scenario-table-wrap" role="region" aria-label="当前工况与已保存方案指标对比，可横向滚动查看所有方案" tabindex="0">' +
       '<table class="fc-scenario-table"><thead><tr><th scope="col">工程指标</th>' + head +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
