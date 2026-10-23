@@ -11,14 +11,13 @@
     if (!html) return false;
     target.innerHTML = html;
     target.dataset.referenceMounted = 'v4';
-    const slider = document.getElementById('pSlider');
-    if (slider) {
-      slider.addEventListener('input', function () {
-        const nextPower = Number(this.value);
-        if (typeof state !== 'undefined' && state.params) state.params.stackPower = nextPower;
-        if (typeof syncTopPower === 'function') syncTopPower(nextPower);
-        if (typeof updateLiveValues === 'function') updateLiveValues();
-      });
+    // Rendering the reference shell replaces the legacy dashboard DOM. Re-run
+    // the original dashboard lifecycle so solver values and parameter handlers
+    // are rebound to the newly mounted nodes instead of leaving placeholder dashes.
+    if (typeof window.afterDashboard === 'function') {
+      window.afterDashboard();
+    } else if (typeof window.updateLiveValues === 'function') {
+      window.updateLiveValues();
     }
     return true;
   }
