@@ -448,3 +448,17 @@ test("Amphlett model rejects a negative cell-voltage operating point", () => {
  );
 });
 
+
+
+test("Amphlett model rejects positive current whose area-normalized density underflows to zero",()=>{
+ const resultInputs={
+  temperatureK:343.15,hydrogenPartialPressureAtm:1,oxygenPartialPressureAtm:1,
+  currentA:Number.MIN_VALUE,activeAreaCm2:Number.MAX_VALUE,
+  membraneThicknessCm:0.0178,membraneWaterContentLambda:23,
+  maxCurrentDensityAcm2:1.5
+ };
+ assert.throws(
+  ()=>calculateAmphlettPolarizationPoint(resultInputs),
+  /current density below the representable numeric range/
+ );
+});
