@@ -311,6 +311,9 @@ export function calculateAmphlettPolarizationPoint({
   }
 
   const currentDensityAcm2 = currentA / activeAreaCm2;
+  if (currentA > 0 && currentDensityAcm2 === 0) {
+    throw new RangeError("positive current produces a current density below the representable numeric range");
+  }
   if (currentDensityAcm2 >= maxCurrentDensityAcm2) {
     throw new RangeError("current density must remain below the Amphlett limiting current density");
   }
