@@ -187,7 +187,12 @@ const fs = require('node:fs');
         !(await scenarioPanel.innerText()).includes('本机快照')) {
       throw new Error('Engineering scenario comparison workspace did not mount with its local-data boundary');
     }
-    await page.locator('#fcScenarioName').fill('低温对照 A');
+    await page.locator('#pSlider').evaluate(node => {
+      node.value = '120';
+      node.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.waitForFunction(() => Number(document.querySelector('#pNum')?.textContent.trim()) === 120);
+    await page.locator('#fcScenarioName').fill('120 kW 基准方案 A');
     await page.locator('#fcScenarioSave').click();
     await page.waitForSelector('.fc-scenario-saved-card');
     const scenarioSaved = await page.evaluate(() => ({
@@ -195,29 +200,63 @@ const fs = require('node:fs');
       rowCount: document.querySelectorAll('.fc-scenario-table tbody tr').length,
       currentPower: document.querySelector('[data-scenario-current="Pstack"]')?.textContent.trim() || '',
       savedPower: document.querySelector('[data-scenario-saved]')?.textContent.trim() || '',
+      savedParameters: JSON.parse(localStorage.getItem('hyhub.scenario-compare.v1') || '{"scenarios":[]}').scenarios?.[0]?.params || null,
       local: JSON.parse(localStorage.getItem('hyhub.scenario-compare.v1') || '{"scenarios":[]}').scenarios?.length || 0
     }));
-    if (scenarioSaved.name !== '低温对照 A' || scenarioSaved.rowCount !== 12 ||
-        !scenarioSaved.currentPower || !scenarioSaved.savedPower || scenarioSaved.local !== 1) {
+    if (scenarioSaved.name !== '120 kW 基准方案 A' || scenarioSaved.rowCount !== 12 ||
+        !scenarioSaved.currentPower || !scenarioSaved.savedPower || scenarioSaved.local !== 1 ||
+        Number(scenarioSaved.savedParameters?.stackPower) !== 120) {
       throw new Error('Scenario snapshot did not preserve a complete, locally stored set of solver outputs: ' +
         JSON.stringify(scenarioSaved));
     }
+    await page.locator('#pSlider').evaluate(node => {
+      node.value = '150';
+      node.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.waitForFunction(() => {
+      const current = document.querySelector('[data-scenario-current="Pstack"]')?.textContent || '';
+      const saved = document.querySelector('[data-scenario-saved]')?.textContent || '';
+      return current.includes('150.00') && saved.includes('120.00');
+    });
+    const contrast = await page.evaluate(() => ({
+      title: getComputedStyle(document.querySelector('#fc-scenario-title')).color,
+      rowLabel: getComputedStyle(document.querySelector('.fc-scenario-table tbody th')).color,
+      metricValue: getComputedStyle(document.querySelector('.fc-scenario-table tbody td[data-scenario-current]')).color
+    }));
+    if (contrast.title !== 'rgb(23, 59, 82)' ||
+        contrast.rowLabel !== 'rgb(62, 91, 107)' ||
+        contrast.metricValue !== 'rgb(8, 114, 126)') {
+      throw new Error('Scenario comparison foreground colors were overridden by the legacy theme: ' +
+        JSON.stringify(contrast));
+    }
     fs.mkdirSync('artifacts', { recursive: true });
+    await page.evaluate(() => document.activeElement?.blur());
     await page.locator('.fc-scenario-compare').screenshot({ path: 'artifacts/fuelcell-scenario-comparison-desktop.png' });
     await page.setViewportSize({ width: 390, height: 844 });
     const mobileScenarioLayout = await page.evaluate(() => {
       const main = document.querySelector('.main')?.getBoundingClientRect();
       const content = document.querySelector('#content')?.getBoundingClientRect();
       const panel = document.querySelector('.fc-scenario-compare')?.getBoundingClientRect();
+      const table = document.querySelector('.fc-scenario-table-wrap');
+      const hint = document.querySelector('.fc-scenario-scroll-hint');
       return { viewport: innerWidth, mainWidth: main?.width, contentWidth: content?.width,
-        panelLeft: panel?.left, panelRight: panel?.right, panelWidth: panel?.width };
+        panelLeft: panel?.left, panelRight: panel?.right, panelWidth: panel?.width,
+        tableClientWidth: table?.clientWidth, tableScrollWidth: table?.scrollWidth,
+        scrollHint: !!hint && getComputedStyle(hint).display !== 'none' };
     });
     if (!mobileScenarioLayout.mainWidth || mobileScenarioLayout.mainWidth < 380 ||
         !mobileScenarioLayout.contentWidth || mobileScenarioLayout.contentWidth < 360 ||
         mobileScenarioLayout.panelLeft < 0 || mobileScenarioLayout.panelRight > 391 ||
-        mobileScenarioLayout.panelWidth < 340) {
-      throw new Error('Mobile engineering workbench is clipped or not full-width: ' + JSON.stringify(mobileScenarioLayout));
+        mobileScenarioLayout.panelWidth < 340 ||
+        mobileScenarioLayout.tableScrollWidth <= mobileScenarioLayout.tableClientWidth ||
+        !mobileScenarioLayout.scrollHint) {
+      throw new Error('Mobile scenario table does not expose its full comparison range: ' +
+        JSON.stringify(mobileScenarioLayout));
     }
+    await page.evaluate(() => {
+      document.activeElement?.blur();
+      document.querySelector('.fc-scenario-table-wrap')?.scrollTo(0, 0);
+    });
     await page.locator('.fc-scenario-compare').screenshot({ path: 'artifacts/fuelcell-scenario-comparison-mobile.png' });
     await page.setViewportSize({ width: 1440, height: 1000 });
     const scenarioPowerBefore = await page.locator('[data-scenario-current="Pstack"]').textContent();
