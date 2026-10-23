@@ -149,7 +149,25 @@
   function refreshPanel() {
     const panel = document.querySelector('#content .fc-scenario-compare');
     if (!panel) return;
+    const previousName = panel.querySelector('#fcScenarioName');
+    const draftName = previousName ? previousName.value : '';
+    const hadFocus = !!previousName && document.activeElement === previousName;
+    const selectionStart = previousName && typeof previousName.selectionStart === 'number'
+      ? previousName.selectionStart : null;
+    const selectionEnd = previousName && typeof previousName.selectionEnd === 'number'
+      ? previousName.selectionEnd : null;
     panel.outerHTML = panelHtml();
+    const nextName = document.querySelector('#content #fcScenarioName');
+    if (!nextName) return;
+    // Recomputing the live comparison must not erase text the user is drafting.
+    nextName.value = draftName;
+    if (hadFocus) {
+      nextName.focus();
+      if (selectionStart !== null && selectionEnd !== null &&
+          typeof nextName.setSelectionRange === 'function') {
+        nextName.setSelectionRange(selectionStart, selectionEnd);
+      }
+    }
   }
 
   function persist() {
