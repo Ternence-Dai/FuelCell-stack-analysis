@@ -528,12 +528,15 @@ const fs = require('node:fs');
       const main = document.querySelector('.main');
       const sidebar = document.querySelector('.sidebar');
       return {
-        columns: getComputedStyle(app).gridTemplateColumns.trim().split(/\\s+/).length,
+        gridTemplateColumns: getComputedStyle(app).gridTemplateColumns,
         sidebarVisible: !!sidebar && getComputedStyle(sidebar).display !== 'none',
+        sidebarWidth: sidebar?.getBoundingClientRect().width || 0,
+        mainLeft: main?.getBoundingClientRect().left || 0,
         mainWidth: main?.getBoundingClientRect().width || 0
       };
     });
-    if (tablet.columns !== 2 || !tablet.sidebarVisible || tablet.mainWidth < 700) {
+    if (!tablet.sidebarVisible || tablet.sidebarWidth < 60 ||
+        tablet.mainLeft < tablet.sidebarWidth - 1 || tablet.mainWidth < 700) {
       throw new Error('Tablet engineering shell lost its compact sidebar or main workspace width: ' + JSON.stringify(tablet));
     }
 
@@ -545,7 +548,9 @@ const fs = require('node:fs');
       const nav = document.querySelector('#bottomNav');
       return {
         viewport: window.innerWidth,
-        columns: getComputedStyle(app).gridTemplateColumns.trim().split(/\\s+/).length,
+        sidebarHidden: !document.querySelector('.sidebar') ||
+          getComputedStyle(document.querySelector('.sidebar')).display === 'none',
+        mainLeft: main?.getBoundingClientRect().left || 0,
         mainWidth: main?.getBoundingClientRect().width || 0,
         contentWidth: content?.getBoundingClientRect().width || 0,
         contentBottomPadding: content ? parseFloat(getComputedStyle(content).paddingBottom) : 0,
@@ -556,7 +561,8 @@ const fs = require('node:fs');
         documentWidth: document.documentElement.scrollWidth
       };
     });
-    if (mobile.columns !== 1 || mobile.mainWidth < 380 || mobile.contentWidth < 360 ||
+    if (!mobile.sidebarHidden || mobile.mainLeft > 1 ||
+        mobile.mainWidth < 380 || mobile.contentWidth < 360 ||
         mobile.contentBottomPadding < mobile.navHeight + 20 ||
         mobile.documentWidth > mobile.viewport + 1 || !mobile.visible || mobile.items < 8) {
       throw new Error('Mobile engineering shell is clipped, covered by navigation or horizontally overflowing: ' + JSON.stringify(mobile));
