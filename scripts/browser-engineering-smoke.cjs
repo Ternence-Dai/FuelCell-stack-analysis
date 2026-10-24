@@ -522,18 +522,50 @@ const fs = require('node:fs');
     const kbCount = await page.locator('#content .kb-entry').count();
     if (kbCount < 10) throw new Error('Fuel-cell knowledge base did not render its indexed entries');
 
+    await page.setViewportSize({ width: 960, height: 900 });
+    const tablet = await page.evaluate(() => {
+      const app = document.querySelector('.app');
+      const main = document.querySelector('.main');
+      const sidebar = document.querySelector('.sidebar');
+      return {
+        gridTemplateColumns: getComputedStyle(app).gridTemplateColumns,
+        sidebarVisible: !!sidebar && getComputedStyle(sidebar).display !== 'none',
+        sidebarWidth: sidebar?.getBoundingClientRect().width || 0,
+        mainLeft: main?.getBoundingClientRect().left || 0,
+        mainWidth: main?.getBoundingClientRect().width || 0
+      };
+    });
+    if (!tablet.sidebarVisible || tablet.sidebarWidth < 60 ||
+        tablet.mainLeft < tablet.sidebarWidth - 1 || tablet.mainWidth < 700) {
+      throw new Error('Tablet engineering shell lost its compact sidebar or main workspace width: ' + JSON.stringify(tablet));
+    }
+
     await page.setViewportSize({ width: 390, height: 844 });
     const mobile = await page.evaluate(() => {
+      const app = document.querySelector('.app');
+      const main = document.querySelector('.main');
+      const content = document.querySelector('.content');
       const nav = document.querySelector('#bottomNav');
       return {
         viewport: window.innerWidth,
+        sidebarHidden: !document.querySelector('.sidebar') ||
+          getComputedStyle(document.querySelector('.sidebar')).display === 'none',
+        mainLeft: main?.getBoundingClientRect().left || 0,
+        mainWidth: main?.getBoundingClientRect().width || 0,
+        contentWidth: content?.getBoundingClientRect().width || 0,
+        contentBottomPadding: content ? parseFloat(getComputedStyle(content).paddingBottom) : 0,
+        navHeight: nav?.getBoundingClientRect().height || 0,
         visible: !!nav && getComputedStyle(nav).display !== 'none' &&
           nav.getBoundingClientRect().width >= 300,
-        items: nav ? nav.querySelectorAll('.bn-item').length : 0
+        items: nav ? nav.querySelectorAll('.bn-item').length : 0,
+        documentWidth: document.documentElement.scrollWidth
       };
     });
-    if (!mobile.visible || mobile.items < 8) {
-      throw new Error('Mobile bottom navigation did not expose all engineering workspaces: ' + JSON.stringify(mobile));
+    if (!mobile.sidebarHidden || mobile.mainLeft > 1 ||
+        mobile.mainWidth < 380 || mobile.contentWidth < 360 ||
+        mobile.contentBottomPadding < mobile.navHeight + 20 ||
+        mobile.documentWidth > mobile.viewport + 1 || !mobile.visible || mobile.items < 8) {
+      throw new Error('Mobile engineering shell is clipped, covered by navigation or horizontally overflowing: ' + JSON.stringify(mobile));
     }
     await page.locator('#bottomNav .bn-item[data-id="sim"]').click();
     await page.waitForFunction(() => document.querySelector('#bottomNav .bn-item.active')?.dataset.id === 'sim');
