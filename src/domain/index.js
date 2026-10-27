@@ -363,8 +363,24 @@ export function calculateAmphlettPolarizationPoint({
     const electronsTransferred = 2;
     const concentrationCoefficientV =
       (gasConstantJPerKmolK * temperatureK) / (electronsTransferred * faradayCPerKmol);
-    concentrationLossV = -concentrationCoefficientV *
-      Math.log(1 - currentDensityAcm2 / maxCurrentDensityAcm2);
+    const currentDensityRatio = currentDensityAcm2 / maxCurrentDensityAcm2;
+    if (currentDensityRatio === 0) {
+      // Preserve a representable loss when j/j_lim underflows before scaling.
+      concentrationLossV = Math.exp(
+        Math.log(concentrationCoefficientV) + Math.log(currentDensityAcm2) -
+        Math.log(maxCurrentDensityAcm2)
+      );
+    } else if (currentDensityRatio < 0.5) {
+      // log1p avoids cancellation when the current ratio is small.
+      concentrationLossV = -concentrationCoefficientV * Math.log1p(-currentDensityRatio);
+    } else {
+      // Near the limiting current, compute log((j_lim-j)/j_lim) without
+      // first rounding j/j_lim to 1.
+      const remainingCurrentDensity = maxCurrentDensityAcm2 - currentDensityAcm2;
+      concentrationLossV = -concentrationCoefficientV * (
+        Math.log(remainingCurrentDensity) - Math.log(maxCurrentDensityAcm2)
+      );
+    }
   }
 
   const cellVoltageV = nernstVoltageV - activationLossV - ohmicLossV - concentrationLossV;
