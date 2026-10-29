@@ -464,3 +464,20 @@ test("Amphlett model rejects positive current whose area-normalized density unde
   /current density below the representable numeric range/
  );
 });
+
+test("Amphlett concentration loss preserves precision for small current-density ratios", () => {
+ const ratio=2 ** -54;
+ const maxCurrentDensityAcm2=2 ** 54;
+ const inputs={
+  temperatureK:343.15,hydrogenPartialPressureAtm:1,oxygenPartialPressureAtm:1,
+  currentA:1,activeAreaCm2:1,membraneThicknessCm:0.0178,
+  membraneWaterContentLambda:23,maxCurrentDensityAcm2
+ };
+ const result=calculateAmphlettPolarizationPoint(inputs);
+ const coefficient=(8314.47*inputs.temperatureK)/(2*96484600);
+ const expected=-coefficient*Math.log1p(-ratio);
+ assert.ok(result.concentrationLossV>0,
+  "a positive current ratio below half an ULP at 1 must not collapse to zero concentration loss");
+ assert.ok(Math.abs(result.concentrationLossV-expected)<=expected*1e-12,
+  "Amphlett concentration loss must retain small-ratio precision");
+});
