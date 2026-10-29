@@ -170,8 +170,10 @@ test("reactant air feed uses the declared 23.2% dry-air oxygen mass fraction",()
  const flow=calculateReactantMassFlows({
   cellCount:370,stackCurrentA:300,hydrogenStoichRatio:1,airStoichRatio:1
  });
- const expectedHydrogenKgPerHour=370*300*2.016*3.6/(2*96485);
- const expectedAirKgPerHour=expectedHydrogenKgPerHour*(8/0.232);
+ // Expectations use CODATA F = 96485.33212 C/mol and the stoichiometric
+ // O2/H2 mass ratio 7.9367 = 0.5 * 31.9988 / 2.01588 (CIAAW molar masses).
+ const expectedHydrogenKgPerHour=370*300*2.016*3.6/(2*96485.33212);
+ const expectedAirKgPerHour=expectedHydrogenKgPerHour*(7.9367/0.232);
  assert.ok(Math.abs(flow.hydrogenConsumedKgPerHour-expectedHydrogenKgPerHour)<1e-12);
  assert.ok(Math.abs(flow.airFeedKgPerHour-expectedAirKgPerHour)<1e-12);
 });

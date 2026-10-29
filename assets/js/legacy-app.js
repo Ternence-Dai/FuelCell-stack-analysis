@@ -84,8 +84,8 @@ const tierName = id => (TIERS.find(t=>t.id===id) || {}).name || id;
  * 本文件顶层代码在 domain 模块动态 import 完成前执行，无法同步读取其导出，
  * 故保留同一字面量，两处必须同步修改。F=96485.33212 C/mol（法拉第常数，
  * CODATA 2018）；M_H2=2.016 g/mol；LHV_H2=33.33 kWh/kg（低热值口径）；
- * E_IDEAL=1.482 V（热中性电压，HHV 口径）。 */
-const F = 96485.33212, M_H2 = 2.016, LHV_H2 = 33.33, E_IDEAL = 1.482;
+ * E_IDEAL=1.48121 V（热中性电压，HHV 口径）。 */
+const F = 96485.33212, M_H2 = 2.016, LHV_H2 = 33.33, E_IDEAL = 1.48121;
 
 /* ================= 电堆求解内核 ================= */
 function nernstPotential(T_K, p){
@@ -2043,9 +2043,9 @@ function runCalc(type){
     const t = tierOf(PkW);
     const period = PkW <= 30 ? 40 : PkW <= 80 ? 25 : PkW <= 200 ? 15 : 8;
     const dur = PkW <= 30 ? 0.35 : PkW <= 80 ? 0.6 : PkW <= 200 ? 0.9 : 1.4;
-    // 单位链：压力 MPa×10 换 bar；R = 0.08314 L·bar/(mol·K)；M(H2) = 2.016 g/mol。
-    // 密度 ρ(g/L) = (p_MPa×10 × 2.016) / (0.08314 × T_K)；单次吹扫氢损(kg) = 容积(L) × ρ(g/L) / 1000。
-    const rho = (ph * 10 * 2.016) / (0.08314 * Tk);
+    // 单位链：压力 MPa×10 换 bar；R = 0.0831446 L·bar/(mol·K)；M(H2) = 2.016 g/mol。
+    // 密度 ρ(g/L) = (p_MPa×10 × 2.016) / (0.0831446 × T_K)；单次吹扫氢损(kg) = 容积(L) × ρ(g/L) / 1000。
+    const rho = (ph * 10 * 2.016) / (0.0831446 * Tk);
     const lossPerPurge = vol * rho / 1000;
     const perDay = lossPerPurge * (3600 / pp) * 20;
     html = `<div class="res-box">

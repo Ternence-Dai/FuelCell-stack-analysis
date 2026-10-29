@@ -7,7 +7,7 @@ export const PHYSICAL_CONSTANTS = Object.freeze({
   R_J_PER_MOL_K: 8.314462618, // 理想气体常数 (J/(mol·K))，CODATA 2018 精确定义值
   M_H2_G_PER_MOL: 2.016, // 氢气摩尔质量 (g/mol)，工程常用取值
   LHV_H2_KWH_PER_KG: 33.33, // 氢气低热值 LHV ≈ 120 MJ/kg = 33.33 kWh/kg
-  HHV_THERMONEUTRAL_V: 1.482, // 热中性电压 (V)，HHV 口径，25 ℃
+  HHV_THERMONEUTRAL_V: 1.48121, // 热中性电压 (V)，HHV 口径，25 ℃；= ΔfH°(H₂O,l) 285.830 kJ/mol ÷ 2F（NIST WebBook）
   LHV_THERMONEUTRAL_V: 1.253 // 热中性电压 (V)，LHV 口径，25 ℃
 });
 
@@ -182,6 +182,11 @@ export function calculateNernstPotential({ temperatureK, hydrogenPressureMPa, ai
   // even when their logarithms and the final Nernst potential are finite.
   const logHydrogenAtm = Math.log(hydrogenPressureMPa) - Math.log(referencePressureMPa);
   const logOxygenAtm = Math.log(airPressureMPa) + Math.log(0.21) - Math.log(referencePressureMPa);
+  // dE/dT = -0.85e-3 V/K follows the Amphlett empirical convention. The
+  // thermodynamic value derived from NIST standard entropies is
+  // -8.46e-4 V/K; the difference is ~0.2 mV at 80 °C and is kept
+  // deliberately so this term stays consistent with the Amphlett model
+  // below, which uses the same coefficient.
   const potential = 1.229 - 0.85e-3 * (temperatureK - 298.15)
     + 4.308e-5 * temperatureK * (logHydrogenAtm + 0.5 * logOxygenAtm);
   finiteResult(potential, "Nernst potential");
@@ -214,12 +219,15 @@ export function calculateReactantMassFlows({
   // product can overflow at cellCount*current before the final divisor brings
   // a mathematically representable mass flow back into range.
   const logHydrogenConsumed = Math.log(cellCount) + Math.log(stackCurrentA) +
-    Math.log(2.016) + Math.log(3.6) - Math.log(2) - Math.log(96485);
+    Math.log(2.016) + Math.log(3.6) - Math.log(2) - Math.log(PHYSICAL_CONSTANTS.F_C_PER_MOL);
   const hydrogenConsumedKgPerHour = Math.exp(logHydrogenConsumed);
   const hydrogenFeedKgPerHour = Math.exp(logHydrogenConsumed + Math.log(hydrogenStoichRatio));
-  // Dry-air/H2 stoichiometric mass ratio: 8 kg O2 per kg H2,
+  // Dry-air/H2 stoichiometric mass ratio: the O2/H2 mass ratio below,
   // divided by the declared 0.232 dry-air oxygen mass fraction.
-  const stoichiometricAirPerHydrogen = 8 / 0.232;
+  // O2/H2 stoichiometric mass ratio = 1/2 * M(O2) / M(H2)
+  // = 0.5 * 31.9988 / 2.01588 = 7.9367 kg O2 per kg H2 (CIAAW molar masses).
+  const O2_TO_H2_STOICH_MASS_RATIO = 7.9367;
+  const stoichiometricAirPerHydrogen = O2_TO_H2_STOICH_MASS_RATIO / 0.232;
   const airFeedKgPerHour = Math.exp(
     logHydrogenConsumed + Math.log(stoichiometricAirPerHydrogen) + Math.log(airStoichRatio)
   );
@@ -345,6 +353,9 @@ export function calculateAmphlettPolarizationPoint({
       oxygenConcentrationMolPerCm3 <= 0) {
     throw new RangeError("Amphlett gas concentrations must remain finite and positive within the model's numeric domain");
   }
+  // The -8.5e-4 V/K temperature coefficient is Amphlett's empirical
+  // value; the NIST-entropy-derived thermodynamic value is -8.46e-4 V/K
+  // (see calculateNernstPotential). Kept as published by the model.
   const nernstVoltageV = 1.229 - 8.5e-4 * (temperatureK - 298.15) +
     4.308e-5 * temperatureK *
     (Math.log(hydrogenPartialPressureAtm) + 0.5 * Math.log(oxygenPartialPressureAtm));

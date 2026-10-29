@@ -6,7 +6,7 @@ const app = fs.readFileSync('assets/js/legacy-app.js', 'utf8');
 const domain = fs.readFileSync('src/domain/index.js', 'utf8');
 
 // --- The page must implement the corrected unit chain -----------------------
-// Density: rho(g/L) = (p_MPa x10 -> bar x M_H2 2.016 g/mol) / (R 0.08314
+// Density: rho(g/L) = (p_MPa x10 -> bar x M_H2 2.016 g/mol) / (R 0.0831446
 // L*bar/(mol*K) x T_K). Per-purge loss: volume(L) x rho(g/L) / 1000 = kg.
 // The legacy chain (rho = p*1000/(0.08314*353), then x 2.016/22.4) mixed a
 // molar-volume conversion into an already mass-based density and was off by
@@ -17,7 +17,7 @@ const purgeEnd = app.indexOf("else if(type === 'cal')", purgeStart);
 assert.ok(runStart >= 0 && purgeStart > runStart && purgeEnd > purgeStart,
   'purge calculator branch must exist');
 const purge = app.slice(purgeStart, purgeEnd);
-assert.ok(purge.includes('(ph * 10 * 2.016) / (0.08314 * Tk)'),
+assert.ok(purge.includes('(ph * 10 * 2.016) / (0.0831446 * Tk)'),
   'purge density must be rho(g/L) = (p_MPa*10 * M_H2) / (R_L_bar * T_K)');
 assert.ok(purge.includes('vol * rho / 1000'),
   'per-purge hydrogen loss must be volume(L) * rho(g/L) / 1000 kg');
@@ -30,15 +30,15 @@ assert.ok(purge.includes("readCalcInput('c_Tk')"),
 
 // --- Independent re-implementation of the same formula, hand vector ---------
 function purgeDensityGPerL(pressureMPa, temperatureK) {
-  return (pressureMPa * 10 * 2.016) / (0.08314 * temperatureK);
+  return (pressureMPa * 10 * 2.016) / (0.0831446 * temperatureK);
 }
 function purgeLossKg(volumeL, pressureMPa, temperatureK) {
   return volumeL * purgeDensityGPerL(pressureMPa, temperatureK) / 1000;
 }
 
 // Hand vector: 0.19 MPa, 353 K, anode volume 1.2 L
-// rho = (0.19*10 * 2.016) / (0.08314*353) = 3.8304 / 29.34842 = 0.13052 g/L (~0.131)
-// loss = 1.2 * 0.13052 / 1000 = 1.566e-4 kg (~1.6e-4)
+// rho = (0.19*10 * 2.016) / (0.0831446*353) = 3.8304 / 29.35006 = 0.13051 g/L (~0.131)
+// loss = 1.2 * 0.13051 / 1000 = 1.566e-4 kg (~1.6e-4)
 const rho = purgeDensityGPerL(0.19, 353);
 assert.ok(Math.abs(rho - 0.13052) / 0.13052 < 0.01,
   'rho at 0.19 MPa / 353 K must be ~0.131 g/L, got ' + rho);
