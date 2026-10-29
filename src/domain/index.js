@@ -1,3 +1,16 @@
+/* Shared physical constants — the single source of truth for this domain
+ * core. assets/js/legacy-app.js mirrors these literals (it is parsed before
+ * this module's dynamic import resolves, so it cannot read them
+ * synchronously); keep both in sync. */
+export const PHYSICAL_CONSTANTS = Object.freeze({
+  F_C_PER_MOL: 96485.33212, // 法拉第常数 (C/mol)，CODATA 2018 精确定义值（e × N_A）
+  R_J_PER_MOL_K: 8.314462618, // 理想气体常数 (J/(mol·K))，CODATA 2018 精确定义值
+  M_H2_G_PER_MOL: 2.016, // 氢气摩尔质量 (g/mol)，工程常用取值
+  LHV_H2_KWH_PER_KG: 33.33, // 氢气低热值 LHV ≈ 120 MJ/kg = 33.33 kWh/kg
+  HHV_THERMONEUTRAL_V: 1.482, // 热中性电压 (V)，HHV 口径，25 ℃
+  LHV_THERMONEUTRAL_V: 1.253 // 热中性电压 (V)，LHV 口径，25 ℃
+});
+
 export function solveFirstPowerCrossing({ targetPower, minCurrentDensity, maxCurrentDensity, steps = 600, powerAt }) {
   for (const [name, value] of Object.entries({ targetPower, minCurrentDensity, maxCurrentDensity })) {
     if (!Number.isFinite(value)) throw new TypeError(name + " must be finite");

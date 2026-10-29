@@ -35,3 +35,20 @@ See [the rebuild plan](docs/REBUILD_PLAN.md) and [domain rules, units and valida
 ## 开源项目深度对标
 
 本项目采用的上游参考、架构借鉴、实现边界与后续验收要求见 [docs/OPEN_SOURCE_BENCHMARKS.md](docs/OPEN_SOURCE_BENCHMARKS.md)。
+
+## 本地运行
+
+本应用以相对路径动态加载 ES 模块（`src/domain/index.js`），直接双击 `index.html`（file://）打开时模块会加载失败（页面底部会给出提示）。请用任意静态 HTTP 服务托管项目目录：
+
+```bash
+python3 -m http.server 8000
+# 然后在浏览器打开 http://localhost:8000
+```
+
+开发校验（需要 Node.js）：
+
+```bash
+npm test        # 领域核心单元测试（node --test）
+npm run check   # JS 语法检查 + 吹扫计算器单位链校验（scripts/validate-purge.cjs）
+# 其余工程校验脚本在 scripts/validate-*.cjs，可逐个用 node 运行
+```

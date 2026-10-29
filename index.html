@@ -46,6 +46,8 @@
 </div>
 <nav class="bottomnav" id="bottomNav"></nav>
 <div class="toast" id="toast"></div>
+<div id="fileProtocolHint" role="alert" style="display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:10001;padding:14px 16px;border:2px solid #f59e0b;border-radius:10px;background:#fff7e6;color:#7c2d12;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.35)">当前是直接打开本地文件（file://），电堆工程模型模块可能无法加载。请通过本地 HTTP 服务打开（如在项目目录运行 <code>python3 -m http.server</code>，再访问 http://localhost:8000）。</div>
+<script>if (location.protocol === 'file:') { document.getElementById('fileProtocolHint').style.display = 'block'; }</script>
 <script src="./assets/js/reference-data.js"></script>
 <script src="./assets/js/legacy-app.js?v=20261020-fuelcell-synthetic-export-v4"></script>
 <script src="./assets/js/engineering-workbench-v3.js?v=20261022-engineering-workbench-v3"></script>

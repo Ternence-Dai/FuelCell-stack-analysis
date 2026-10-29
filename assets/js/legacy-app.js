@@ -80,7 +80,12 @@ const TIERS = [
 const tierOf = P => TIERS.find(t => P <= t.max) || TIERS[3];
 const tierName = id => (TIERS.find(t=>t.id===id) || {}).name || id;
 
-const F = 96485, M_H2 = 2.016, LHV_H2 = 33.33, E_IDEAL = 1.482;
+/* 物理常量镜像：单一事实来源为 src/domain/index.js 的 PHYSICAL_CONSTANTS。
+ * 本文件顶层代码在 domain 模块动态 import 完成前执行，无法同步读取其导出，
+ * 故保留同一字面量，两处必须同步修改。F=96485.33212 C/mol（法拉第常数，
+ * CODATA 2018）；M_H2=2.016 g/mol；LHV_H2=33.33 kWh/kg（低热值口径）；
+ * E_IDEAL=1.482 V（热中性电压，HHV 口径）。 */
+const F = 96485.33212, M_H2 = 2.016, LHV_H2 = 33.33, E_IDEAL = 1.482;
 
 /* ================= 电堆求解内核 ================= */
 function nernstPotential(T_K, p){
@@ -224,7 +229,7 @@ function solveSystem(){
   const etaSys = window.FuelCellDomain.calculateFuelToElectricEfficiency({
     netPowerKw:Pnet,
     hydrogenFeedKgPerHour:mH2,
-    hydrogenLhvKwhPerKg:33.33
+    hydrogenLhvKwhPerKg:LHV_H2
   });
 
   const coreVolL = P.N * (P.cellThk||1.5) * P.area / 1000;
@@ -1476,6 +1481,7 @@ function runSim(){
         <div class="kpi p"><div class="kpi-k">体积功率密度</div><div class="kpi-v">${fmt(r.vpd,2)}<small>kW/L</small></div></div>
         <div class="kpi r"><div class="kpi-k">比功率</div><div class="kpi-v">${fmt(r.sp,2)}<small>kW/kg</small></div></div>
       </div>
+      <div class="hint" role="note" style="margin-bottom:12px">口径说明：电堆效率：热中性电压（HHV）口径；系统效率（电堆净效率）：LHV 口径，两者不可直接比较。</div>
       <div class="chart-wrap"><canvas id="cv1" class="tall"></canvas>${legend([{c:'#0a84ff',n:'极化曲线 V–i'}])}</div>
       <div class="chart-wrap"><canvas id="cv2"></canvas>${legend([{c:'#00d48a',n:'功率密度 mW/cm²'}])}</div>
       <div class="chart-wrap"><canvas id="cv3"></canvas>${legend([{c:'#a78bfa',n:'电堆效率 %'}])}</div>
@@ -1811,6 +1817,7 @@ function calcPanel(){
       F_('氢侧压降 (kPa)', 'c_dp', P.dpH2) +
       F_('阳极容积 (L)', 'c_v', 1.2, 0.1) +
       F_('阳极压力 (MPa)', 'c_ph', P.pH2, 0.01) +
+      F_('堆温 (K · 堆温近似)', 'c_Tk', 353, 1) +
       F_('吹扫周期 (s)', 'c_pp', P.purgePeriod) +
       F_('吹扫时长 (s)', 'c_pd', P.purgeDur, 0.1) +
       `<button class="btn primary block" data-action="calc-run" data-id="purge">计算</button>`,
@@ -1881,6 +1888,18 @@ function calcPanel(){
 
 function runCalc(type){
   const g = id => parseFloat(($('#' + id) || {}).value) || 0;
+  // 显式解析：空值或非数值返回 null 表示无效；0 作为真实值返回。
+  // 热管理 / 阳极吹扫 / 台架标定三个计算器用它取代 g() || 默认值 的静默兜底。
+  const readCalcInput = id => {
+    const el = $('#' + id);
+    const raw = el ? String(el.value).trim() : '';
+    if (raw === '') return null;
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : null;
+  };
+  const invalidInput = label => {
+    out.innerHTML = '<div class="hint" role="alert">输入无效：' + label + ' 必须填写有效数值，已停止计算（0 会按真实值参与计算，不再套用默认值）。</div>';
+  };
   const out = $('#calcRes');
   if(!out) return;
   let html = '';
@@ -1916,7 +1935,8 @@ function runCalc(type){
       ${row('电堆效率', fmt(V/E_IDEAL*100, 2), '%')}
       ${row('功率校验', fmt(actualPowerKw, 2), 'kW')}
       ${row('目标功率可达性', powerTargetLabel, '')}
-    </div>`;
+    </div>
+    <div class="hint" role="note">口径说明：电堆效率：热中性电压（HHV）口径；系统效率：LHV 口径，两者不可直接比较。</div>`;
   }
   else if(type === 'h2'){
     const PkW = g('c_p'), e = g('c_e') / 100, lam = g('c_l') || 1.05;
@@ -1979,13 +1999,16 @@ function runCalc(type){
       ${row('整机综合效率', fmt(v / E_IDEAL * net / ps * 100, 2), '%')}
       ${row('辅机占比', fmt(bop / ps * 100, 2), '%')}
       ${row('年节省电量 (6000h)', fmt(bop * 0.15 * 6000, 0), 'kWh')}
-    </div>`;
+    </div>
+    <div class="hint" role="note">口径说明：电堆效率：热中性电压（HHV）口径；系统效率：LHV 口径，两者不可直接比较。</div>`;
   }
   else if(type === 'heat'){
-    const PkW = g('c_p'), e = g('c_e') / 100, dT = g('c_dt');
-    const cp = g('c_cp') || 3.55;
-    const rho = g('c_rho') || 1.05;
-    const rm = g('c_rm') || 20;
+    const PkW = readCalcInput('c_p'), ePct = readCalcInput('c_e'), dT = readCalcInput('c_dt');
+    const cp = readCalcInput('c_cp');
+    const rho = readCalcInput('c_rho');
+    const rm = readCalcInput('c_rm');
+    if ([PkW, ePct, dT, cp, rho, rm].some(v => v === null)) { invalidInput('电堆功率、电堆效率、温差、冷却液比热、密度与散热器裕度'); return; }
+    const e = ePct / 100;
     const Q = PkW * (1 / e - 1);
     let coolantFlow;
     try {
@@ -2013,20 +2036,24 @@ function runCalc(type){
     </div>`;
   }
   else if(type === 'purge'){
-    const PkW = g('c_p'), dp = g('c_dp') || 15, vol = g('c_v') || 1.2;
-    const ph = g('c_ph') || 0.19, pp = g('c_pp') || 15, pd = g('c_pd') || 0.9;
+    const PkW = readCalcInput('c_p'), dp = readCalcInput('c_dp'), vol = readCalcInput('c_v');
+    const ph = readCalcInput('c_ph'), pp = readCalcInput('c_pp'), pd = readCalcInput('c_pd');
+    const Tk = readCalcInput('c_Tk');
+    if ([PkW, dp, vol, ph, pp, pd, Tk].some(v => v === null)) { invalidInput('电堆功率、氢侧压降、阳极容积、阳极压力、吹扫周期、吹扫时长与堆温'); return; }
     const t = tierOf(PkW);
     const period = PkW <= 30 ? 40 : PkW <= 80 ? 25 : PkW <= 200 ? 15 : 8;
     const dur = PkW <= 30 ? 0.35 : PkW <= 80 ? 0.6 : PkW <= 200 ? 0.9 : 1.4;
-    const rho = ph * 1000 / (0.08314 * 353);
-    const lossPerPurge = vol * rho * 2.016 / 22.4;
+    // 单位链：压力 MPa×10 换 bar；R = 0.08314 L·bar/(mol·K)；M(H2) = 2.016 g/mol。
+    // 密度 ρ(g/L) = (p_MPa×10 × 2.016) / (0.08314 × T_K)；单次吹扫氢损(kg) = 容积(L) × ρ(g/L) / 1000。
+    const rho = (ph * 10 * 2.016) / (0.08314 * Tk);
+    const lossPerPurge = vol * rho / 1000;
     const perDay = lossPerPurge * (3600 / pp) * 20;
     html = `<div class="res-box">
       ${row('电堆功率档位', t.name + '型', '')}
       ${row('氢侧压降', dp, 'kPa')}
       ${row('推荐吹扫周期', fmt(period, 0), 's')}
       ${row('推荐吹扫时长', fmt(dur, 2), 's')}
-      ${row('阳极氢气密度', fmt(rho * 1000, 1), 'g/L')}
+      ${row('阳极氢气密度', fmt(rho, 3), 'g/L')}
       ${row('单次吹扫氢损', fmt(lossPerPurge, 4), 'kg')}
       ${row('日氢损 (20h)', fmt(perDay, 2), 'kg')}
       ${row('年氢损 (6000h)', fmt(perDay * 300, 1), 'kg')}
@@ -2034,8 +2061,9 @@ function runCalc(type){
     </div>`;
   }
   else if(type === 'cal'){
-    const set = g('c_set'), mea = g('c_mea'), range = g('c_range');
-    const T = g('c_T') || 25, rh = g('c_rh') || 45, n = g('c_n') || 5;
+    const set = readCalcInput('c_set'), mea = readCalcInput('c_mea'), range = readCalcInput('c_range');
+    const T = readCalcInput('c_T'), rh = readCalcInput('c_rh'), n = readCalcInput('c_n');
+    if ([set, mea, range, T, rh, n].some(v => v === null)) { invalidInput('设定值、实测值、传感器量程、环境温度、环境湿度与重复测量次数'); return; }
     const dev = mea - set, rel = dev / set * 100, k = set / mea, err = dev / range * 100;
     const tempComp = 1 + 0.0004 * (T - 25);
     const rhComp = 1 + 0.0002 * (rh - 45);
