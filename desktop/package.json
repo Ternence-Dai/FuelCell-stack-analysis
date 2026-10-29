@@ -1,0 +1,15 @@
+{
+  "description": "氢枢 HyHub 燃料电池工程平台桌面版（Electron 壳 + 本地静态服务）",
+  "devDependencies": {
+    "electron": "^33.2.1"
+  },
+  "main": "main.cjs",
+  "name": "hyhub-desktop",
+  "private": true,
+  "productName": "氢枢 HyHub",
+  "scripts": {
+    "build:win": "node build-windows.cjs",
+    "start": "electron ."
+  },
+  "version": "1.0.0"
+}
